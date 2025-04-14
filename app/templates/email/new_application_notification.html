@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Job Application</title>
+    <style>
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9fafb;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .header {
+            padding: 2rem 1.5rem;
+            text-align: center;
+            background: linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%);
+            color: white;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .notification-badge {
+            background-color: #f43f5e;
+            color: white;
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            font-weight: 500;
+        }
+        .content {
+            padding: 2rem 1.5rem;
+        }
+        .section {
+            margin-bottom: 1.5rem;
+        }
+        .section-title {
+            font-size: 1.125rem;
+            margin-bottom: 1rem;
+            color: #4f46e5;
+            font-weight: 600;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.625rem;
+            position: relative;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #4f46e5 0%, #0ea5e9 100%);
+            border-radius: 1px;
+        }
+        .job-info {
+            background-color: #f8fafc;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            margin-bottom: 1.25rem;
+            border-left: 4px solid #4f46e5;
+        }
+        .job-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.625rem;
+            color: #4f46e5;
+        }
+        .job-meta {
+            margin-bottom: 0.625rem;
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        .job-meta-item {
+            margin-bottom: 0.375rem;
+        }
+        .job-meta-item strong {
+            display: inline-block;
+            width: 100px;
+            color: #1e293b;
+        }
+        .applicant-info {
+            background-color: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .applicant-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .applicant-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            color: #4f46e5;
+            font-size: 1.25rem;
+            font-weight: 600;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .applicant-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin: 0;
+            color: #1e293b;
+        }
+        .applicant-location {
+            color: #64748b;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        .applicant-meta {
+            margin-bottom: 1rem;
+        }
+        .applicant-meta-item {
+            margin-bottom: 0.5rem;
+            display: flex;
+        }
+        .applicant-meta-label {
+            width: 120px;
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+        .applicant-meta-value {
+            flex: 1;
+            font-size: 0.875rem;
+            color: #1e293b;
+            font-weight: 500;
+        }
+        .applicant-match {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+        .match-score {
+            display: inline-block;
+            padding: 0.25rem 0.625rem;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: white;
+            margin-right: 0.375rem;
+        }
+        .high-match {
+            background-color: #10b981;
+        }
+        .medium-match {
+            background-color: #f59e0b;
+        }
+        .low-match {
+            background-color: #0ea5e9;
+        }
+        .matched-skills {
+            margin-top: 0.625rem;
+        }
+        .skill-tag {
+            display: inline-block;
+            background-color: #f1f5f9;
+            color: #64748b;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.625rem;
+            border-radius: 1.25rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .matched-skill {
+            background-color: #dcfce7;
+            color: #10b981;
+            border: 1px solid #a7f3d0;
+        }
+        .cta-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-top: 1.25rem;
+        }
+        .cta-button {
+            display: inline-block;
+            text-decoration: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            margin-bottom: 0.625rem;
+        }
+        .primary-cta {
+            background-color: #4f46e5;
+            color: white;
+        }
+        .primary-cta:hover {
+            background-color: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .secondary-cta {
+            background-color: #f8fafc;
+            color: #4f46e5;
+            border: 1px solid #4f46e5;
+        }
+        .secondary-cta:hover {
+            background-color: #f1f5f9;
+            color: #4338ca;
+            border-color: #4338ca;
+        }
+        .download-cta {
+            background-color: #f43f5e;
+            color: white;
+        }
+        .download-cta:hover {
+            background-color: #e11d48;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .cta-button:hover {
+            opacity: 0.9;
+        }
+        .cta-wide {
+            flex: 0 0 100%;
+        }
+        .cta-half {
+            flex: 0 0 48%;
+        }
+        .recent-applications {
+            margin-top: 1.5rem;
+        }
+        .application-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .application-item {
+            padding: 0.625rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .application-item:last-child {
+            border-bottom: none;
+        }
+        .application-link {
+            color: #4f46e5;
+            text-decoration: none;
+        }
+        .application-link:hover {
+            text-decoration: underline;
+            color: #4338ca;
+        }
+        .footer {
+            background-color: #f8fafc;
+            padding: 1.25rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #64748b;
+            border-top: 1px solid #e2e8f0;
+        }
+        .footer a {
+            color: #4f46e5;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .footer a:hover {
+            color: #4338ca;
+            text-decoration: underline;
+        }
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 100%;
+                border-radius: 0;
+            }
+            .cta-buttons {
+                flex-direction: column;
+            }
+            .cta-button {
+                margin-bottom: 0.625rem;
+                width: 100%;
+            }
+            .cta-half {
+                flex: 0 0 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>New Job Application</h1>
+            <div class="notification-badge">{{ application.submission_date|date }}</div>
+        </div>
+        <div class="content">
+            <p>Hello {{ recruiter.name }},</p>
+            <p>You have received a new application for the following position:</p>
+            
+            <div class="section">
+                <div class="job-info">
+                    <div class="job-title">{{ job.title }}</div>
+                    <div class="job-meta">
+                        <div class="job-meta-item"><strong>Job ID:</strong> {{ job.id }}</div>
+                        <div class="job-meta-item"><strong>Department:</strong> {{ job.department }}</div>
+                        <div class="job-meta-item"><strong>Location:</strong> {{ job.location }}</div>
+                        <div class="job-meta-item"><strong>Posted on:</strong> {{ job.posted_date|date }}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Applicant Information</div>
+                <div class="applicant-info">
+                    <div class="applicant-header">
+                        <div class="applicant-avatar">
+                            {% if applicant.profile_picture %}
+                            <img src="{{ applicant.profile_picture }}" alt="{{ applicant.name }}" width="50" height="50">
+                            {% else %}
+                            {{ applicant.name[:1] }}
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h3 class="applicant-name">{{ applicant.name }}</h3>
+                            <div class="applicant-location">{{ applicant.location }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="applicant-meta">
+                        <div class="applicant-meta-item">
+                            <div class="applicant-meta-label">Email:</div>
+                            <div class="applicant-meta-value">{{ applicant.email }}</div>
+                        </div>
+                        <div class="applicant-meta-item">
+                            <div class="applicant-meta-label">Phone:</div>
+                            <div class="applicant-meta-value">{{ applicant.phone }}</div>
+                        </div>
+                        <div class="applicant-meta-item">
+                            <div class="applicant-meta-label">Experience:</div>
+                            <div class="applicant-meta-value">{{ applicant.experience }} years</div>
+                        </div>
+                        <div class="applicant-meta-item">
+                            <div class="applicant-meta-label">Current role:</div>
+                            <div class="applicant-meta-value">{{ applicant.current_role }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="applicant-match">
+                        {% if application.match_score >= 80 %}
+                            <span class="match-score high-match">{{ application.match_score }}% Match</span>
+                        {% elif application.match_score >= 60 %}
+                            <span class="match-score medium-match">{{ application.match_score }}% Match</span>
+                        {% else %}
+                            <span class="match-score low-match">{{ application.match_score }}% Match</span>
+                        {% endif %}
+                        <strong>with job requirements</strong>
+                        
+                        <div class="matched-skills">
+                            {% for skill in job.required_skills %}
+                                <span class="skill-tag {% if skill in applicant.skills %}matched-skill{% endif %}">
+                                    {{ skill }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="cta-buttons">
+                    <a href="{{ url_for('applications.view', application_id=application.id, _external=True) }}" class="cta-button primary-cta cta-wide">View Full Application</a>
+                    <a href="{{ url_for('applications.download_resume', application_id=application.id, _external=True) }}" class="cta-button download-cta cta-half">Download Resume</a>
+                    <a href="{{ url_for('applications.download_cover_letter', application_id=application.id, _external=True) }}" class="cta-button secondary-cta cta-half">Download Cover Letter</a>
+                </div>
+            </div>
+            
+            {% if recent_applications %}
+            <div class="section recent-applications">
+                <div class="section-title">Recent Applications for This Position</div>
+                <ul class="application-list">
+                    {% for app in recent_applications %}
+                    <li class="application-item">
+                        <a href="{{ url_for('applications.view', application_id=app.id, _external=True) }}" class="application-link">
+                            {{ app.applicant_name }} ({{ app.match_score }}% match) - {{ app.submission_date|date }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            
+            <p>You can manage all applications through your recruiter dashboard.</p>
+        </div>
+        <div class="footer">
+            <p>This is an automated notification from your recruitment system.</p>
+            <p>
+                <a href="{{ url_for('recruiters.dashboard', _external=True) }}">Recruiter Dashboard</a> | 
+                <a href="{{ url_for('jobs.manage', _external=True) }}">Manage Jobs</a>
+            </p>
+            <p>
+                <a href="{{ url_for('recruiters.email_preferences', token=unsubscribe_token, _external=True) }}">Manage email preferences</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

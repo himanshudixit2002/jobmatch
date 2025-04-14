@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Jobs | JobMatch{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-right">
+        <h1 class="section-title">Manage Jobs</h1>
+        <a href="{{ url_for('jobs.create_job') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i> Post New Job
+        </a>
+    </div>
+
+    {% if jobs %}
+        <div class="card shadow-sm border-0 mb-4" data-aos="fade-up">
+            <div class="card-header bg-white py-3">
+                <ul class="nav nav-tabs card-header-tabs" id="jobTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="active-tab" data-bs-toggle="tab" data-bs-target="#active-jobs" type="button" role="tab" aria-controls="active-jobs" aria-selected="true">
+                            <i class="bi bi-play-circle me-2"></i> Active Jobs
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="inactive-tab" data-bs-toggle="tab" data-bs-target="#inactive-jobs" type="button" role="tab" aria-controls="inactive-jobs" aria-selected="false">
+                            <i class="bi bi-pause-circle me-2"></i> Inactive Jobs
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body p-0">
+                <div class="tab-content" id="jobTabsContent">
+                    <div class="tab-pane fade show active" id="active-jobs" role="tabpanel" aria-labelledby="active-tab">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Title</th>
+                                        <th>Location</th>
+                                        <th>Posted</th>
+                                        <th>Applications</th>
+                                        <th class="text-end pe-4">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for job in jobs if job.is_active %}
+                                        <tr data-job-id="{{ job.id }}">
+                                            <td class="ps-4">
+                                                <div class="fw-semibold">{{ job.title }}</div>
+                                                <div class="small text-muted">
+                                                    {% for skill in job.skills[:3] %}
+                                                        <span class="badge bg-primary-subtle text-primary me-1">{{ skill.name }}</span>
+                                                    {% endfor %}
+                                                    {% if job.skills|length > 3 %}
+                                                        <span class="badge bg-secondary-subtle text-secondary">+{{ job.skills|length - 3 }} more</span>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td>{{ job.location }}</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi bi-calendar-event text-muted me-2"></i>
+                                                    <span>{{ job.created_at.strftime('%b %d, %Y') }}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <a href="{{ url_for('jobs.view_applications', job_id=job.id) }}" class="btn btn-sm btn-primary-subtle text-primary app-count">
+                                                    <i class="bi bi-people me-1"></i> {{ job.applications|length }} Applications
+                                                </a>
+                                            </td>
+                                            <td class="text-end pe-4">
+                                                <div class="btn-group" role="group">
+                                                    <a href="{{ url_for('jobs.view_job', job_id=job.id) }}" class="btn btn-sm btn-outline-secondary">
+                                                        <i class="bi bi-eye me-1"></i> View
+                                                    </a>
+                                                    <form action="{{ url_for('jobs.toggle_job_status', job_id=job.id) }}" method="POST" class="d-inline">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                            <i class="bi bi-pause-circle me-1"></i> Deactivate
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="5" class="text-center py-5">
+                                                <div class="mb-3">
+                                                    <i class="bi bi-briefcase text-muted" style="font-size: 3rem;"></i>
+                                                </div>
+                                                <p class="text-muted mb-3">No active jobs found.</p>
+                                                <a href="{{ url_for('jobs.create_job') }}" class="btn btn-sm btn-primary">
+                                                    <i class="bi bi-plus-circle me-1"></i> Post a Job
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="inactive-jobs" role="tabpanel" aria-labelledby="inactive-tab">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4">Title</th>
+                                        <th>Location</th>
+                                        <th>Posted</th>
+                                        <th>Applications</th>
+                                        <th class="text-end pe-4">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for job in jobs if not job.is_active %}
+                                        <tr data-job-id="{{ job.id }}">
+                                            <td class="ps-4">
+                                                <div class="fw-semibold">{{ job.title }}</div>
+                                                <div class="small text-muted">
+                                                    {% for skill in job.skills[:3] %}
+                                                        <span class="badge bg-primary-subtle text-primary me-1">{{ skill.name }}</span>
+                                                    {% endfor %}
+                                                    {% if job.skills|length > 3 %}
+                                                        <span class="badge bg-secondary-subtle text-secondary">+{{ job.skills|length - 3 }} more</span>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td>{{ job.location }}</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi bi-calendar-event text-muted me-2"></i>
+                                                    <span>{{ job.created_at.strftime('%b %d, %Y') }}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <a href="{{ url_for('jobs.view_applications', job_id=job.id) }}" class="btn btn-sm btn-primary-subtle text-primary app-count">
+                                                    <i class="bi bi-people me-1"></i> {{ job.applications|length }} Applications
+                                                </a>
+                                            </td>
+                                            <td class="text-end pe-4">
+                                                <div class="btn-group" role="group">
+                                                    <a href="{{ url_for('jobs.view_job', job_id=job.id) }}" class="btn btn-sm btn-outline-secondary">
+                                                        <i class="bi bi-eye me-1"></i> View
+                                                    </a>
+                                                    <form action="{{ url_for('jobs.toggle_job_status', job_id=job.id) }}" method="POST" class="d-inline">
+                                                        <button type="submit" class="btn btn-sm btn-outline-success">
+                                                            <i class="bi bi-play-circle me-1"></i> Activate
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="5" class="text-center py-5">
+                                                <div class="mb-3">
+                                                    <i class="bi bi-archive text-muted" style="font-size: 3rem;"></i>
+                                                </div>
+                                                <p class="text-muted">No inactive jobs found.</p>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info d-flex" data-aos="fade-up">
+            <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+            <div>
+                You haven't posted any jobs yet.
+                <a href="{{ url_for('jobs.create_job') }}" class="alert-link">Create your first job posting</a> to start finding candidates.
+            </div>
+        </div>
+        
+        <div class="card shadow-sm border-0 p-5 text-center" data-aos="fade-up" data-aos-delay="100">
+            <div class="mb-4">
+                <i class="bi bi-briefcase text-primary" style="font-size: 4rem;"></i>
+            </div>
+            <h3 class="mb-3">Ready to find the perfect candidates?</h3>
+            <p class="text-muted mb-4">Post your first job and let our matching algorithm find the best candidates for your position.</p>
+            <div>
+                <a href="{{ url_for('jobs.create_job') }}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-plus-circle me-2"></i> Post Your First Job
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Function to refresh job list data
+        function refreshJobs() {
+            fetch('/api/jobs/manage-data')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateJobTables(data.jobs);
+                    }
+                })
+                .catch(error => console.error('Error refreshing jobs data:', error));
+        }
+
+        function updateJobTables(jobs) {
+            // Get the active and inactive job tables
+            const activeJobsTable = document.querySelector('#active-jobs tbody');
+            const inactiveJobsTable = document.querySelector('#inactive-jobs tbody');
+            
+            if (!activeJobsTable || !inactiveJobsTable) return;
+            
+            // Filter jobs by active status
+            const activeJobs = jobs.filter(job => job.is_active);
+            const inactiveJobs = jobs.filter(job => !job.is_active);
+            
+            // Update the application counts in the existing rows
+            jobs.forEach(job => {
+                const jobRow = document.querySelector(`tr[data-job-id="${job.id}"]`);
+                if (jobRow) {
+                    // Update application count
+                    const appCountBtn = jobRow.querySelector('.app-count');
+                    if (appCountBtn) {
+                        appCountBtn.innerHTML = `<i class="bi bi-people me-1"></i> ${job.application_count} Applications`;
+                    }
+                    
+                    // If job status changed, move to the correct table
+                    if (job.is_active && jobRow.closest('#inactive-jobs')) {
+                        // Job was activated - move to active table
+                        jobRow.remove();
+                        addJobRow(activeJobsTable, job, true);
+                    } else if (!job.is_active && jobRow.closest('#active-jobs')) {
+                        // Job was deactivated - move to inactive table
+                        jobRow.remove();
+                        addJobRow(inactiveJobsTable, job, false);
+                    }
+                }
+            });
+        }
+
+        function addJobRow(tableBody, job, isActive) {
+            // Check if the tableBody doesn't have any rows or has only the empty message row
+            if (tableBody.children.length === 0 || 
+                (tableBody.children.length === 1 && tableBody.querySelector('td[colspan="5"]'))) {
+                // Clear the empty message row if it exists
+                tableBody.innerHTML = '';
+            }
+            
+            // Create job skills badges
+            let skillBadges = '';
+            job.skills.slice(0, 3).forEach(skill => {
+                skillBadges += `<span class="badge bg-primary-subtle text-primary me-1">${skill}</span>`;
+            });
+            
+            if (job.skills.length > 3) {
+                skillBadges += `<span class="badge bg-secondary-subtle text-secondary">+${job.skills.length - 3} more</span>`;
+            }
+            
+            // Create the table row
+            const newRow = document.createElement('tr');
+            newRow.setAttribute('data-job-id', job.id);
+            
+            newRow.innerHTML = `
+                <td class="ps-4">
+                    <div class="fw-semibold">${job.title}</div>
+                    <div class="small text-muted">
+                        ${skillBadges}
+                    </div>
+                </td>
+                <td>${job.location}</td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-calendar-event text-muted me-2"></i>
+                        <span>${job.created_at}</span>
+                    </div>
+                </td>
+                <td>
+                    <a href="/jobs/${job.id}/applications" class="btn btn-sm btn-primary-subtle text-primary app-count">
+                        <i class="bi bi-people me-1"></i> ${job.application_count} Applications
+                    </a>
+                </td>
+                <td class="text-end pe-4">
+                    <div class="btn-group" role="group">
+                        <a href="/jobs/${job.id}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-eye me-1"></i> View
+                        </a>
+                        <form action="/jobs/${job.id}/toggle" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-${isActive ? 'danger' : 'success'}">
+                                <i class="bi bi-${isActive ? 'pause' : 'play'}-circle me-1"></i> ${isActive ? 'Deactivate' : 'Activate'}
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            `;
+            
+            tableBody.appendChild(newRow);
+        }
+
+        // Set up auto-refresh every 30 seconds
+        setInterval(refreshJobs, 30000);
+        
+        // Refresh when page becomes visible again
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                refreshJobs();
+            }
+        });
+    });
+</script>
+{% endblock %}

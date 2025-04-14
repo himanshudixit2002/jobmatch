@@ -1,0 +1,28 @@
+New Job Application
+
+Hello {{ job.recruiter.name }},
+
+You've received a new application for the position of {{ job.title }}.
+
+Applicant Information:
+- Name: {{ applicant.name }}
+- Email: {{ applicant.email }}
+- Experience: {{ applicant.experience or 0 }} years
+- Education: {{ applicant.education or 'Not specified' }}
+
+Skills:
+{% for skill in applicant.skills %}
+- {{ skill.name }}
+{% endfor %}
+
+Match Score: {{ application.match_score }}%
+
+{% if application.cover_letter %}
+Cover Letter:
+{{ application.cover_letter }}
+{% endif %}
+
+To view this application, please visit:
+{{ url_for('jobs.view_applications', job_id=job.id, _external=True) }}
+
+This is an automated message from JobMatch. Please do not reply to this email. 

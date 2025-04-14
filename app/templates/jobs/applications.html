@@ -1,0 +1,448 @@
+{% extends "base.html" %}
+
+{% block title %}Applications for "{{ job.title }}" | JobMatch{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="mb-4" data-aos="fade-right">
+        <a href="{{ url_for('jobs.view_job', job_id=job.id) }}" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left me-2"></i> Back to Job
+        </a>
+    </div>
+
+    <h1 class="section-title mb-4" data-aos="fade-right">Applications for "{{ job.title }}"</h1>
+
+    {% if applications %}
+        <div class="alert alert-info d-flex mb-4" data-aos="fade-up">
+            <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+            <div>
+                Applications are ranked by match score. Higher scores indicate better matches for this position.
+            </div>
+        </div>
+        
+        <div class="row" data-aos="fade-up" data-aos-delay="100" id="job-applications-container" data-job-id="{{ job.id }}">
+            {% for application in applications %}
+                {% set applicant = application.applicant %}
+                {% if application.match_score is not none %}
+                    {% set score = application.match_score|float %}
+                    {% set match_class = 'success' if score >= 70 else ('warning' if score >= 40 else 'danger') %}
+                {% else %}
+                    {% set match_class = 'secondary' %}
+                {% endif %}
+                
+                <div class="col-md-12 mb-4" data-application-id="{{ application.id }}">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-body p-4">
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; font-size: 1.25rem; font-weight: 600;">
+                                            {{ applicant.name[:1] }}
+                                        </div>
+                                        <div>
+                                            <h5 class="card-title mb-1">{{ applicant.name }}</h5>
+                                            <p class="text-muted mb-0">
+                                                <i class="bi bi-envelope me-1"></i> {{ applicant.email }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="bi bi-briefcase text-primary me-2"></i>
+                                                <div>
+                                                    <div class="small text-muted">Experience</div>
+                                                    <div class="fw-medium">{{ applicant.experience or 0 }} years</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <i class="bi bi-mortarboard text-primary me-2"></i>
+                                                <div>
+                                                    <div class="small text-muted">Education</div>
+                                                    <div class="fw-medium">{{ applicant.education or 'Not specified' }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <h6 class="fw-semibold mb-2">Skills:</h6>
+                                        {% for skill in applicant.skills %}
+                                            <span class="badge bg-primary-subtle text-primary px-3 py-2 me-2 mb-2">{{ skill.name }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    
+                                    {% if application.cover_letter %}
+                                        <div class="mb-3">
+                                            <h6 class="fw-semibold mb-2">Cover Letter:</h6>
+                                            <div class="p-3 bg-light rounded">
+                                                {{ application.cover_letter|nl2br }}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    {% if applicant.resume %}
+                                        <div class="mb-3">
+                                            <h6 class="fw-semibold mb-2">Resume:</h6>
+                                            <div class="p-3 bg-light rounded">
+                                                {{ applicant.resume|nl2br }}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    <div class="text-muted">
+                                        <small><i class="bi bi-calendar me-1"></i> Applied on {{ application.created_at.strftime('%B %d, %Y') }}</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 text-md-end">
+                                    <div class="mb-4">
+                                        <div class="card shadow-sm border-0 mb-3">
+                                            <div class="card-body text-center p-3">
+                                                {% if application.match_score is not none %}
+                                                    <div class="text-{{ match_class }} fw-bold fs-1 mb-0">{{ score|round|int }}%</div>
+                                                    <p class="text-muted mb-0"><small>Match Score</small></p>
+                                                {% else %}
+                                                    <div class="text-secondary fw-bold fs-1 mb-0">Not calculated</div>
+                                                    <p class="text-muted mb-0"><small>Match Score</small></p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        
+                                        <a href="{{ url_for('profiles.view_applicant_profile', applicant_id=applicant.id) }}" class="btn btn-outline-primary btn-sm w-100 mb-3">
+                                            <i class="bi bi-person me-1"></i> View Full Profile
+                                        </a>
+                                    </div>
+                                    
+                                    <div class="mb-2">
+                                        <label class="form-label fw-semibold">Application Status</label>
+                                        <select class="form-select application-status" 
+                                                data-application-id="{{ application.id }}"
+                                                data-original-value="{{ application.status }}"
+                                                aria-label="Application status">
+                                            <option value="pending" {% if application.status == 'pending' %}selected{% endif %}>Pending</option>
+                                            <option value="reviewed" {% if application.status == 'reviewed' %}selected{% endif %}>Reviewed</option>
+                                            <option value="interviewed" {% if application.status == 'interviewed' %}selected{% endif %}>Interviewed</option>
+                                            <option value="offered" {% if application.status == 'offered' %}selected{% endif %}>Offered</option>
+                                            <option value="accepted" {% if application.status == 'accepted' %}selected{% endif %}>Accepted</option>
+                                            <option value="rejected" {% if application.status == 'rejected' %}selected{% endif %}>Rejected</option>
+                                            <option value="withdrawn" {% if application.status == 'withdrawn' %}selected{% endif %}>Withdrawn</option>
+                                        </select>
+                                        
+                                        <div class="mt-3 text-center">
+                                            {% set status_map = {
+                                                'pending': {'label': 'Pending', 'color': 'secondary'},
+                                                'reviewed': {'label': 'Reviewed', 'color': 'info'},
+                                                'interviewed': {'label': 'Interviewed', 'color': 'primary'},
+                                                'offered': {'label': 'Offered', 'color': 'success'},
+                                                'accepted': {'label': 'Accepted', 'color': 'success'},
+                                                'rejected': {'label': 'Rejected', 'color': 'danger'},
+                                                'withdrawn': {'label': 'Withdrawn', 'color': 'dark'}
+                                            } %}
+                                            
+                                            {% set status = application.status|default('pending')|lower %}
+                                            {% set status_info = status_map.get(status, {'label': 'Pending', 'color': 'secondary'}) %}
+                                            
+                                            <span class="badge bg-{{ status_info.color }}-subtle text-{{ status_info.color }} px-3 py-2 status-badge">
+                                                {{ status_info.label }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-warning d-flex" data-aos="fade-up">
+            <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+            <div>
+                No applications received yet for this job posting.
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all application status dropdowns
+        const statusDropdowns = document.querySelectorAll('.application-status');
+        
+        // Add change event listener to each dropdown
+        statusDropdowns.forEach(dropdown => {
+            dropdown.addEventListener('change', function() {
+                const applicationId = this.dataset.applicationId;
+                const newStatus = this.value;
+                const selectElement = this;
+                
+                // Show success toast notification
+                const showSuccessToast = function(message) {
+                    const toastContainer = document.createElement('div');
+                    toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                    toastContainer.innerHTML = `
+                        <div class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="d-flex">
+                                <div class="toast-body">
+                                    ${message}
+                                </div>
+                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(toastContainer);
+                    
+                    const toastElement = toastContainer.querySelector('.toast');
+                    const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
+                    toast.show();
+                    
+                    toastElement.addEventListener('hidden.bs.toast', function() {
+                        toastContainer.remove();
+                    });
+                };
+                
+                // Show error toast notification
+                const showErrorToast = function(message) {
+                    const toastContainer = document.createElement('div');
+                    toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                    toastContainer.innerHTML = `
+                        <div class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="d-flex">
+                                <div class="toast-body">
+                                    ${message}
+                                </div>
+                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(toastContainer);
+                    
+                    const toastElement = toastContainer.querySelector('.toast');
+                    const toast = new bootstrap.Toast(toastElement, { delay: 5000 });
+                    toast.show();
+                    
+                    toastElement.addEventListener('hidden.bs.toast', function() {
+                        toastContainer.remove();
+                    });
+                };
+                
+                // Prepare confirmation modal content based on status
+                let confirmationMessage = '';
+                let feedbackPrompt = '';
+                
+                switch(newStatus) {
+                    case 'reviewed':
+                        confirmationMessage = 'Mark application as reviewed?';
+                        feedbackPrompt = 'Optional notes about your review:';
+                        break;
+                    case 'interviewed':
+                        confirmationMessage = 'Mark candidate as interviewed?';
+                        feedbackPrompt = 'Add interview notes:';
+                        break;
+                    case 'offered':
+                        confirmationMessage = 'Send job offer to candidate?';
+                        feedbackPrompt = 'Include any details about the offer:';
+                        break;
+                    case 'accepted':
+                        confirmationMessage = 'Mark application as accepted?';
+                        feedbackPrompt = 'Add any additional notes:';
+                        break;
+                    case 'rejected':
+                        confirmationMessage = 'Reject this application?';
+                        feedbackPrompt = 'Reason for rejection (optional):';
+                        break;
+                    case 'withdrawn':
+                        confirmationMessage = 'Mark this application as withdrawn?';
+                        feedbackPrompt = 'Reason for withdrawal (optional):';
+                        break;
+                    default:
+                        confirmationMessage = `Change status to ${newStatus}?`;
+                        feedbackPrompt = 'Add additional notes (optional):';
+                }
+                
+                // Create confirmation modal
+                const modalContainer = document.createElement('div');
+                modalContainer.innerHTML = `
+                    <div class="modal fade" id="confirmStatusChangeModal" tabindex="-1" aria-labelledby="confirmStatusChangeModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="confirmStatusChangeModalLabel">Confirm Status Change</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>${confirmationMessage}</p>
+                                    <div class="mb-3">
+                                        <label for="feedbackText" class="form-label">${feedbackPrompt}</label>
+                                        <textarea class="form-control" id="feedbackText" rows="3"></textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="button" class="btn btn-primary" id="confirmStatusChange">Confirm</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modalContainer);
+                
+                const modal = new bootstrap.Modal(document.getElementById('confirmStatusChangeModal'));
+                modal.show();
+                
+                // Handle confirmation
+                document.getElementById('confirmStatusChange').addEventListener('click', function() {
+                    const feedback = document.getElementById('feedbackText').value;
+                    
+                    // Prepare data to send
+                    const requestBody = {
+                        'status': newStatus,
+                        'feedback': feedback
+                    };
+                    
+                    // Send request to update status
+                    fetch(`/api/applications/${applicationId}/status`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestBody)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update status badge
+                            const statusMap = {
+                                'pending': {'label': 'Pending', 'color': 'secondary'},
+                                'reviewed': {'label': 'Reviewed', 'color': 'info'},
+                                'interviewed': {'label': 'Interviewed', 'color': 'primary'},
+                                'offered': {'label': 'Offered', 'color': 'success'},
+                                'accepted': {'label': 'Accepted', 'color': 'success'},
+                                'rejected': {'label': 'Rejected', 'color': 'danger'},
+                                'withdrawn': {'label': 'Withdrawn', 'color': 'dark'}
+                            };
+                            
+                            const statusInfo = statusMap[newStatus];
+                            const badgeParent = selectElement.closest('.card').querySelector('.status-badge');
+                            
+                            if (badgeParent) {
+                                badgeParent.className = `badge bg-${statusInfo.color}-subtle text-${statusInfo.color} px-3 py-2`;
+                                badgeParent.textContent = statusInfo.label;
+                            }
+                            
+                            // Show success message
+                            modal.hide();
+                            showSuccessToast('Application status updated successfully!');
+                            
+                            // Email notification status
+                            if (data.email_sent) {
+                                showSuccessToast('Email notification sent to the applicant.');
+                            }
+                        } else {
+                            modal.hide();
+                            showErrorToast(data.error || 'Failed to update status.');
+                            // Reset the dropdown
+                            selectElement.value = data.previous_status || 'pending';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        modal.hide();
+                        showErrorToast('An error occurred while updating status.');
+                        // Reset the dropdown
+                        selectElement.value = 'pending';
+                    })
+                    .finally(() => {
+                        // Clean up modal
+                        modalContainer.remove();
+                    });
+                });
+                
+                // Handle modal close/dismiss
+                document.getElementById('confirmStatusChangeModal').addEventListener('hidden.bs.modal', function() {
+                    // Reset dropdown if modal is closed without confirmation
+                    if (document.contains(modalContainer)) {
+                        selectElement.value = selectElement.getAttribute('data-original-value') || 'pending';
+                        setTimeout(() => {
+                            modalContainer.remove();
+                        }, 300);
+                    }
+                });
+                
+                // Store original value
+                selectElement.setAttribute('data-original-value', selectElement.value);
+            });
+        });
+
+        // Function to refresh applications data
+        function refreshApplications() {
+            const jobId = document.getElementById('job-applications-container').getAttribute('data-job-id');
+            if (!jobId) return;
+            
+            fetch(`/api/jobs/${jobId}/applications-data`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.applications) {
+                        updateApplicationsUI(data.applications);
+                    }
+                })
+                .catch(error => console.error('Error refreshing applications:', error));
+        }
+
+        function updateApplicationsUI(applications) {
+            const container = document.getElementById('job-applications-container');
+            if (!container) return;
+            
+            // Find the existing application cards and update them
+            applications.forEach(app => {
+                const appCard = document.querySelector(`[data-application-id="${app.id}"]`);
+                if (appCard) {
+                    // Update status badge
+                    const statusBadge = appCard.querySelector('.status-badge');
+                    if (statusBadge) {
+                        const statusInfo = getStatusInfo(app.status);
+                        statusBadge.className = `badge bg-${statusInfo.color}-subtle text-${statusInfo.color} px-3 py-2 status-badge`;
+                        statusBadge.textContent = statusInfo.label;
+                    }
+                    
+                    // Update dropdown
+                    const statusDropdown = appCard.querySelector('.application-status');
+                    if (statusDropdown) {
+                        statusDropdown.value = app.status;
+                        statusDropdown.setAttribute('data-original-value', app.status);
+                    }
+                }
+            });
+        }
+
+        function getStatusInfo(status) {
+            const statusMap = {
+                'pending': {'label': 'Pending', 'color': 'secondary'},
+                'reviewed': {'label': 'Reviewed', 'color': 'info'},
+                'interviewed': {'label': 'Interviewed', 'color': 'primary'},
+                'offered': {'label': 'Offered', 'color': 'success'},
+                'accepted': {'label': 'Accepted', 'color': 'success'},
+                'rejected': {'label': 'Rejected', 'color': 'danger'},
+                'withdrawn': {'label': 'Withdrawn', 'color': 'dark'}
+            };
+            
+            return statusMap[status] || {'label': 'Pending', 'color': 'secondary'};
+        }
+
+        // Set up auto-refresh every 30 seconds
+        setInterval(refreshApplications, 30000);
+        
+        // Refresh when page becomes visible again
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                refreshApplications();
+            }
+        });
+    });
+</script>
+{% endblock %}

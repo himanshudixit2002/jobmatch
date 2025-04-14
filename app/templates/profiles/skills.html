@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Skills | JobMatch{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .skill-badge {
+        transition: all 0.3s ease;
+    }
+    
+    .skill-badge:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .skill-badge form button:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+    }
+    
+    .skills-container {
+        min-height: 60px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <h1 class="section-title mb-4" data-aos="fade-right">Manage Skills</h1>
+            
+            <div class="alert alert-info d-flex" data-aos="fade-up">
+                <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+                <div>
+                    Adding relevant skills to your profile helps us match you with the right job opportunities.
+                </div>
+            </div>
+            
+            <div class="card shadow-sm border-0 mb-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-semibold">Your Skills</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="skills-container mb-4">
+                        {% if user_skills %}
+                            {% for skill in user_skills %}
+                                <div class="badge bg-primary px-3 py-2 me-2 mb-2 d-inline-flex align-items-center skill-badge">
+                                    {{ skill.name }}
+                                    <form action="{{ url_for('profiles.remove_skill', skill_id=skill.id) }}" method="POST" class="d-inline ms-2 skill-remove-form">
+                                        <button type="submit" class="btn-close btn-close-white" style="font-size: 0.5rem;" aria-label="Remove skill"></button>
+                                    </form>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="alert alert-light border" id="noSkillsMessage">
+                                <p class="text-muted mb-0">
+                                    <i class="bi bi-info-circle me-1"></i> You haven't added any skills yet. Add skills below to improve your job matches.
+                                </p>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <h6 class="fw-semibold mt-4 mb-3">Add a Skill</h6>
+                    <form method="POST" action="" class="row g-2" id="addSkillForm">
+                        {{ form.hidden_tag() }}
+                        <div class="col-md-8">
+                            {% if form.name.errors %}
+                                {{ form.name(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.name(class="form-control", placeholder="Enter a skill name") }}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            {{ form.submit(class="btn btn-primary w-100", id="addSkillBtn") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 mb-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-semibold">Popular Skills</h5>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted small mb-3">Click on a skill to add it to your profile:</p>
+                    
+                    {% if all_skills %}
+                        <div class="d-flex flex-wrap">
+                            {% for skill in all_skills %}
+                                {% if skill not in user_skills %}
+                                    <form method="POST" action="" class="me-2 mb-2">
+                                        {{ form.hidden_tag() }}
+                                        <input type="hidden" name="{{ form.name.name }}" value="{{ skill.name }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-primary px-3 py-2">
+                                            {{ skill.name }}
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-light border">
+                            <p class="text-muted mb-0">
+                                <i class="bi bi-info-circle me-1"></i> No skills available in the system yet.
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card shadow-sm border-0" data-aos="fade-up" data-aos-delay="300">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-semibold">Why Skills Matter</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex mb-3">
+                        <div class="me-3 text-primary">
+                            <i class="bi bi-graph-up-arrow fs-4"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0">Skills are the primary factor in matching you with jobs</p>
+                        </div>
+                    </div>
+                    <div class="d-flex mb-3">
+                        <div class="me-3 text-primary">
+                            <i class="bi bi-list-check fs-4"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0">Be specific about your technical and soft skills</p>
+                        </div>
+                    </div>
+                    <div class="d-flex mb-3">
+                        <div class="me-3 text-primary">
+                            <i class="bi bi-tools fs-4"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0">Add both tools/technologies and industry-specific skills</p>
+                        </div>
+                    </div>
+                    <div class="d-flex">
+                        <div class="me-3 text-primary">
+                            <i class="bi bi-check2-circle fs-4"></i>
+                        </div>
+                        <div>
+                            <p class="mb-0">Only add skills you are genuinely proficient in</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add loading indicator when adding a skill
+        const addSkillForm = document.getElementById('addSkillForm');
+        if (addSkillForm) {
+            addSkillForm.addEventListener('submit', function() {
+                const addBtn = document.getElementById('addSkillBtn');
+                addBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Adding...';
+                addBtn.disabled = true;
+            });
+        }
+        
+        // Add confirmation for skill removal
+        const skillRemoveForms = document.querySelectorAll('.skill-remove-form');
+        skillRemoveForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const skillName = this.parentElement.textContent.trim();
+                
+                if (confirm(`Remove skill: ${skillName}?`)) {
+                    const badge = this.parentElement;
+                    badge.style.opacity = '0.5';
+                    this.submit();
+                }
+            });
+        });
+        
+        // Highlight newly added skills (if coming from a redirect with success)
+        if (document.querySelector('.alert-success')) {
+            const message = document.querySelector('.alert-success').textContent;
+            if (message.includes('added')) {
+                const skillName = message.match(/"([^"]+)"/);
+                if (skillName && skillName[1]) {
+                    const badges = document.querySelectorAll('.skill-badge');
+                    badges.forEach(badge => {
+                        if (badge.textContent.trim().includes(skillName[1])) {
+                            badge.style.backgroundColor = '#0d6efd';
+                            badge.style.boxShadow = '0 0 0 4px rgba(13, 110, 253, 0.25)';
+                            setTimeout(() => {
+                                badge.style.backgroundColor = '';
+                                badge.style.boxShadow = '';
+                            }, 2000);
+                        }
+                    });
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

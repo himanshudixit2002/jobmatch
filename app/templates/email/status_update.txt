@@ -1,0 +1,30 @@
+Application Status Update: {{ application.job.title }}
+
+Hello {{ application.applicant.name }},
+
+Your application status for {{ application.job.title }} at {{ application.job.recruiter.company }} has been updated to: {{ application.status|capitalize }}
+
+Job Details:
+- Title: {{ application.job.title }}
+- Company: {{ application.job.recruiter.company }}
+- Location: {{ application.job.location }}
+- Applied on: {{ application.created_at.strftime('%b %d, %Y') }}
+
+Status Information:
+{{ application.get_status_message(application.status) }}
+
+{% if application.notes %}
+Feedback from Recruiter:
+{{ application.notes }}
+{% endif %}
+
+You can view the complete details of your application by logging into your account:
+{{ url_for('profiles.view_applications', _external=True) }}
+
+If you have any questions, please don't hesitate to contact us.
+
+Best regards,
+The {{ application.job.recruiter.company }} Recruitment Team
+
+---
+This is an automated message. Please do not reply to this email. 

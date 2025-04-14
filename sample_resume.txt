@@ -1,0 +1,41 @@
+JOHN DOE
+Software Engineer
+john.doe@example.com | (555) 123-4567 | linkedin.com/in/johndoe | github.com/johndoe
+
+SUMMARY
+Experienced software engineer with 5 years of experience specializing in backend development, cloud infrastructure, and machine learning. Passionate about creating scalable solutions and optimizing application performance.
+
+SKILLS
+Programming Languages: Python, JavaScript, Java, C++
+Frameworks: Django, Flask, React, Node.js, Spring Boot
+Database: PostgreSQL, MongoDB, MySQL, Redis
+Cloud: AWS, Google Cloud Platform, Azure
+DevOps: Docker, Kubernetes, Jenkins, CI/CD
+Other: Git, RESTful APIs, GraphQL, Microservices
+
+EXPERIENCE
+Senior Software Engineer | Tech Solutions Inc. | Jan 2021 - Present
+- Redesigned the company's backend architecture, improving API response time by 40%
+- Implemented CI/CD pipelines that reduced deployment time by 60%
+- Led a team of 5 engineers to deliver major platform features on schedule
+- Migrated legacy systems to cloud infrastructure, resulting in 30% cost reduction
+
+Software Engineer | Data Innovations Co. | Jun 2018 - Dec 2020
+- Developed machine learning models to optimize customer recommendations
+- Created RESTful APIs consumed by web and mobile clients
+- Implemented automated testing, achieving 90% code coverage
+- Collaborated with cross-functional teams to deliver features on time
+
+Junior Developer | Web Start Ltd. | Aug 2016 - May 2018
+- Built responsive web applications using JavaScript and React
+- Maintained and improved existing codebase
+- Participated in code reviews and technical documentation
+
+EDUCATION
+Master of Science in Computer Science | Stanford University | 2016
+Bachelor of Science in Computer Engineering | MIT | 2014
+
+PROJECTS
+Personal Finance Tracker - Full-stack application using React, Node.js, and MongoDB
+Smart Home Automation System - IoT project using Raspberry Pi, Python, and AWS
+Open-source contributions to Django and several machine learning libraries 

@@ -1,0 +1,416 @@
+{% extends "base.html" %}
+
+{% block title %}Find Your Dream Job | JobMatch{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6" data-aos="fade-right">
+                <h1 class="display-4 fw-bold">Discover Your <span class="highlight">Perfect Career</span> Match</h1>
+                <p>JobMatch uses advanced AI matching to connect talented professionals with their ideal opportunities.
+                Get personalized job recommendations based on your skills and career goals.</p>
+                <div class="d-flex flex-wrap gap-3">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.is_recruiter() %}
+                            <a href="{{ url_for('jobs.create_job') }}" class="btn btn-light btn-lg">
+                                <i class="bi bi-plus-circle me-2"></i> Post a Job
+                            </a>
+                            <a href="{{ url_for('jobs.manage_jobs') }}" class="btn btn-outline-light btn-lg">
+                                <i class="bi bi-list-check me-2"></i> Manage Jobs
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('jobs.browse_jobs') }}" class="btn btn-light btn-lg">
+                                <i class="bi bi-search me-2"></i> Find Jobs
+                            </a>
+                            <a href="{{ url_for('profiles.manage_skills') }}" class="btn btn-outline-light btn-lg">
+                                <i class="bi bi-tools me-2"></i> Manage Skills
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg">
+                            <i class="bi bi-person-plus me-2"></i> Get Started
+                        </a>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-box-arrow-in-right me-2"></i> Sign In
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6 mt-5 mt-lg-0" data-aos="fade-left">
+                <div class="hero-image-wrapper">
+                    <img src="{{ url_for('static', filename='img/hero-illustration.svg') }}" alt="Job matching illustration" class="img-fluid hero-image" onerror="this.src='https://via.placeholder.com/600x400?text=JobMatch';this.onerror='';">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5 bg-white stats-section">
+    <div class="container">
+        <div class="row text-center" data-aos="fade-up">
+            <div class="col-md-4 mb-4 mb-md-0">
+                <div class="stat-card">
+                    <div class="stat-icon mb-3">
+                        <i class="bi bi-briefcase-fill"></i>
+                    </div>
+                    <h2 class="display-4 fw-bold text-primary counter">5,000+</h2>
+                    <p class="text-muted">Active Job Listings</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4 mb-md-0">
+                <div class="stat-card">
+                    <div class="stat-icon mb-3">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <h2 class="display-4 fw-bold text-primary counter">10,000+</h2>
+                    <p class="text-muted">Registered Professionals</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <div class="stat-icon mb-3">
+                        <i class="bi bi-building-fill"></i>
+                    </div>
+                    <h2 class="display-4 fw-bold text-primary counter">2,500+</h2>
+                    <p class="text-muted">Companies Hiring</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5 features-section">
+    <div class="container">
+        <h2 class="section-title text-center mb-5" data-aos="fade-up">How JobMatch Works</h2>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                <div class="feature-box">
+                    <div class="feature-icon">
+                        <i class="bi bi-person-badge"></i>
+                    </div>
+                    <h3 class="h4 mb-3">For Job Seekers</h3>
+                    <p class="text-muted mb-4">Create a profile, add your skills and experience, and let our AI matching system connect you with the perfect job opportunities. Get personalized recommendations based on your unique skillset.</p>
+                    {% if not current_user.is_authenticated or current_user.is_applicant() %}
+                        <a href="{{ url_for('jobs.browse_jobs') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-search me-2"></i> Find Jobs
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                <div class="feature-box">
+                    <div class="feature-icon">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <h3 class="h4 mb-3">For Recruiters</h3>
+                    <p class="text-muted mb-4">Post jobs and let our AI matching algorithm find the best candidates for your positions. Our system ranks applications based on skills and experience match to save you time in the hiring process.</p>
+                    {% if not current_user.is_authenticated or current_user.is_recruiter() %}
+                        <a href="{{ url_for('jobs.create_job') if current_user.is_authenticated else url_for('auth.register') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-{% if current_user.is_authenticated %}plus-circle{% else %}person-plus{% endif %} me-2"></i>
+                            {% if current_user.is_authenticated %}Post a Job{% else %}Join as Recruiter{% endif %}
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                <div class="feature-box">
+                    <div class="feature-icon">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <h3 class="h4 mb-3">Smart Matching</h3>
+                    <p class="text-muted mb-4">Our proprietary algorithm analyzes skills, experience, and job requirements to calculate precise match scores. Higher scores indicate better matches for both job seekers and employers.</p>
+                    {% if not current_user.is_authenticated %}
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-person-plus me-2"></i> Sign Up Now
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5 bg-white process-section">
+    <div class="container">
+        <h2 class="section-title text-center mb-5" data-aos="fade-up">The JobMatch Process</h2>
+        <div class="row">
+            <div class="col-lg-3 col-md-6 mb-4 mb-lg-0" data-aos="fade-up" data-aos-delay="100">
+                <div class="text-center position-relative">
+                    <div class="process-circle bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-4">
+                        <span class="fw-bold fs-3">1</span>
+                    </div>
+                    <h4>Create Profile</h4>
+                    <p class="text-muted">Sign up and build your professional profile with skills and experience</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4 mb-lg-0" data-aos="fade-up" data-aos-delay="200">
+                <div class="text-center position-relative">
+                    <div class="process-circle bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-4">
+                        <span class="fw-bold fs-3">2</span>
+                    </div>
+                    <h4>Browse Jobs</h4>
+                    <p class="text-muted">Explore job listings or receive personalized recommendations</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-4 mb-lg-0" data-aos="fade-up" data-aos-delay="300">
+                <div class="text-center position-relative">
+                    <div class="process-circle bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-4">
+                        <span class="fw-bold fs-3">3</span>
+                    </div>
+                    <h4>Apply</h4>
+                    <p class="text-muted">Submit applications with just a few clicks to jobs that match your profile</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                <div class="text-center position-relative">
+                    <div class="process-circle bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-4">
+                        <span class="fw-bold fs-3">4</span>
+                    </div>
+                    <h4>Get Hired</h4>
+                    <p class="text-muted">Connect with employers and land your dream job opportunity</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="py-5 testimonials-section">
+    <div class="container">
+        <h2 class="section-title text-center mb-5" data-aos="fade-up">Success Stories</h2>
+        <div class="row">
+            <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="card testimonial-card h-100">
+                    <div class="card-body p-4">
+                        <div class="testimonial-header d-flex align-items-center mb-4">
+                            <div class="testimonial-avatar me-3">
+                                <div class="avatar-circle bg-primary d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-person-fill fs-3 text-white"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">Sarah Johnson</h5>
+                                <p class="testimonial-position mb-0">UX Designer at DesignHub</p>
+                            </div>
+                            <div class="testimonial-quote ms-auto">
+                                <i class="bi bi-quote fs-1 text-primary-subtle"></i>
+                            </div>
+                        </div>
+                        <p class="card-text">"JobMatch helped me find my dream job in just two weeks! The platform's matching algorithm connected me with companies that were perfect for my skills and career goals. The process was smooth and efficient, and I'm now working at a company that truly values my contributions."</p>
+                        <div class="testimonial-rating mt-3">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="card testimonial-card h-100">
+                    <div class="card-body p-4">
+                        <div class="testimonial-header d-flex align-items-center mb-4">
+                            <div class="testimonial-avatar me-3">
+                                <div class="avatar-circle bg-primary d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-person-fill fs-3 text-white"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h5 class="mb-1">Michael Chen</h5>
+                                <p class="testimonial-position mb-0">Software Engineer at TechInnovate</p>
+                            </div>
+                            <div class="testimonial-quote ms-auto">
+                                <i class="bi bi-quote fs-1 text-primary-subtle"></i>
+                            </div>
+                        </div>
+                        <p class="card-text">"As someone transitioning careers, JobMatch was invaluable. The platform highlighted my transferable skills and connected me with employers willing to take a chance on me. Within a month, I had multiple interviews and landed a great position!"</p>
+                        <div class="testimonial-rating mt-3">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 cta-section">
+    <div class="container text-center" data-aos="fade-up">
+        <div class="cta-card">
+            <h2 class="mb-4">Ready to Find Your Perfect Match?</h2>
+            <p class="lead mb-4">Join thousands of professionals who have found their dream jobs through JobMatch</p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                {% if current_user.is_authenticated %}
+                    {% if current_user.is_recruiter() %}
+                        <a href="{{ url_for('jobs.create_job') }}" class="btn btn-light btn-lg">
+                            <i class="bi bi-plus-circle me-2"></i> Post a Job
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('jobs.browse_jobs') }}" class="btn btn-light btn-lg">
+                            <i class="bi bi-search me-2"></i> Browse Jobs
+                        </a>
+                    {% endif %}
+                {% else %}
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-light btn-lg">
+                        <i class="bi bi-person-plus me-2"></i> Create Account
+                    </a>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Sign In
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* Hero section enhancements */
+    .hero h1 .highlight {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .hero h1 .highlight::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 30%;
+        background-color: rgba(255, 255, 255, 0.25);
+        z-index: -1;
+        border-radius: 4px;
+    }
+    
+    .hero-image-wrapper {
+        text-align: center;
+    }
+    
+    .hero-image {
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        max-width: 90%;
+    }
+    
+    /* Stats section enhancements */
+    .stats-section {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .stat-card {
+        padding: 2rem;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: var(--primary);
+    }
+    
+    .counter {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    /* Process section enhancements */
+    .process-section {
+        position: relative;
+    }
+    
+    .process-circle {
+        width: 80px;
+        height: 80px;
+        box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+        background: var(--gradient-primary) !important;
+    }
+    
+    /* Testimonial enhancements */
+    .testimonial-card {
+        border-radius: 16px;
+        border-top: 4px solid var(--primary);
+        transition: all 0.3s ease;
+    }
+    
+    .testimonial-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .avatar-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: var(--gradient-primary);
+    }
+    
+    .testimonial-position {
+        font-size: 0.9rem;
+        color: var(--gray);
+    }
+    
+    .testimonial-quote {
+        opacity: 0.3;
+    }
+    
+    /* CTA section enhancements */
+    .cta-section {
+        background: var(--gradient-primary);
+        color: white;
+        position: relative;
+    }
+    
+    .cta-card {
+        position: relative;
+        z-index: 10;
+        padding: 3rem;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.1);
+    }
+    
+    @media (max-width: 768px) {
+        .hero-image {
+            max-width: 100%;
+            margin-top: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Simple animation for stat numbers
+        const counters = document.querySelectorAll('.counter');
+        counters.forEach(counter => {
+            const text = counter.textContent;
+            counter.textContent = '0';
+            setTimeout(() => {
+                counter.textContent = text;
+            }, 500);
+        });
+    });
+</script>
+{% endblock %}

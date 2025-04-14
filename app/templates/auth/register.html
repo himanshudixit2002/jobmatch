@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-body p-4">
+                <h2 class="text-center mb-4">Create an Account</h2>
+                <form method="POST" action="">
+                    {{ form.hidden_tag() }}
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            {{ form.name.label(class="form-label") }}
+                            {% if form.name.errors %}
+                                {{ form.name(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.name(class="form-control") }}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.email.label(class="form-label") }}
+                            {% if form.email.errors %}
+                                {{ form.email(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.email.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.email(class="form-control") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.user_type.label(class="form-label") }}
+                        {{ form.user_type(class="form-select", id="userTypeSelect") }}
+                    </div>
+                    
+                    <div id="recruiterFields" class="row mb-3" style="display: none;">
+                        <div class="col-md-6">
+                            {{ form.company.label(class="form-label") }}
+                            {% if form.company.errors %}
+                                {{ form.company(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.company.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.company(class="form-control") }}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.position.label(class="form-label") }}
+                            {% if form.position.errors %}
+                                {{ form.position(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.position.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.position(class="form-control") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div id="applicantFields" class="row mb-3">
+                        <div class="col-md-6">
+                            {{ form.experience.label(class="form-label") }}
+                            {% if form.experience.errors %}
+                                {{ form.experience(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.experience.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.experience(class="form-control") }}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.education.label(class="form-label") }}
+                            {% if form.education.errors %}
+                                {{ form.education(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.education.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.education(class="form-control") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            {{ form.password.label(class="form-label") }}
+                            {% if form.password.errors %}
+                                {{ form.password(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.password.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.password(class="form-control") }}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {{ form.confirm_password.label(class="form-label") }}
+                            {% if form.confirm_password.errors %}
+                                {{ form.confirm_password(class="form-control is-invalid") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.confirm_password.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.confirm_password(class="form-control") }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-success btn-lg") }}
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center py-3">
+                <div class="small">
+                    Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const userTypeSelect = document.getElementById('userTypeSelect');
+        const recruiterFields = document.getElementById('recruiterFields');
+        const applicantFields = document.getElementById('applicantFields');
+        
+        function toggleFields() {
+            if (userTypeSelect.value === 'recruiter') {
+                recruiterFields.style.display = 'flex';
+                applicantFields.style.display = 'none';
+            } else {
+                recruiterFields.style.display = 'none';
+                applicantFields.style.display = 'flex';
+            }
+        }
+        
+        // Initial toggle
+        toggleFields();
+        
+        // Add event listener for changes
+        userTypeSelect.addEventListener('change', toggleFields);
+    });
+</script>
+{% endblock %}

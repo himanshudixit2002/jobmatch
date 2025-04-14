@@ -1,0 +1,52 @@
+{
+  "skills": [
+    "Python",
+    "JavaScript",
+    "Java",
+    "C++",
+    "Django",
+    "Flask",
+    "React",
+    "Node.js",
+    "Spring Boot",
+    "PostgreSQL",
+    "MongoDB",
+    "MySQL",
+    "Redis",
+    "AWS",
+    "Google Cloud Platform",
+    "Azure",
+    "Docker",
+    "Kubernetes",
+    "Jenkins",
+    "CI/CD",
+    "Git",
+    "RESTful APIs",
+    "GraphQL",
+    "Microservices"
+  ],
+  "experience": 7,
+  "education": {
+    "degree": "Master of Science",
+    "field": "Computer Science",
+    "university": "Stanford University"
+  },
+  "job_history": [
+    {
+      "company": "Tech Solutions Inc.",
+      "title": "Senior Software Engineer",
+      "duration": "Jan 2021 - Present"
+    },
+    {
+      "company": "Data Innovations Co.",
+      "title": "Software Engineer",
+      "duration": "Jun 2018 - Dec 2020"
+    },
+    {
+      "company": "Web Start Ltd.",
+      "title": "Junior Developer",
+      "duration": "Aug 2016 - May 2018"
+    }
+  ],
+  "success": true
+}

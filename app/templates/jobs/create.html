@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Post a New Job | JobMatch{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <h1 class="section-title mb-4" data-aos="fade-right">Post a New Job</h1>
+            
+            <div class="card shadow-sm border-0" data-aos="fade-up">
+                <div class="card-body p-4 p-lg-5">
+                    <form method="POST" action="">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                {{ form.title.label(class="form-label fw-semibold") }}
+                                {% if form.title.errors %}
+                                    {{ form.title(class="form-control is-invalid", placeholder="e.g. Senior Software Engineer") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.title.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.title(class="form-control", placeholder="e.g. Senior Software Engineer") }}
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i> Use a specific title to attract the right candidates
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.location.label(class="form-label fw-semibold") }}
+                                {% if form.location.errors %}
+                                    {{ form.location(class="form-control is-invalid", placeholder="e.g. New York, NY or Remote") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.location.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.location(class="form-control", placeholder="e.g. New York, NY or Remote") }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3 mb-md-0">
+                                {{ form.salary.label(class="form-label fw-semibold") }}
+                                {% if form.salary.errors %}
+                                    {{ form.salary(class="form-control is-invalid", placeholder="e.g. $80,000 - $100,000") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.salary.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.salary(class="form-control", placeholder="e.g. $80,000 - $100,000") }}
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i> Including salary range increases application rates
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.experience_required.label(class="form-label fw-semibold") }}
+                                {% if form.experience_required.errors %}
+                                    {{ form.experience_required(class="form-control is-invalid") }}
+                                    <div class="invalid-feedback">
+                                        {% for error in form.experience_required.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.experience_required(class="form-control") }}
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i> Years of experience required for this position
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            {{ form.description.label(class="form-label fw-semibold") }}
+                            {% if form.description.errors %}
+                                {{ form.description(class="form-control is-invalid", rows=10, placeholder="Describe the role, responsibilities, and requirements...") }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.description.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.description(class="form-control", rows=10, placeholder="Describe the role, responsibilities, and requirements...") }}
+                            {% endif %}
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i> Include details about the role, responsibilities, and requirements
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            {{ form.skills.label(class="form-label fw-semibold") }}
+                            {% if form.skills.errors %}
+                                {{ form.skills(class="form-select is-invalid", multiple="multiple", size=8) }}
+                                <div class="invalid-feedback">
+                                    {% for error in form.skills.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.skills(class="form-select", multiple="multiple", size=8) }}
+                            {% endif %}
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i> Hold Ctrl (or Command on Mac) to select multiple skills. Skills are used to match candidates to your job.
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info d-flex mb-4" data-aos="fade-up">
+                            <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+                            <div>
+                                <strong>Tip:</strong> Be specific about required skills to improve the quality of applicant matches. Our algorithm uses these skills to calculate match scores.
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

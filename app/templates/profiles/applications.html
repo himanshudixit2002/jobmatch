@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+
+{% block title %}My Applications | JobMatch{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .job-logo {
+        width: 32px;
+        height: 32px;
+        background-color: #e9ecef;
+        color: #495057;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        border-radius: 4px;
+    }
+    
+    .progress {
+        background-color: #e9ecef;
+    }
+    
+    .progress-bar {
+        transition: width 0.3s ease;
+    }
+    
+    .badge {
+        transition: all 0.2s ease;
+    }
+    
+    .score-progress {
+        height: 6px;
+        width: 80px;
+        flex-grow: 1;
+        margin-right: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="section-title" data-aos="fade-right">My Applications</h1>
+        <a href="{{ url_for('jobs.browse_jobs') }}" class="btn btn-primary" data-aos="fade-left">
+            <i class="bi bi-search me-2"></i> Find More Jobs
+        </a>
+    </div>
+
+    {% if applications %}
+        <div class="card shadow-sm border-0 overflow-hidden" data-aos="fade-up">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="px-4 py-3">Job</th>
+                                <th class="py-3">Company</th>
+                                <th class="py-3">Applied On</th>
+                                <th class="py-3">Match Score</th>
+                                <th class="py-3">Status</th>
+                                <th class="py-3 text-end pe-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for application in applications %}
+                                <tr>
+                                    <td class="px-4 py-3">
+                                        <div class="fw-semibold">{{ application.job.title }}</div>
+                                        <div class="small text-muted">
+                                            <i class="bi bi-geo-alt me-1"></i>{{ application.job.location }}
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="job-logo me-2">
+                                                {{ application.job.recruiter.company[:1] }}
+                                            </div>
+                                            <span>{{ application.job.recruiter.company }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">{{ application.created_at.strftime('%b %d, %Y') }}</td>
+                                    <td class="py-3">
+                                        {% if application.match_score is not none %}
+                                            {% set score = application.match_score|float %}
+                                            {% set match_class = 'success' if score >= 70 else ('warning' if score >= 40 else 'danger') %}
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress score-progress">
+                                                    <div class="progress-bar bg-{{ match_class }}" data-width="{{ score }}" role="progressbar" aria-valuenow="{{ score }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <span class="badge bg-{{ match_class }}-subtle text-{{ match_class }}">{{ score|round|int }}%</span>
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted">Not calculated</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="py-3">
+                                        {% set status_map = {
+                                            'pending': 'secondary',
+                                            'reviewed': 'info',
+                                            'interviewed': 'primary',
+                                            'offered': 'success',
+                                            'accepted': 'success',
+                                            'rejected': 'danger',
+                                            'withdrawn': 'dark'
+                                        } %}
+                                        
+                                        {% set status = application.status|default('pending')|lower %}
+                                        {% set status_class = status_map.get(status, 'secondary') %}
+                                        
+                                        <span class="badge bg-{{ status_class }}-subtle text-{{ status_class }} px-3 py-2">
+                                            {{ status|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end pe-4 py-3">
+                                        <div class="btn-group">
+                                            <a href="{{ url_for('jobs.view_job', job_id=application.job.id) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye me-1"></i> View Job
+                                            </a>
+                                            {% if application.status == 'offered' %}
+                                                <a href="#" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#acceptOfferModal{{ application.id }}">
+                                                    <i class="bi bi-check-lg me-1"></i> Accept
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Accept Offer Modals -->
+        {% for application in applications %}
+            {% if application.status == 'offered' %}
+                <div class="modal fade" id="acceptOfferModal{{ application.id }}" tabindex="-1" aria-labelledby="acceptOfferModalLabel{{ application.id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="acceptOfferModalLabel{{ application.id }}">Accept Job Offer</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>You're about to accept the job offer for <strong>{{ application.job.title }}</strong> at <strong>{{ application.job.recruiter.company }}</strong>.</p>
+                                <p>Congratulations! Would you like to proceed?</p>
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle me-2"></i> Accepting this offer will mark your other active applications as withdrawn.
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <form action="{{ url_for('profiles.accept_job_offer', application_id=application.id) }}" method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="bi bi-check-lg me-1"></i> Accept Offer
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+        
+        <div class="mt-4" data-aos="fade-up" data-aos-delay="100">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-semibold">Application Status Guide</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-3 d-flex align-items-center">
+                                    <span class="badge bg-secondary-subtle text-secondary px-3 py-2 me-2">Pending</span>
+                                    <span>Your application has been submitted but not yet reviewed</span>
+                                </li>
+                                <li class="mb-3 d-flex align-items-center">
+                                    <span class="badge bg-info-subtle text-info px-3 py-2 me-2">Reviewed</span>
+                                    <span>The recruiter has reviewed your application</span>
+                                </li>
+                                <li class="mb-3 d-flex align-items-center">
+                                    <span class="badge bg-primary-subtle text-primary px-3 py-2 me-2">Interviewed</span>
+                                    <span>You've been interviewed for this position</span>
+                                </li>
+                                <li class="mb-3 d-flex align-items-center">
+                                    <span class="badge bg-dark-subtle text-dark px-3 py-2 me-2">Withdrawn</span>
+                                    <span>You've withdrawn your application</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-3 d-flex align-items-center">
+                                    <span class="badge bg-success-subtle text-success px-3 py-2 me-2">Offered</span>
+                                    <span>You've received a job offer</span>
+                                </li>
+                                <li class="mb-3 d-flex align-items-center">
+                                    <span class="badge bg-success-subtle text-success px-3 py-2 me-2">Accepted</span>
+                                    <span>You've accepted the job offer</span>
+                                </li>
+                                <li class="d-flex align-items-center">
+                                    <span class="badge bg-danger-subtle text-danger px-3 py-2 me-2">Rejected</span>
+                                    <span>Your application was not selected</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info d-flex align-items-center" data-aos="fade-up">
+            <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+            <div>
+                <p class="mb-0">You haven't applied to any jobs yet.
+                <a href="{{ url_for('jobs.browse_jobs') }}" class="alert-link">Browse jobs</a> to find opportunities that match your skills.</p>
+            </div>
+        </div>
+        
+        <div class="card mt-4 border-0 shadow-sm" data-aos="fade-up" data-aos-delay="100">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 fw-semibold">Tips for Finding the Right Job</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="d-flex mb-3">
+                            <div class="me-3 text-primary">
+                                <i class="bi bi-tools fs-4"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-semibold">Update your skills</h6>
+                                <p class="text-muted mb-0">Make sure your profile includes all relevant skills to improve matching</p>
+                            </div>
+                        </div>
+                        <div class="d-flex mb-3">
+                            <div class="me-3 text-primary">
+                                <i class="bi bi-file-earmark-text fs-4"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-semibold">Add a detailed resume</h6>
+                                <p class="text-muted mb-0">A comprehensive resume helps recruiters understand your qualifications</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex mb-3">
+                            <div class="me-3 text-primary">
+                                <i class="bi bi-envelope-paper fs-4"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-semibold">Write personalized cover letters</h6>
+                                <p class="text-muted mb-0">Explain why you're a good fit for each specific job</p>
+                            </div>
+                        </div>
+                        <div class="d-flex">
+                            <div class="me-3 text-primary">
+                                <i class="bi bi-graph-up-arrow fs-4"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-semibold">Apply to jobs with high match scores</h6>
+                                <p class="text-muted mb-0">Jobs with higher match scores are more likely to be a good fit</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips if Bootstrap is available
+        if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+            const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            tooltips.forEach(tooltip => new bootstrap.Tooltip(tooltip));
+        }
+        
+        // Set progress bar widths
+        document.querySelectorAll('.progress-bar[data-width]').forEach(function(progressBar) {
+            const width = progressBar.getAttribute('data-width');
+            progressBar.style.width = width + '%';
+        });
+    });
+</script>
+{% endblock %}

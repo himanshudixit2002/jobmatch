@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Invitation</title>
+    <style>
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9fafb;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%);
+            color: white;
+            padding: 2rem 1.5rem;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .content {
+            padding: 2rem 1.5rem;
+        }
+        .section {
+            margin-bottom: 1.5rem;
+        }
+        .section-title {
+            font-size: 1.125rem;
+            color: #4f46e5;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            border-bottom: 1px solid #e1e1e1;
+            padding-bottom: 0.5rem;
+            position: relative;
+        }
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #4f46e5 0%, #0ea5e9 100%);
+            border-radius: 1px;
+        }
+        .interview-details {
+            background-color: #f8fafc;
+            border-left: 4px solid #4f46e5;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            margin: 1.25rem 0;
+        }
+        .detail-row {
+            margin-bottom: 0.75rem;
+            display: flex;
+        }
+        .detail-row:last-child {
+            margin-bottom: 0;
+        }
+        .detail-icon {
+            width: 24px;
+            margin-right: 0.75rem;
+            color: #4f46e5;
+            text-align: center;
+        }
+        .detail-content {
+            flex: 1;
+        }
+        .detail-label {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: #4f46e5;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: #4f46e5;
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            margin: 0.375rem;
+            transition: all 0.3s ease;
+        }
+        .cta-button:hover {
+            background-color: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .cta-button.secondary {
+            background-color: #f8fafc;
+            color: #4f46e5;
+            border: 1px solid #4f46e5;
+        }
+        .cta-button.secondary:hover {
+            background-color: #f1f5f9;
+            color: #4338ca;
+            border-color: #4338ca;
+        }
+        .actions {
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+        .company-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid #e1e1e1;
+        }
+        .company-logo {
+            width: 60px;
+            height: 60px;
+            background-color: #f1f5f9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .company-logo img {
+            max-width: 45px;
+            max-height: 45px;
+        }
+        .company-details {
+            flex: 1;
+        }
+        .company-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            color: #1e293b;
+        }
+        .job-title {
+            color: #4f46e5;
+            font-weight: 500;
+        }
+        .preparation-tips {
+            background-color: #f0f9ff;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            margin-bottom: 1.25rem;
+            border-left: 4px solid #0ea5e9;
+        }
+        .preparation-tips h3 {
+            margin-top: 0;
+            color: #0ea5e9;
+            font-size: 1rem;
+        }
+        .preparation-tips ul {
+            padding-left: 1.25rem;
+            margin-bottom: 0;
+        }
+        .preparation-tips ul li {
+            margin-bottom: 0.5rem;
+        }
+        .preparation-tips ul li:last-child {
+            margin-bottom: 0;
+        }
+        .footer {
+            background-color: #f8fafc;
+            padding: 1.25rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #64748b;
+            border-top: 1px solid #e2e8f0;
+        }
+        .footer a {
+            color: #4f46e5;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .footer a:hover {
+            color: #4338ca;
+            text-decoration: underline;
+        }
+        .calendar-icon {
+            display: inline-block;
+            margin-right: 0.25rem;
+        }
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 100%;
+                border-radius: 0;
+            }
+            .actions {
+                display: flex;
+                flex-direction: column;
+            }
+            .cta-button {
+                margin: 0.375rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Interview Invitation</h1>
+        </div>
+        <div class="content">
+            <div class="company-info">
+                <div class="company-logo">
+                    {% if job.company_logo %}
+                    <img src="{{ job.company_logo }}" alt="{{ job.company_name }} logo">
+                    {% else %}
+                    <span style="font-size: 1.5rem; color: #4f46e5; font-weight: 700;">{{ job.company_name[:1] }}</span>
+                    {% endif %}
+                </div>
+                <div class="company-details">
+                    <div class="company-name">{{ job.company_name }}</div>
+                    <div class="job-title">{{ job.title }}</div>
+                </div>
+            </div>
+
+            <p>Hello {{ user.name }},</p>
+            <p>Congratulations! We're pleased to inform you that your application for the <strong>{{ job.title }}</strong> position has been selected for an interview.</p>
+            
+            <div class="section">
+                <div class="section-title">Interview Details</div>
+                <div class="interview-details">
+                    <div class="detail-row">
+                        <div class="detail-icon">📅</div>
+                        <div class="detail-content">
+                            <div class="detail-label">Date</div>
+                            <div>{{ interview.date|date }}</div>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-icon">⏰</div>
+                        <div class="detail-content">
+                            <div class="detail-label">Time</div>
+                            <div>{{ interview.start_time }} - {{ interview.end_time }}</div>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-icon">🏢</div>
+                        <div class="detail-content">
+                            <div class="detail-label">Location</div>
+                            <div>
+                                {% if interview.location_type == 'remote' %}
+                                Remote Interview (Video Conference)
+                                {% else %}
+                                {{ interview.location }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% if interview.location_type == 'remote' %}
+                    <div class="detail-row">
+                        <div class="detail-icon">🔗</div>
+                        <div class="detail-content">
+                            <div class="detail-label">Meeting Link</div>
+                            <div><a href="{{ interview.meeting_link }}" style="color: #4f46e5;">{{ interview.meeting_link }}</a></div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="detail-row">
+                        <div class="detail-icon">👥</div>
+                        <div class="detail-content">
+                            <div class="detail-label">Interviewer(s)</div>
+                            <div>{{ interview.interviewers }}</div>
+                        </div>
+                    </div>
+                    {% if interview.additional_info %}
+                    <div class="detail-row">
+                        <div class="detail-icon">ℹ️</div>
+                        <div class="detail-content">
+                            <div class="detail-label">Additional Information</div>
+                            <div>{{ interview.additional_info }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Preparation Tips</div>
+                <div class="preparation-tips">
+                    <ul>
+                        <li>Research about our company and the role you've applied for</li>
+                        <li>Review your resume and be prepared to discuss your experiences</li>
+                        <li>Prepare questions to ask about the role and company</li>
+                        <li>Test your equipment beforehand if this is a remote interview</li>
+                        <li>Be ready 5-10 minutes before the scheduled time</li>
+                    </ul>
+                </div>
+            </div>
+
+            <p>Please confirm your attendance by clicking one of the buttons below:</p>
+            
+            <div class="actions">
+                <a href="{{ url_for('interviews.confirm', interview_id=interview.id, response='accept', token=confirmation_token, _external=True) }}" class="cta-button">
+                    <span class="calendar-icon">✓</span> Confirm Attendance
+                </a>
+                <a href="{{ url_for('interviews.reschedule', interview_id=interview.id, token=confirmation_token, _external=True) }}" class="cta-button secondary">
+                    Request Reschedule
+                </a>
+            </div>
+            
+            <p>If you need to make any changes or have questions, please contact us at <a href="mailto:{{ job.contact_email }}" style="color: #4f46e5;">{{ job.contact_email }}</a>.</p>
+            
+            <p>We look forward to meeting you!</p>
+            
+            <p>Best regards,<br>{{ job.company_name }} Hiring Team</p>
+        </div>
+        <div class="footer">
+            <p>This email was sent regarding your application on our job portal.</p>
+            <p>
+                <a href="{{ url_for('applications.view', application_id=application.id, _external=True) }}">View Application</a> | 
+                <a href="{{ url_for('users.add_calendar', interview_id=interview.id, token=calendar_token, _external=True) }}">Add to Calendar</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

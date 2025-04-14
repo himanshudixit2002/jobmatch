@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Jobs | JobMatch{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="section-title mb-4" data-aos="fade-right">Browse Jobs</h1>
+
+    <div class="card shadow-sm border-0 mb-4" data-aos="fade-up">
+        <div class="card-body p-4">
+            <form method="GET" action="{{ url_for('jobs.browse_jobs') }}" class="row g-3">
+                <div class="col-md-4 col-sm-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0" name="q" placeholder="Search job titles, skills, or companies..." value="{{ search_query }}">
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <select class="form-select" name="skill">
+                        <option value="">All Skills</option>
+                        {% for skill in all_skills %}
+                            <option value="{{ skill.name }}" {% if skill_filter == skill.name %}selected{% endif %}>{{ skill.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <select class="form-select" name="location">
+                        <option value="">All Locations</option>
+                        {% for location in locations %}
+                            <option value="{{ location }}" {% if location_filter == location %}selected{% endif %}>{{ location }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 col-sm-6">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-filter me-2"></i> Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if current_user.is_authenticated and current_user.is_applicant() %}
+        <div class="alert alert-info d-flex mb-4" data-aos="fade-up">
+            <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+            <div>
+                Jobs are ordered by how well they match your skills and experience.
+                <a href="{{ url_for('profiles.manage_skills') }}" class="alert-link">Add more skills</a> to improve your matches.
+            </div>
+        </div>
+    {% endif %}
+
+    {% if jobs %}
+        <div class="row" data-aos="fade-up" data-aos-delay="100">
+            {% for job in jobs %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card shadow-sm border-0 h-100 position-relative">
+                        {% if current_user.is_authenticated and current_user.is_applicant() %}
+                            {% set match_class = 'success' if job.user_match >= 70 else ('warning' if job.user_match >= 40 else 'danger') %}
+                            <div class="position-absolute top-0 end-0 mt-3 me-3">
+                                <span class="badge bg-{{ match_class }}-subtle text-{{ match_class }} px-3 py-2">
+                                    {{ job.user_match }}% Match
+                                </span>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; font-size: 1.25rem;">
+                                    {{ job.recruiter.company[:1] }}
+                                </div>
+                                <div>
+                                    <h5 class="card-title mb-1">{{ job.title }}</h5>
+                                    <h6 class="card-subtitle text-muted">{{ job.recruiter.company }}</h6>
+                                </div>
+                            </div>
+                            
+                            <p class="card-text text-muted mb-3">{{ job.description[:150] }}{% if job.description|length > 150 %}...{% endif %}</p>
+                            
+                            <div class="mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-geo-alt text-primary me-2"></i>
+                                    <span>{{ job.location }}</span>
+                                </div>
+                                
+                                {% if job.salary %}
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="bi bi-cash text-primary me-2"></i>
+                                        <span>{{ job.salary }}</span>
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-briefcase text-primary me-2"></i>
+                                    <span>{{ job.experience_required }} years experience</span>
+                                </div>
+                                
+                                <div class="d-flex align-items-center text-muted small">
+                                    <i class="bi bi-calendar me-2"></i>
+                                    <span>Posted {{ job.created_at.strftime('%b %d, %Y') }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                {% for skill in job.skills %}
+                                    <span class="badge bg-primary-subtle text-primary px-3 py-2 me-2 mb-2">{{ skill.name }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white p-4 pt-0 border-0">
+                            <a href="{{ url_for('jobs.view_job', job_id=job.id) }}" class="btn btn-primary w-100">
+                                <i class="bi bi-eye me-2"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-warning d-flex" data-aos="fade-up">
+            <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+            <div>
+                No jobs found matching your criteria.
+                {% if search_query or skill_filter or location_filter %}
+                    <a href="{{ url_for('jobs.browse_jobs') }}" class="alert-link">Clear filters</a> to see all available jobs.
+                {% elif current_user.is_authenticated and current_user.is_recruiter() %}
+                    <a href="{{ url_for('jobs.create_job') }}" class="alert-link">Post a job</a> to get started.
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card shadow-sm border-0 p-5 text-center" data-aos="fade-up" data-aos-delay="100">
+            <div class="mb-4">
+                <i class="bi bi-search text-primary" style="font-size: 4rem;"></i>
+            </div>
+            <h3 class="mb-3">No jobs found</h3>
+            <p class="text-muted mb-4">
+                {% if search_query or skill_filter or location_filter %}
+                    Try adjusting your search criteria to find more job opportunities.
+                {% else %}
+                    Check back soon for new job opportunities.
+                {% endif %}
+            </p>
+            <div>
+                {% if search_query or skill_filter or location_filter %}
+                    <a href="{{ url_for('jobs.browse_jobs') }}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-arrow-repeat me-2"></i> Clear Filters
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

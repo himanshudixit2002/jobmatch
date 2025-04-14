@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}{{ job.title }} | JobMatch{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card shadow-sm border-0 mb-4" data-aos="fade-up">
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-md-8" data-aos="fade-right">
+                    <h1 class="mb-2">{{ job.title }}</h1>
+                    <h5 class="text-muted mb-3">{{ job.recruiter.company }}</h5>
+                    
+                    <div class="d-flex flex-wrap gap-3 mb-4">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 36px; height: 36px;">
+                                <i class="bi bi-geo-alt"></i>
+                            </div>
+                            <span>{{ job.location }}</span>
+                        </div>
+                        
+                        {% if job.salary %}
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 36px; height: 36px;">
+                                    <i class="bi bi-cash"></i>
+                                </div>
+                                <span>{{ job.salary }}</span>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 36px; height: 36px;">
+                                <i class="bi bi-briefcase"></i>
+                            </div>
+                            <span>{{ job.experience_required }} years experience</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6 class="fw-semibold mb-2">Required Skills:</h6>
+                        {% for skill in job.skills %}
+                            <span class="badge bg-primary-subtle text-primary px-3 py-2 me-2 mb-2">{{ skill.name }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="col-md-4 text-md-end" data-aos="fade-left">
+                    {% if current_user.is_authenticated and current_user.is_applicant() %}
+                        {% if match_score is not none %}
+                            <div class="mb-4">
+                                <div class="card shadow-sm border-0">
+                                    <div class="card-body text-center p-4">
+                                        {% set score_class = 'success' if match_score >= 70 else ('warning' if match_score >= 40 else 'danger') %}
+                                        <div class="text-{{ score_class }} fw-bold fs-1 mb-0">{{ match_score }}%</div>
+                                        <p class="text-muted mb-0">Match Score</p>
+                                        <div class="mt-2">
+                                            <span class="badge bg-{{ score_class }}-subtle text-{{ score_class }} px-3 py-2">
+                                                {% if match_score >= 70 %}Strong Match{% elif match_score >= 40 %}Good Match{% else %}Low Match{% endif %}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    
+                        {% if has_applied %}
+                            <button class="btn btn-secondary w-100" disabled>
+                                <i class="bi bi-check-circle me-2"></i> Application Submitted
+                            </button>
+                        {% else %}
+                            <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#applyModal">
+                                <i class="bi bi-send me-2"></i> Apply Now
+                            </button>
+                        {% endif %}
+                    {% endif %}
+                    
+                    {% if current_user.is_authenticated and current_user.is_recruiter() and current_user.id == job.recruiter_id %}
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('jobs.view_applications', job_id=job.id) }}" class="btn btn-primary">
+                                <i class="bi bi-people me-2"></i> View Applications
+                            </a>
+                            <form action="{{ url_for('jobs.toggle_job_status', job_id=job.id) }}" method="POST">
+                                <button type="submit" class="btn btn-outline-{{ 'danger' if job.is_active else 'success' }} w-100">
+                                    <i class="bi bi-{{ 'pause-circle' if job.is_active else 'play-circle' }} me-2"></i>
+                                    {% if job.is_active %}Deactivate{% else %}Activate{% endif %} Job
+                                </button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 mb-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-semibold">Job Description</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="job-description">
+                        {{ job.description|nl2br }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 mb-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-semibold">About the Company</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; font-size: 1.25rem;">
+                            {{ job.recruiter.company[:1] }}
+                        </div>
+                        <div>
+                            <h6 class="fw-semibold mb-1">{{ job.recruiter.company }}</h6>
+                            <p class="text-muted mb-0 small">{{ job.recruiter.name }}, {{ job.recruiter.position }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center text-muted mb-3">
+                        <i class="bi bi-calendar-event me-2"></i>
+                        <span>Posted on {{ job.created_at.strftime('%B %d, %Y') }}</span>
+                    </div>
+                    
+                    <div class="d-flex align-items-center text-muted">
+                        <i class="bi bi-people me-2"></i>
+                        <span>{{ job.applications|length }} applications received</span>
+                    </div>
+                </div>
+            </div>
+            
+            {% if current_user.is_authenticated and current_user.is_recruiter() and current_user.id == job.recruiter_id %}
+                <div class="card shadow-sm border-0 mb-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0 fw-semibold">Management</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-grid gap-2">
+                            <a href="{{ url_for('jobs.edit_job', job_id=job.id) }}" class="btn btn-outline-primary">
+                                <i class="bi bi-pencil-square me-2"></i> Edit Job
+                            </a>
+                            <a href="{{ url_for('jobs.manage_jobs') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-list-check me-2"></i> Manage All Jobs
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Apply Modal -->
+{% if current_user.is_authenticated and current_user.is_applicant() and not has_applied and form %}
+<div class="modal fade" id="applyModal" tabindex="-1" aria-labelledby="applyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="applyModalLabel">Apply for {{ job.title }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('jobs.apply_for_job', job_id=job.id) }}" method="POST">
+                <div class="modal-body">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ form.cover_letter.label(class="form-label fw-semibold") }}
+                        {{ form.cover_letter(class="form-control", rows=6, placeholder="Explain why you're a good fit for this position...") }}
+                        <div class="form-text">
+                            <i class="bi bi-info-circle me-1"></i> A personalized cover letter can greatly increase your chances of being selected.
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info d-flex">
+                        <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+                        <div>
+                            Your profile information and skills will be automatically included with your application.
+                            <a href="{{ url_for('profiles.edit_profile') }}" target="_blank">Update your profile</a> or 
+                            <a href="{{ url_for('profiles.manage_skills') }}" target="_blank">manage your skills</a> before applying.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    {{ form.submit(class="btn btn-primary") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

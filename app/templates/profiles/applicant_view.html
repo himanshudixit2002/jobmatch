@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}{{ applicant.name }} | JobMatch{% endblock %}
+
+{% block content %}
+<div class="profile-header bg-primary text-white py-5 mb-4">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8" data-aos="fade-right">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-white text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 80px; height: 80px; font-size: 2rem; font-weight: 700;">
+                        {{ applicant.name[:1] }}
+                    </div>
+                    <div>
+                        <h1 class="mb-1">{{ applicant.name }}</h1>
+                        <p class="mb-0 opacity-75">{{ applicant.email }}</p>
+                        <span class="badge bg-success-subtle text-success mt-2">Applicant</span>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-briefcase me-2"></i>
+                            <div>
+                                <div class="small opacity-75">Experience</div>
+                                <div class="fw-semibold">{{ applicant.experience or 0 }} years</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-mortarboard me-2"></i>
+                            <div>
+                                <div class="small opacity-75">Education</div>
+                                <div class="fw-semibold">{{ applicant.education or 'Not specified' }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-4 mt-lg-0" data-aos="fade-left">
+                <a href="javascript:history.back()" class="btn btn-light">
+                    <i class="bi bi-arrow-left me-2"></i> Back to Applications
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-4" data-aos="fade-up">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-semibold">Skills</h5>
+                </div>
+                <div class="card-body p-4">
+                    {% if applicant.skills %}
+                        {% for skill in applicant.skills %}
+                            <span class="badge bg-primary-subtle text-primary px-3 py-2 me-2 mb-2">{{ skill.name }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-light border">
+                            <p class="text-muted mb-0">
+                                <i class="bi bi-info-circle me-1"></i> This applicant has not added any skills.
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card shadow-sm border-0 mb-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-semibold">Resume/CV</h5>
+                </div>
+                <div class="card-body p-4">
+                    {% if applicant.resume %}
+                        <div class="resume-content">
+                            {{ applicant.resume|nl2br }}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-light border">
+                            <p class="text-muted mb-0">
+                                <i class="bi bi-info-circle me-1"></i> This applicant has not added a resume.
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 mb-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-semibold">Applications to Your Jobs</h5>
+                </div>
+                <div class="card-body p-4">
+                    {% if applications %}
+                        <div class="list-group list-group-flush">
+                            {% for app in applications %}
+                                <div class="list-group-item px-0 py-3 border-bottom">
+                                    <div class="mb-2">
+                                        <h6 class="mb-1 fw-semibold">{{ app.job.title }}</h6>
+                                        <div class="d-flex align-items-center text-muted small">
+                                            <i class="bi bi-calendar-event me-1"></i>
+                                            <span>Applied: {{ app.created_at.strftime('%b %d, %Y') }}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="me-2">Match Score:</span>
+                                        <div class="progress flex-grow-1" style="height: 8px;">
+                                            {% set score_class = 'bg-danger' if app.match_score < 40 else ('bg-warning' if app.match_score < 70 else 'bg-success') %}
+                                            <div class="progress-bar {{ score_class }}" role="progressbar" style="width: {{ app.match_score }}%;" aria-valuenow="{{ app.match_score }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <span class="ms-2 fw-semibold">{{ app.match_score }}%</span>
+                                    </div>
+                                    
+                                    {% set status_class = {
+                                        'pending': 'secondary',
+                                        'reviewed': 'info',
+                                        'interviewed': 'primary',
+                                        'offered': 'success',
+                                        'rejected': 'danger',
+                                        'accepted': 'success',
+                                        'withdrawn': 'dark'
+                                    } %}
+                                    
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-{{ status_class.get(app.status, 'secondary') }}-subtle text-{{ status_class.get(app.status, 'secondary') }} px-3 py-2">
+                                            {{ app.status|capitalize }}
+                                        </span>
+                                        <a href="{{ url_for('jobs.view_applications', job_id=app.job.id) }}" class="btn btn-sm btn-outline-primary">
+                                            View Application
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-light border">
+                            <p class="text-muted mb-0">
+                                <i class="bi bi-info-circle me-1"></i> This applicant has not applied to any of your jobs.
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card shadow-sm border-0 mb-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-semibold">Notes</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form id="notesForm" class="mb-3">
+                        <div class="mb-3">
+                            <label for="recruiterNotes" class="form-label">Private Recruiter Notes</label>
+                            <textarea class="form-control" id="recruiterNotes" rows="4" placeholder="Add your private notes about this applicant here..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Notes</button>
+                        <div id="notesSaveStatus" class="mt-2" style="display: none;">
+                            <div class="alert alert-success">Notes saved successfully!</div>
+                        </div>
+                    </form>
+                    <div class="alert alert-info mt-3">
+                        <small class="mb-0"><i class="bi bi-info-circle-fill me-2"></i> These notes are only visible to you and are not shared with the applicant.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for handling notes -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const notesForm = document.getElementById('notesForm');
+    const statusDiv = document.getElementById('notesSaveStatus');
+    
+    // Load existing notes if any
+    fetch(`/api/applicant/{{ applicant.id }}/notes`)
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+        })
+        .then(data => {
+            if (data && data.content) {
+                document.getElementById('recruiterNotes').value = data.content;
+            }
+        })
+        .catch(error => console.error('Error loading notes:', error));
+    
+    notesForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const notes = document.getElementById('recruiterNotes').value;
+        
+        // Send notes to the server
+        fetch(`/api/applicant/{{ applicant.id }}/notes`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ notes: notes }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Show success message
+            statusDiv.style.display = 'block';
+            
+            // Hide after 3 seconds
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 3000);
+        })
+        .catch(error => {
+            console.error('Error saving notes:', error);
+            alert('There was an error saving your notes. Please try again.');
+        });
+    });
+});
+</script>
+{% endblock %} 
