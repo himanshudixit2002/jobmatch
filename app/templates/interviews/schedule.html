@@ -4,162 +4,494 @@
 
 {% block content %}
 <div class="container py-4">
-    <div class="mb-4">
-        <a href="{{ url_for('jobs.view_applications', job_id=job.id) }}" class="text-decoration-none">
-            <i class="bi bi-arrow-left me-2"></i> Back to Applications
-        </a>
-    </div>
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('interviews.manage') }}">Interviews</a></li>
+            <li class="breadcrumb-item active">Schedule Interview</li>
+        </ol>
+    </nav>
 
-    <div class="row">
+    <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card shadow-sm border-0 mb-4" data-aos="fade-up">
-                <div class="card-header bg-white p-4">
-                    <h4 class="mb-0 fw-semibold">Schedule Interview</h4>
-                </div>
-                <div class="card-body p-4">
-                    <form method="POST" action="{{ url_for('interviews.schedule_interview', application_id=application.id) }}">
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <label for="interview_date" class="form-label fw-semibold">Interview Date</label>
-                                <input type="date" class="form-control" id="interview_date" name="interview_date" required min="{{ now.strftime('%Y-%m-%d') }}">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="interview_time" class="form-label fw-semibold">Interview Time</label>
-                                <input type="time" class="form-control" id="interview_time" name="interview_time" required>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="interview_type" class="form-label fw-semibold">Interview Type</label>
-                            <select class="form-select" id="interview_type" name="interview_type" required>
-                                <option value="">-- Select Type --</option>
-                                <option value="in_person">In Person</option>
-                                <option value="video">Video Interview</option>
-                                <option value="phone">Phone Interview</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-4" id="locationField">
-                            <label for="location" class="form-label fw-semibold">Location</label>
-                            <input type="text" class="form-control" id="location" name="location" 
-                                placeholder="Enter office address, meeting link, or phone number">
-                            <div class="form-text text-muted">
-                                <i class="bi bi-info-circle me-1"></i>
-                                <span id="locationHelp">Provide the complete address for the interview.</span>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="notes" class="form-label fw-semibold">Additional Notes</label>
-                            <textarea class="form-control" id="notes" name="notes" rows="4" 
-                                placeholder="Provide any additional information or instructions for the candidate..."></textarea>
-                        </div>
-
-                        <div class="alert alert-info d-flex mb-4">
-                            <i class="bi bi-info-circle-fill fs-4 me-3"></i>
-                            <div>
-                                The applicant will be notified via email about this interview, and it will appear in their interviews dashboard.
-                            </div>
-                        </div>
-
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{{ url_for('jobs.view_applications', job_id=job.id) }}" class="btn btn-outline-secondary me-md-2">Cancel</a>
-                            <button type="submit" class="btn btn-primary">Schedule Interview</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-4">
-            <div class="card shadow-sm border-0 mb-4" data-aos="fade-up" data-aos-delay="100">
+            <div class="card shadow-sm mb-4">
                 <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 fw-semibold">Job Details</h5>
+                    <h5 class="mb-0">
+                        {% if edit_mode %}
+                        Edit Interview
+                        {% else %}
+                        Schedule New Interview
+                        {% endif %}
+                    </h5>
                 </div>
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                            <i class="bi bi-briefcase fs-4"></i>
-                        </div>
-                        <div>
-                            <h6 class="fw-semibold mb-1">{{ job.title }}</h6>
-                            <p class="text-muted mb-0">{{ job.location }}</p>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="d-grid">
-                        <a href="{{ url_for('jobs.view_job', job_id=job.id) }}" class="btn btn-outline-primary">
-                            <i class="bi bi-eye me-2"></i> View Job Posting
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card shadow-sm border-0 mb-4" data-aos="fade-up" data-aos-delay="200">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 fw-semibold">Applicant Details</h5>
-                </div>
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                            <i class="bi bi-person fs-4"></i>
-                        </div>
-                        <div>
-                            <h6 class="fw-semibold mb-1">{{ application.applicant.name }}</h6>
-                            <p class="text-muted mb-0">{{ application.applicant.email }}</p>
-                        </div>
-                    </div>
-                    
-                    {% if application.cover_letter %}
-                        <div class="mt-3">
-                            <h6 class="fw-semibold mb-2">Cover Letter Preview</h6>
-                            <div class="p-3 bg-light rounded small">
-                                {{ application.cover_letter|truncate(150)|nl2br }}
-                                <a href="{{ url_for('jobs.view_application', job_id=job.id, application_id=application.id) }}" class="text-primary">Read more</a>
-                            </div>
-                        </div>
+                <form method="post" action="{{ url_for('interviews.schedule', job_id=job.id, application_id=application.id) if not edit_mode else url_for('interviews.edit', interview_id=interview.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    {% if edit_mode %}
+                    <input type="hidden" name="interview_id" value="{{ interview.id }}">
                     {% endif %}
                     
-                    <div class="d-grid mt-3">
-                        <a href="{{ url_for('jobs.view_application', job_id=job.id, application_id=application.id) }}" class="btn btn-outline-primary">
-                            <i class="bi bi-file-text me-2"></i> View Full Application
-                        </a>
+                    <div class="card-body">
+                        {% if errors %}
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                {% for error in errors %}
+                                <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="candidate_name" class="form-label fw-bold">Candidate</label>
+                                    <div class="d-flex align-items-center">
+                                        {% if candidate.profile_image %}
+                                        <img src="{{ candidate.profile_image }}" alt="{{ candidate.name }}" class="rounded-circle me-2" style="width: 40px; height: 40px;">
+                                        {% else %}
+                                        <div class="rounded-circle bg-primary bg-opacity-10 d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                            <span class="text-primary fw-bold">{{ candidate.name[:1] }}</span>
+                                        </div>
+                                        {% endif %}
+                                        <input type="text" class="form-control-plaintext" id="candidate_name" value="{{ candidate.name }}" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label fw-bold">Position</label>
+                                    <input type="text" class="form-control-plaintext" id="job_title" value="{{ job.title }}" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="interview_stage" class="form-label fw-bold">Interview Stage <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="interview_stage" name="interview_stage" required>
+                                        <option value="" disabled {% if not interview %}selected{% endif %}>Select interview stage</option>
+                                        <option value="screening" {% if interview and interview.stage == 'screening' %}selected{% endif %}>Initial Screening</option>
+                                        <option value="technical" {% if interview and interview.stage == 'technical' %}selected{% endif %}>Technical Interview</option>
+                                        <option value="behavioral" {% if interview and interview.stage == 'behavioral' %}selected{% endif %}>Behavioral Interview</option>
+                                        <option value="team" {% if interview and interview.stage == 'team' %}selected{% endif %}>Team Interview</option>
+                                        <option value="manager" {% if interview and interview.stage == 'manager' %}selected{% endif %}>Hiring Manager Interview</option>
+                                        <option value="final" {% if interview and interview.stage == 'final' %}selected{% endif %}>Final Round</option>
+                                        <option value="custom" {% if interview and interview.stage == 'custom' %}selected{% endif %}>Custom</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="custom_stage" class="form-label fw-bold">Custom Stage Name</label>
+                                    <input type="text" class="form-control" id="custom_stage" name="custom_stage" value="{{ interview.custom_stage if interview and interview.custom_stage else '' }}" placeholder="If 'Custom' is selected" disabled>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="interview_type" class="form-label fw-bold">Interview Type <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="interview_type" name="interview_type" required>
+                                        <option value="" disabled {% if not interview %}selected{% endif %}>Select interview type</option>
+                                        <option value="video" {% if interview and interview.interview_type == 'video' %}selected{% endif %}>Video Interview</option>
+                                        <option value="phone" {% if interview and interview.interview_type == 'phone' %}selected{% endif %}>Phone Interview</option>
+                                        <option value="in-person" {% if interview and interview.interview_type == 'in-person' %}selected{% endif %}>In-Person Interview</option>
+                                        <option value="technical" {% if interview and interview.interview_type == 'technical' %}selected{% endif %}>Technical Assessment</option>
+                                        <option value="group" {% if interview and interview.interview_type == 'group' %}selected{% endif %}>Group Interview</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="duration" class="form-label fw-bold">Duration (minutes) <span class="text-danger">*</span></label>
+                                    <select class="form-select" id="duration" name="duration" required>
+                                        <option value="" disabled {% if not interview %}selected{% endif %}>Select duration</option>
+                                        <option value="15" {% if interview and interview.duration == 15 %}selected{% endif %}>15 minutes</option>
+                                        <option value="30" {% if interview and interview.duration == 30 %}selected{% endif %}>30 minutes</option>
+                                        <option value="45" {% if interview and interview.duration == 45 %}selected{% endif %}>45 minutes</option>
+                                        <option value="60" {% if interview and interview.duration == 60 %}selected{% endif %} {% if not interview %}selected{% endif %}>60 minutes</option>
+                                        <option value="90" {% if interview and interview.duration == 90 %}selected{% endif %}>90 minutes</option>
+                                        <option value="120" {% if interview and interview.duration == 120 %}selected{% endif %}>2 hours</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="scheduled_date" class="form-label fw-bold">Date <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="scheduled_date" name="scheduled_date" value="{{ interview.scheduled_at.strftime('%Y-%m-%d') if interview else '' }}" min="{{ today }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="scheduled_time" class="form-label fw-bold">Time <span class="text-danger">*</span></label>
+                                    <input type="time" class="form-control" id="scheduled_time" name="scheduled_time" value="{{ interview.scheduled_at.strftime('%H:%M') if interview else '' }}" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="interviewers" class="form-label fw-bold">Interviewers</label>
+                            <select class="form-select" id="interviewers" name="interviewers[]" multiple>
+                                {% for interviewer in available_interviewers %}
+                                <option value="{{ interviewer.id }}" {% if interview and interviewer.id in interview.interviewer_ids %}selected{% endif %}>
+                                    {{ interviewer.name }} ({{ interviewer.role }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">Hold Ctrl/Cmd to select multiple interviewers. You can add more interviewers later.</div>
+                        </div>
+
+                        <!-- Dynamic fields based on interview type -->
+                        <div id="videoFields" class="mb-4 d-none">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="video_platform" class="form-label fw-bold">Video Platform</label>
+                                    <select class="form-select" id="video_platform" name="video_platform">
+                                        <option value="" {% if not interview or not interview.video_platform %}selected{% endif %}>Select platform</option>
+                                        <option value="zoom" {% if interview and interview.video_platform == 'zoom' %}selected{% endif %}>Zoom</option>
+                                        <option value="teams" {% if interview and interview.video_platform == 'teams' %}selected{% endif %}>Microsoft Teams</option>
+                                        <option value="google_meet" {% if interview and interview.video_platform == 'google_meet' %}selected{% endif %}>Google Meet</option>
+                                        <option value="webex" {% if interview and interview.video_platform == 'webex' %}selected{% endif %}>Webex</option>
+                                        <option value="skype" {% if interview and interview.video_platform == 'skype' %}selected{% endif %}>Skype</option>
+                                        <option value="other" {% if interview and interview.video_platform == 'other' %}selected{% endif %}>Other</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="video_link" class="form-label fw-bold">Meeting Link</label>
+                                    <input type="url" class="form-control" id="video_link" name="video_link" value="{{ interview.video_link if interview and interview.video_link else '' }}" placeholder="https://...">
+                                    <div class="form-text">You can add this later if not available now.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="phoneFields" class="mb-4 d-none">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="phone_number" class="form-label fw-bold">Phone Number</label>
+                                    <input type="tel" class="form-control" id="phone_number" name="phone_number" value="{{ interview.phone_number if interview and interview.phone_number else '' }}" placeholder="Phone number to call">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="who_calls" class="form-label fw-bold">Who Initiates Call</label>
+                                    <select class="form-select" id="who_calls" name="who_calls">
+                                        <option value="interviewer" {% if interview and interview.who_calls == 'interviewer' %}selected{% endif %} selected>Interviewer calls candidate</option>
+                                        <option value="candidate" {% if interview and interview.who_calls == 'candidate' %}selected{% endif %}>Candidate calls interviewer</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="inPersonFields" class="mb-4 d-none">
+                            <label for="location" class="form-label fw-bold">Interview Location</label>
+                            <input type="text" class="form-control" id="location" name="location" value="{{ interview.location if interview and interview.location else '' }}" placeholder="Office address or meeting location">
+                            <div class="form-text">Be specific to help the candidate find the location easily.</div>
+                        </div>
+
+                        <div id="technicalFields" class="mb-4 d-none">
+                            <label for="technical_details" class="form-label fw-bold">Technical Assessment Details</label>
+                            <textarea class="form-control" id="technical_details" name="technical_details" rows="3" placeholder="e.g., coding languages to prepare, tools that will be used, or specific topics to be covered">{{ interview.technical_details if interview and interview.technical_details else '' }}</textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="notes" class="form-label fw-bold">Additional Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Any special instructions or information for the interview">{{ interview.notes if interview and interview.notes else '' }}</textarea>
+                            <div class="form-text">These notes will be visible to interviewers but not to the candidate.</div>
+                        </div>
+
+                        <div class="notification-options mb-4">
+                            <label class="form-label fw-bold">Notifications</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="1" id="notify_candidate" name="notify_candidate" {% if not interview or notify_candidate %}checked{% endif %}>
+                                <label class="form-check-label" for="notify_candidate">
+                                    Send invitation to candidate
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="1" id="notify_interviewers" name="notify_interviewers" {% if not interview or notify_interviewers %}checked{% endif %}>
+                                <label class="form-check-label" for="notify_interviewers">
+                                    Notify selected interviewers
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="1" id="add_to_calendar" name="add_to_calendar" {% if not interview or add_to_calendar %}checked{% endif %}>
+                                <label class="form-check-label" for="add_to_calendar">
+                                    Add calendar invites with automatic reminders
+                                </label>
+                            </div>
+                        </div>
                     </div>
+                    <div class="card-footer bg-white py-3 d-flex justify-content-between">
+                        {% if edit_mode %}
+                        <a href="{{ url_for('interviews.view', interview_id=interview.id) }}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Update Interview</button>
+                        {% else %}
+                        <a href="{{ url_for('jobs.application', job_id=job.id, application_id=application.id) }}" class="btn btn-outline-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Schedule Interview</button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">Candidate Availability</h5>
+                </div>
+                <div class="card-body">
+                    {% if candidate_availability %}
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Preferred Times</h6>
+                        <ul class="list-group list-group-flush">
+                            {% for slot in candidate_availability %}
+                            <li class="list-group-item px-0 py-2 border-0">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0 me-2">
+                                        <i class="bi bi-calendar-check text-success"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">{{ slot.date.strftime('%A, %B %d') }}</div>
+                                        <div>{{ slot.start_time }} - {{ slot.end_time }}</div>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-primary ms-auto select-time-btn" 
+                                            data-date="{{ slot.date.strftime('%Y-%m-%d') }}" 
+                                            data-time="{{ slot.start_time }}">
+                                        Select
+                                    </button>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-3">
+                        <div class="mb-3">
+                            <i class="bi bi-calendar text-muted" style="font-size: 2rem;"></i>
+                        </div>
+                        <p class="mb-0">No availability preferences provided by the candidate.</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% if candidate.phone or candidate.email %}
+                <div class="card-footer bg-white py-3">
+                    <h6 class="text-muted mb-2">Contact Candidate Directly</h6>
+                    <div class="d-flex gap-2">
+                        {% if candidate.phone %}
+                        <a href="tel:{{ candidate.phone }}" class="btn btn-sm btn-outline-secondary flex-grow-1">
+                            <i class="bi bi-telephone me-1"></i> Call
+                        </a>
+                        {% endif %}
+                        {% if candidate.email %}
+                        <a href="mailto:{{ candidate.email }}" class="btn btn-sm btn-outline-secondary flex-grow-1">
+                            <i class="bi bi-envelope me-1"></i> Email
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if application.status %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">Application Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Current Stage</h6>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-primary p-2">{{ application.status|replace('_', ' ')|title }}</span>
+                            <span class="ms-2 text-muted small">Updated {{ application.updated_at.strftime('%b %d, %Y') }}</span>
+                        </div>
+                    </div>
+                    
+                    {% if application.interviews %}
+                    <h6 class="text-muted mb-2">Previous Interviews</h6>
+                    <ul class="list-group list-group-flush mb-0">
+                        {% for prev_interview in application.interviews %}
+                        <li class="list-group-item px-0 py-2 border-0">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 me-2">
+                                    {% if prev_interview.status == 'completed' %}
+                                    <i class="bi bi-check-circle-fill text-success"></i>
+                                    {% elif prev_interview.status == 'scheduled' %}
+                                    <i class="bi bi-calendar-event text-primary"></i>
+                                    {% elif prev_interview.status == 'cancelled' %}
+                                    <i class="bi bi-x-circle-fill text-danger"></i>
+                                    {% elif prev_interview.status == 'no_show' %}
+                                    <i class="bi bi-exclamation-circle-fill text-warning"></i>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <div class="fw-bold">{{ prev_interview.stage|replace('_', ' ')|title }}</div>
+                                    <div class="small">{{ prev_interview.scheduled_at.strftime('%b %d, %Y at %I:%M %p') }}</div>
+                                </div>
+                                <a href="{{ url_for('interviews.view', interview_id=prev_interview.id) }}" class="btn btn-sm btn-link ms-auto">View</a>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-white py-3">
+                    <a href="{{ url_for('jobs.application', job_id=job.id, application_id=application.id) }}" class="btn btn-sm btn-outline-secondary w-100">
+                        <i class="bi bi-file-earmark-text me-1"></i> View Full Application
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">Scheduling Tips</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item px-0 py-2 border-0">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0 me-2 pt-1">
+                                    <i class="bi bi-calendar-check text-primary"></i>
+                                </div>
+                                <div>
+                                    <p class="mb-0">Allow at least 24 hours notice for candidates to prepare</p>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item px-0 py-2 border-0">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0 me-2 pt-1">
+                                    <i class="bi bi-people text-primary"></i>
+                                </div>
+                                <div>
+                                    <p class="mb-0">Include relevant interviewers based on the role requirements</p>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item px-0 py-2 border-0">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0 me-2 pt-1">
+                                    <i class="bi bi-info-circle text-primary"></i>
+                                </div>
+                                <div>
+                                    <p class="mb-0">Provide clear instructions, especially for technical or in-person interviews</p>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item px-0 py-2 border-0">
+                            <div class="d-flex">
+                                <div class="flex-shrink-0 me-2 pt-1">
+                                    <i class="bi bi-clock text-primary"></i>
+                                </div>
+                                <div>
+                                    <p class="mb-0">Be mindful of time zones when scheduling with remote candidates</p>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-{% block scripts %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const interviewTypeSelect = document.getElementById('interview_type');
-        const locationHelp = document.getElementById('locationHelp');
+document.addEventListener('DOMContentLoaded', function() {
+    const interviewTypeSelect = document.getElementById('interview_type');
+    const videoFields = document.getElementById('videoFields');
+    const phoneFields = document.getElementById('phoneFields');
+    const inPersonFields = document.getElementById('inPersonFields');
+    const technicalFields = document.getElementById('technicalFields');
+    
+    const interviewStageSelect = document.getElementById('interview_stage');
+    const customStageInput = document.getElementById('custom_stage');
+    
+    // Handle interview type change
+    function updateInterviewTypeFields() {
+        // Hide all fields first
+        videoFields.classList.add('d-none');
+        phoneFields.classList.add('d-none');
+        inPersonFields.classList.add('d-none');
+        technicalFields.classList.add('d-none');
         
-        interviewTypeSelect.addEventListener('change', function() {
-            switch(this.value) {
-                case 'in_person':
-                    locationHelp.textContent = 'Provide the complete address for the interview.';
-                    break;
-                case 'video':
-                    locationHelp.textContent = 'Provide the meeting link or platform (e.g., Zoom, Microsoft Teams).';
-                    break;
-                case 'phone':
-                    locationHelp.textContent = 'Provide the phone number to call or mention if you will be calling the candidate.';
-                    break;
-                default:
-                    locationHelp.textContent = 'Provide location details relevant to the interview type.';
-            }
-        });
-        
-        // Set min date to today for interview date picker
-        const dateInput = document.getElementById('interview_date');
-        if (dateInput) {
-            const today = new Date().toISOString().split('T')[0];
-            dateInput.setAttribute('min', today);
+        // Show relevant fields based on selection
+        const selectedType = interviewTypeSelect.value;
+        if (selectedType === 'video') {
+            videoFields.classList.remove('d-none');
+        } else if (selectedType === 'phone') {
+            phoneFields.classList.remove('d-none');
+        } else if (selectedType === 'in-person') {
+            inPersonFields.classList.remove('d-none');
+        } else if (selectedType === 'technical') {
+            technicalFields.classList.remove('d-none');
         }
+    }
+    
+    // Handle interview stage change
+    function updateInterviewStageFields() {
+        const isCustom = interviewStageSelect.value === 'custom';
+        customStageInput.disabled = !isCustom;
+        if (isCustom) {
+            customStageInput.required = true;
+            customStageInput.focus();
+        } else {
+            customStageInput.required = false;
+        }
+    }
+    
+    // Initial setup
+    updateInterviewTypeFields();
+    updateInterviewStageFields();
+    
+    // Add event listeners
+    interviewTypeSelect.addEventListener('change', updateInterviewTypeFields);
+    interviewStageSelect.addEventListener('change', updateInterviewStageFields);
+    
+    // Handle candidate availability selection
+    const selectTimeBtns = document.querySelectorAll('.select-time-btn');
+    selectTimeBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const date = this.getAttribute('data-date');
+            const time = this.getAttribute('data-time');
+            
+            // Set the date and time in the form
+            document.getElementById('scheduled_date').value = date;
+            document.getElementById('scheduled_time').value = time;
+            
+            // Scroll to the date/time fields
+            document.getElementById('scheduled_date').scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+        });
     });
+    
+    // Initialize multi-select for interviewers
+    // If using a library like Select2, initialize it here
+});
 </script>
-{% endblock %}
+
+<style>
+/* Required field indicator */
+.text-danger {
+    color: #dc3545;
+}
+
+/* Custom styles for availability items */
+.list-group-item:hover {
+    background-color: rgba(13, 110, 253, 0.04);
+}
+
+/* Multi-select enhancements */
+select[multiple] {
+    height: 120px;
+}
+
+/* Time selection button hover effect */
+.select-time-btn:hover {
+    background-color: #0d6efd;
+    color: white;
+}
+</style>
 {% endblock %}

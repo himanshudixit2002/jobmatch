@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h2 mb-2">Manage Interviews</h1>
+            <p class="text-muted">View and manage all scheduled interviews for your job postings</p>
+        </div>
+        <div class="col-auto align-self-center">
+            <a href="{{ url_for('interviews.schedule') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Schedule New Interview
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" id="filterForm">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label for="job_filter" class="form-label">Job Position</label>
+                        <select class="form-select" id="job_filter" name="job_id">
+                            <option value="">All Positions</option>
+                            {% for job in jobs %}
+                                <option value="{{ job.id }}" {% if request.args.get('job_id')|int == job.id %}selected{% endif %}>{{ job.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="status_filter" class="form-label">Status</label>
+                        <select class="form-select" id="status_filter" name="status">
+                            <option value="">All Statuses</option>
+                            <option value="scheduled" {% if request.args.get('status') == 'scheduled' %}selected{% endif %}>Scheduled</option>
+                            <option value="completed" {% if request.args.get('status') == 'completed' %}selected{% endif %}>Completed</option>
+                            <option value="cancelled" {% if request.args.get('status') == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                            <option value="rescheduled" {% if request.args.get('status') == 'rescheduled' %}selected{% endif %}>Rescheduled</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="date_filter" class="form-label">Date Range</label>
+                        <select class="form-select" id="date_filter" name="date_range">
+                            <option value="">All Dates</option>
+                            <option value="today" {% if request.args.get('date_range') == 'today' %}selected{% endif %}>Today</option>
+                            <option value="tomorrow" {% if request.args.get('date_range') == 'tomorrow' %}selected{% endif %}>Tomorrow</option>
+                            <option value="this_week" {% if request.args.get('date_range') == 'this_week' %}selected{% endif %}>This Week</option>
+                            <option value="next_week" {% if request.args.get('date_range') == 'next_week' %}selected{% endif %}>Next Week</option>
+                            <option value="past" {% if request.args.get('date_range') == 'past' %}selected{% endif %}>Past Interviews</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="button" class="btn btn-outline-secondary me-2" id="clearFilters">Clear Filters</button>
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Interview List -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            {% if interviews %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th scope="col">Candidate</th>
+                                <th scope="col">Job Position</th>
+                                <th scope="col">Date & Time</th>
+                                <th scope="col">Type</th>
+                                <th scope="col">Status</th>
+                                <th scope="col" class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for interview in interviews %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm me-3">
+                                            {% if interview.candidate.profile_image %}
+                                                <img src="{{ url_for('static', filename='uploads/profile_images/' + interview.candidate.profile_image) }}" alt="{{ interview.candidate.name }}" class="rounded-circle" width="40" height="40">
+                                            {% else %}
+                                                <div class="avatar-initials rounded-circle bg-primary text-white">
+                                                    {{ interview.candidate.name|initials }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">{{ interview.candidate.name }}</h6>
+                                            <small class="text-muted">{{ interview.candidate.email }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ interview.job.title }}</td>
+                                <td>
+                                    <div>{{ interview.scheduled_time.strftime('%b %d, %Y') }}</div>
+                                    <small class="text-muted">{{ interview.scheduled_time.strftime('%I:%M %p') }}</small>
+                                </td>
+                                <td>
+                                    {% if interview.interview_type == 'technical' %}
+                                        <span class="badge bg-info text-dark">Technical</span>
+                                    {% elif interview.interview_type == 'behavioral' %}
+                                        <span class="badge bg-warning text-dark">Behavioral</span>
+                                    {% elif interview.interview_type == 'screening' %}
+                                        <span class="badge bg-secondary">Screening</span>
+                                    {% elif interview.interview_type == 'final' %}
+                                        <span class="badge bg-dark">Final</span>
+                                    {% else %}
+                                        <span class="badge bg-light text-dark">{{ interview.interview_type }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if interview.status == 'scheduled' %}
+                                        <span class="badge bg-primary">Scheduled</span>
+                                    {% elif interview.status == 'completed' %}
+                                        <span class="badge bg-success">Completed</span>
+                                    {% elif interview.status == 'cancelled' %}
+                                        <span class="badge bg-danger">Cancelled</span>
+                                    {% elif interview.status == 'rescheduled' %}
+                                        <span class="badge bg-warning text-dark">Rescheduled</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton{{ interview.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Actions
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton{{ interview.id }}">
+                                            <li>
+                                                <a class="dropdown-item" href="{{ url_for('interviews.view', interview_id=interview.id) }}">
+                                                    <i class="bi bi-eye me-2"></i> View Details
+                                                </a>
+                                            </li>
+                                            {% if interview.status == 'scheduled' %}
+                                                <li>
+                                                    <a class="dropdown-item" href="{{ url_for('interviews.edit', interview_id=interview.id) }}">
+                                                        <i class="bi bi-pencil me-2"></i> Edit
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="{{ url_for('interviews.complete', interview_id=interview.id) }}">
+                                                        <i class="bi bi-check-circle me-2"></i> Mark as Completed
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#cancelModal{{ interview.id }}">
+                                                        <i class="bi bi-x-circle me-2"></i> Cancel
+                                                    </a>
+                                                </li>
+                                            {% elif interview.status == 'completed' %}
+                                                <li>
+                                                    <a class="dropdown-item" href="{{ url_for('interviews.feedback', interview_id=interview.id) }}">
+                                                        <i class="bi bi-chat-left-text me-2"></i> Provide Feedback
+                                                    </a>
+                                                </li>
+                                            {% endif %}
+                                            <li>
+                                                <a class="dropdown-item" href="{{ url_for('interviews.send_reminder', interview_id=interview.id) }}">
+                                                    <i class="bi bi-bell me-2"></i> Send Reminder
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <!-- Cancel Modal -->
+                                    <div class="modal fade" id="cancelModal{{ interview.id }}" tabindex="-1" aria-labelledby="cancelModalLabel{{ interview.id }}" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="cancelModalLabel{{ interview.id }}">Cancel Interview</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Are you sure you want to cancel the interview with <strong>{{ interview.candidate.name }}</strong> for the position of <strong>{{ interview.job.title }}</strong>?</p>
+                                                    <div class="alert alert-warning">
+                                                        <i class="bi bi-exclamation-triangle"></i> This will notify the candidate about the cancellation.
+                                                    </div>
+                                                    <form method="post" action="{{ url_for('interviews.cancel', interview_id=interview.id) }}" id="cancelForm{{ interview.id }}">
+                                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                        <div class="mb-3">
+                                                            <label for="cancelReason{{ interview.id }}" class="form-label">Reason for cancellation (optional):</label>
+                                                            <textarea class="form-control" id="cancelReason{{ interview.id }}" name="reason" rows="3"></textarea>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    <button type="submit" form="cancelForm{{ interview.id }}" class="btn btn-danger">Cancel Interview</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                {% if pagination.pages > 1 %}
+                <div class="d-flex justify-content-center mt-4">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            <li class="page-item {% if pagination.page == 1 %}disabled{% endif %}">
+                                <a class="page-link" href="{{ url_for('interviews.manage', page=pagination.page-1, **request.args) if pagination.page > 1 else '#' }}">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            
+                            {% for page_num in pagination.iter_pages() %}
+                                {% if page_num %}
+                                    <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                                        <a class="page-link" href="{{ url_for('interviews.manage', page=page_num, **request.args) }}">
+                                            {{ page_num }}
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            <li class="page-item {% if pagination.page == pagination.pages %}disabled{% endif %}">
+                                <a class="page-link" href="{{ url_for('interviews.manage', page=pagination.page+1, **request.args) if pagination.page < pagination.pages else '#' }}">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="text-center py-5">
+                    <img src="{{ url_for('static', filename='images/empty_state.svg') }}" alt="No interviews" class="img-fluid mb-3" style="max-width: 200px;">
+                    <h3 class="h5">No interviews found</h3>
+                    <p class="text-muted">There are no interviews matching your search criteria</p>
+                    {% if not request.args %}
+                        <a href="{{ url_for('interviews.schedule') }}" class="btn btn-primary mt-2">
+                            <i class="bi bi-plus-circle"></i> Schedule New Interview
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-submit form when filters change
+        const filterSelects = document.querySelectorAll('#filterForm select');
+        filterSelects.forEach(select => {
+            select.addEventListener('change', function() {
+                document.getElementById('filterForm').submit();
+            });
+        });
+        
+        // Clear filters button
+        document.getElementById('clearFilters').addEventListener('click', function() {
+            const selects = document.querySelectorAll('#filterForm select');
+            selects.forEach(select => {
+                select.value = '';
+            });
+            document.getElementById('filterForm').submit();
+        });
+    });
+</script>
+{% endblock %} 

@@ -4,220 +4,655 @@
 
 {% block content %}
 <div class="container py-4">
-    <div class="mb-4">
-        <a href="{{ url_for('interviews.list_interviews') }}" class="text-decoration-none">
-            <i class="bi bi-arrow-left me-2"></i> Back to Interviews
-        </a>
-    </div>
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('interviews.manage') }}">Interviews</a></li>
+            <li class="breadcrumb-item active">Interview Details</li>
+        </ol>
+    </nav>
 
     <div class="row">
-        <div class="col-lg-8">
-            <div class="card shadow-sm border-0 mb-4" data-aos="fade-up">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center p-4">
-                    <h4 class="mb-0 fw-semibold">Interview Details</h4>
-                    <div>
+        <!-- Left Column: Interview Details -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Interview Details</h5>
+                    <div class="interview-status">
                         {% if interview.status == 'scheduled' %}
-                            <span class="badge bg-warning-subtle text-warning px-3 py-2">Scheduled</span>
+                        <span class="badge bg-primary">Scheduled</span>
                         {% elif interview.status == 'completed' %}
-                            {% if interview.result == 'passed' %}
-                                <span class="badge bg-success-subtle text-success px-3 py-2">Passed</span>
-                            {% elif interview.result == 'failed' %}
-                                <span class="badge bg-danger-subtle text-danger px-3 py-2">Not Selected</span>
-                            {% else %}
-                                <span class="badge bg-secondary-subtle text-secondary px-3 py-2">Completed</span>
-                            {% endif %}
+                        <span class="badge bg-success">Completed</span>
                         {% elif interview.status == 'cancelled' %}
-                            <span class="badge bg-danger-subtle text-danger px-3 py-2">Cancelled</span>
-                        {% elif interview.status == 'rescheduled' %}
-                            <span class="badge bg-info-subtle text-info px-3 py-2">Rescheduled</span>
-                        {% else %}
-                            <span class="badge bg-secondary-subtle text-secondary px-3 py-2">{{ interview.status }}</span>
+                        <span class="badge bg-danger">Cancelled</span>
+                        {% elif interview.status == 'no_show' %}
+                        <span class="badge bg-warning text-dark">No Show</span>
                         {% endif %}
                     </div>
                 </div>
-                <div class="card-body p-4">
-                    <div class="row mb-4">
+                <div class="card-body">
+                    <div class="row g-4">
                         <div class="col-md-6">
-                            <h6 class="fw-semibold text-muted mb-2">Date & Time</h6>
-                            <p class="mb-0 fs-5">{{ interview.scheduled_time.strftime('%A, %B %d, %Y') }}</p>
-                            <p class="mb-0 fs-5">{{ interview.scheduled_time.strftime('%I:%M %p') }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <h6 class="fw-semibold text-muted mb-2">Interview Type</h6>
-                            <p class="mb-0 fs-5">
-                                {% if interview.interview_type == 'in_person' %}
-                                    <i class="bi bi-building me-2 text-primary"></i> In Person
-                                {% elif interview.interview_type == 'video' %}
-                                    <i class="bi bi-camera-video me-2 text-info"></i> Video Interview
-                                {% elif interview.interview_type == 'phone' %}
-                                    <i class="bi bi-telephone me-2 text-success"></i> Phone Interview
-                                {% else %}
-                                    <i class="bi bi-calendar-event me-2"></i> {{ interview.interview_type }}
-                                {% endif %}
-                            </p>
-                        </div>
-                    </div>
+                            <h6 class="text-muted mb-2">Job Position</h6>
+                            <div class="mb-4">
+                                <h5>{{ interview.job.title }}</h5>
+                                <p class="text-muted mb-0">{{ interview.job.company_name }}</p>
+                            </div>
 
-                    <div class="mb-4">
-                        <h6 class="fw-semibold text-muted mb-2">Location</h6>
-                        <p class="mb-0">{{ interview.location or 'No location specified' }}</p>
+                            <h6 class="text-muted mb-2">Date and Time</h6>
+                            <div class="mb-4">
+                                <div class="d-flex align-items-center mb-1">
+                                    <i class="bi bi-calendar-event me-2 text-primary"></i>
+                                    <span>{{ interview.scheduled_at.strftime('%A, %B %d, %Y') }}</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-1">
+                                    <i class="bi bi-clock me-2 text-primary"></i>
+                                    <span>{{ interview.scheduled_at.strftime('%I:%M %p') }} - {{ interview.end_time.strftime('%I:%M %p') }}</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-hourglass-split me-2 text-primary"></i>
+                                    <span>{{ interview.duration }} minutes</span>
+                                </div>
+                            </div>
+
+                            <h6 class="text-muted mb-2">Interview Type</h6>
+                            <div class="mb-4">
+                                {% if interview.interview_type == 'video' %}
+                                <div class="d-flex align-items-center mb-1">
+                                    <i class="bi bi-camera-video me-2 text-primary"></i>
+                                    <span>Video Interview</span>
+                                </div>
+                                {% if interview.video_platform %}
+                                <div class="d-flex align-items-center mb-1">
+                                    <i class="bi bi-display me-2 text-primary"></i>
+                                    <span>Platform: {{ interview.video_platform }}</span>
+                                </div>
+                                {% endif %}
+                                {% if interview.video_link %}
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-link-45deg me-2 text-primary"></i>
+                                    <a href="{{ interview.video_link }}" target="_blank">Join Meeting <i class="bi bi-box-arrow-up-right ms-1"></i></a>
+                                </div>
+                                {% endif %}
+                                {% elif interview.interview_type == 'phone' %}
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-telephone me-2 text-primary"></i>
+                                    <span>Phone Interview</span>
+                                </div>
+                                {% if interview.phone_number %}
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-telephone-inbound me-2 text-primary"></i>
+                                    <span>{{ interview.phone_number }}</span>
+                                </div>
+                                {% endif %}
+                                {% elif interview.interview_type == 'in-person' %}
+                                <div class="d-flex align-items-center mb-1">
+                                    <i class="bi bi-building me-2 text-primary"></i>
+                                    <span>In-Person Interview</span>
+                                </div>
+                                {% if interview.location %}
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-geo-alt me-2 text-primary"></i>
+                                    <span>{{ interview.location }}</span>
+                                </div>
+                                {% endif %}
+                                {% elif interview.interview_type == 'technical' %}
+                                <div class="d-flex align-items-center mb-1">
+                                    <i class="bi bi-code-square me-2 text-primary"></i>
+                                    <span>Technical Interview</span>
+                                </div>
+                                {% if interview.technical_details %}
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-info-circle me-2 text-primary"></i>
+                                    <span>{{ interview.technical_details }}</span>
+                                </div>
+                                {% endif %}
+                                {% else %}
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-person-video me-2 text-primary"></i>
+                                    <span>{{ interview.interview_type|capitalize }} Interview</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">Candidate</h6>
+                            <div class="card bg-light border-0 mb-4">
+                                <div class="card-body p-3">
+                                    <div class="d-flex align-items-center mb-2">
+                                        {% if interview.candidate.profile_image %}
+                                        <img src="{{ interview.candidate.profile_image }}" class="rounded-circle me-3" width="48" height="48" alt="{{ interview.candidate.name }}">
+                                        {% else %}
+                                        <div class="avatar-placeholder rounded-circle bg-primary bg-opacity-10 me-3 d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
+                                            <span class="text-primary fw-bold">{{ interview.candidate.name[:1] }}</span>
+                                        </div>
+                                        {% endif %}
+                                        <div>
+                                            <h6 class="mb-1">{{ interview.candidate.name }}</h6>
+                                            <div class="d-flex align-items-center text-muted">
+                                                <i class="bi bi-envelope me-1"></i>
+                                                <a href="mailto:{{ interview.candidate.email }}" class="text-muted text-decoration-none">{{ interview.candidate.email }}</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% if interview.candidate.phone %}
+                                    <div class="d-flex align-items-center mb-2 ps-2">
+                                        <i class="bi bi-telephone me-2 text-muted"></i>
+                                        <a href="tel:{{ interview.candidate.phone }}" class="text-muted text-decoration-none">{{ interview.candidate.phone }}</a>
+                                    </div>
+                                    {% endif %}
+                                    <div class="mt-2">
+                                        <a href="{{ url_for('profiles.view_candidate', user_id=interview.candidate.id) }}" class="btn btn-sm btn-outline-secondary w-100">
+                                            <i class="bi bi-person-badge me-1"></i> View Full Profile
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h6 class="text-muted mb-2">Interviewers</h6>
+                            {% if interview.interviewers %}
+                            <div class="card bg-light border-0 mb-4">
+                                <div class="card-body p-3">
+                                    {% for interviewer in interview.interviewers %}
+                                    <div class="d-flex align-items-center {% if not loop.last %}mb-3{% endif %}">
+                                        {% if interviewer.profile_image %}
+                                        <img src="{{ interviewer.profile_image }}" class="rounded-circle me-3" width="40" height="40" alt="{{ interviewer.name }}">
+                                        {% else %}
+                                        <div class="avatar-placeholder rounded-circle bg-secondary bg-opacity-10 me-3 d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
+                                            <span class="text-secondary">{{ interviewer.name[:1] }}</span>
+                                        </div>
+                                        {% endif %}
+                                        <div>
+                                            <h6 class="mb-0">{{ interviewer.name }}</h6>
+                                            <small class="text-muted">{{ interviewer.role }}</small>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-warning mb-4">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                No interviewers assigned
+                            </div>
+                            {% endif %}
+
+                            {% if interview.status == 'cancelled' %}
+                            <div class="card border-danger mb-4">
+                                <div class="card-header bg-danger text-white">
+                                    <i class="bi bi-x-circle me-2"></i> Interview Cancelled
+                                </div>
+                                <div class="card-body">
+                                    <h6 class="text-muted mb-1">Cancelled On</h6>
+                                    <p>{{ interview.cancelled_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                                    
+                                    <h6 class="text-muted mb-1">Reason</h6>
+                                    <p class="mb-0">{{ interview.cancellation_reason or 'No reason provided' }}</p>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
 
                     {% if interview.notes %}
-                        <div class="mb-4">
-                            <h6 class="fw-semibold text-muted mb-2">Notes</h6>
-                            <div class="p-3 bg-light rounded">{{ interview.notes|nl2br }}</div>
-                        </div>
-                    {% endif %}
-
-                    {% if interview.feedback and (current_user.is_recruiter() or interview.status == 'completed') %}
-                        <div class="mb-4">
-                            <h6 class="fw-semibold text-muted mb-2">Feedback</h6>
-                            <div class="p-3 bg-light rounded">{{ interview.feedback|nl2br }}</div>
-                        </div>
-                    {% endif %}
-
-                    {% if current_user.is_recruiter() and job.recruiter_id == current_user.id and interview.status == 'scheduled' %}
-                        <hr class="my-4">
-                        <h5 class="fw-semibold mb-3">Update Interview Status</h5>
-                        <form id="updateStatusForm" method="POST" action="{{ url_for('interviews.update_interview_status', interview_id=interview.id) }}">
-                            <div class="row mb-3">
-                                <div class="col-md-4">
-                                    <label for="status" class="form-label">Status</label>
-                                    <select class="form-select" id="status" name="status" required>
-                                        <option value="">-- Select Status --</option>
-                                        <option value="completed">Completed</option>
-                                        <option value="cancelled">Cancelled</option>
-                                        <option value="rescheduled">Rescheduled</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-8" id="resultContainer" style="display: none;">
-                                    <label for="result" class="form-label">Result</label>
-                                    <select class="form-select" id="result" name="result">
-                                        <option value="">-- Select Result --</option>
-                                        <option value="passed">Passed</option>
-                                        <option value="failed">Failed</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="feedback" class="form-label">Feedback</label>
-                                <textarea class="form-control" id="feedback" name="feedback" rows="4" placeholder="Provide feedback about the interview..."></textarea>
-                            </div>
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                                <button type="submit" class="btn btn-primary">Update Status</button>
-                            </div>
-                        </form>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-4">
-            <div class="card shadow-sm border-0 mb-4" data-aos="fade-up" data-aos-delay="100">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 fw-semibold">Job Details</h5>
-                </div>
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                            <i class="bi bi-briefcase fs-4"></i>
-                        </div>
-                        <div>
-                            <h6 class="fw-semibold mb-1">{{ job.title }}</h6>
-                            <p class="text-muted mb-0">{{ job.location }}</p>
+                    <div class="mt-3">
+                        <h6 class="text-muted mb-2">Additional Notes</h6>
+                        <div class="p-3 bg-light rounded">
+                            {{ interview.notes|nl2br }}
                         </div>
                     </div>
-                    <hr>
-                    <div class="mb-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="bi bi-building me-2 text-muted"></i>
-                            <span>{{ job.recruiter.company }}</span>
-                        </div>
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="bi bi-person me-2 text-muted"></i>
-                            <span>{{ job.recruiter.name }}</span>
-                        </div>
-                    </div>
-                    <div class="d-grid">
-                        <a href="{{ url_for('jobs.view_job', job_id=job.id) }}" class="btn btn-outline-primary">
-                            <i class="bi bi-eye me-2"></i> View Job Posting
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-white py-3">
+                    <div class="d-flex flex-wrap gap-2">
+                        {% if interview.status == 'scheduled' %}
+                        <a href="{{ url_for('interviews.edit', interview_id=interview.id) }}" class="btn btn-secondary">
+                            <i class="bi bi-pencil me-1"></i> Edit Interview
                         </a>
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sendReminderModal" data-interview-id="{{ interview.id }}">
+                            <i class="bi bi-bell me-1"></i> Send Reminder
+                        </button>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cancelInterviewModal" data-interview-id="{{ interview.id }}">
+                            <i class="bi bi-x-circle me-1"></i> Cancel Interview
+                        </button>
+                        {% elif interview.status == 'completed' or interview.status == 'no_show' %}
+                        {% if not interview.feedback %}
+                        <a href="{{ url_for('interviews.feedback', interview_id=interview.id) }}" class="btn btn-primary">
+                            <i class="bi bi-clipboard-check me-1"></i> Submit Feedback
+                        </a>
+                        {% endif %}
+                        {% if interview.status == 'no_show' %}
+                        <a href="{{ url_for('interviews.reschedule', interview_id=interview.id) }}" class="btn btn-secondary">
+                            <i class="bi bi-calendar-plus me-1"></i> Reschedule
+                        </a>
+                        {% endif %}
+                        {% elif interview.status == 'cancelled' %}
+                        <a href="{{ url_for('interviews.reschedule', interview_id=interview.id) }}" class="btn btn-primary">
+                            <i class="bi bi-calendar-plus me-1"></i> Reschedule
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
 
-            <div class="card shadow-sm border-0 mb-4" data-aos="fade-up" data-aos-delay="200">
+            {% if interview.feedback %}
+            <div class="card shadow-sm mb-4">
                 <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 fw-semibold">{% if current_user.is_recruiter() %}Applicant{% else %}Your Application{% endif %}</h5>
+                    <h5 class="mb-0">Interview Feedback</h5>
                 </div>
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                            <i class="bi bi-person fs-4"></i>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">Overall Rating</h6>
+                            <div class="rating mb-3">
+                                {% for i in range(5) %}
+                                <i class="bi bi-star-fill{% if i >= interview.feedback.overall_rating %} text-muted opacity-25{% else %} text-warning{% endif %}"></i>
+                                {% endfor %}
+                                <span class="ms-1 fw-bold">{{ interview.feedback.overall_rating }}/5</span>
+                            </div>
                         </div>
-                        <div>
-                            <h6 class="fw-semibold mb-1">{{ application.applicant.name }}</h6>
-                            <p class="text-muted mb-0">{{ application.applicant.email }}</p>
-                        </div>
-                    </div>
-
-                    {% if application.cover_letter %}
-                        <div class="mt-3">
-                            <h6 class="fw-semibold mb-2">Cover Letter</h6>
-                            <div class="p-3 bg-light rounded small">
-                                {{ application.cover_letter|truncate(200)|nl2br }}
-                                {% if application.cover_letter|length > 200 %}
-                                    <a href="{{ url_for('jobs.view_application', job_id=job.id, application_id=application.id) if current_user.is_recruiter() else '#' }}" class="text-primary">Read more</a>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">Hiring Recommendation</h6>
+                            <div>
+                                {% if interview.feedback.recommendation == 'strong_yes' %}
+                                <span class="badge bg-success p-2"><i class="bi bi-check-circle-fill me-1"></i> Strong Yes</span>
+                                {% elif interview.feedback.recommendation == 'yes' %}
+                                <span class="badge bg-light-success text-success p-2"><i class="bi bi-check-circle me-1"></i> Yes</span>
+                                {% elif interview.feedback.recommendation == 'maybe' %}
+                                <span class="badge bg-warning text-dark p-2"><i class="bi bi-question-circle me-1"></i> Maybe</span>
+                                {% elif interview.feedback.recommendation == 'no' %}
+                                <span class="badge bg-light-danger text-danger p-2"><i class="bi bi-x-circle me-1"></i> No</span>
+                                {% elif interview.feedback.recommendation == 'strong_no' %}
+                                <span class="badge bg-danger p-2"><i class="bi bi-x-circle-fill me-1"></i> Strong No</span>
                                 {% endif %}
                             </div>
                         </div>
+                    </div>
+
+                    {% if interview.feedback.skills_assessment %}
+                    <h6 class="text-muted mb-3">Skills Assessment</h6>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Skill</th>
+                                    <th>Rating</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for skill in interview.feedback.skills_assessment %}
+                                <tr>
+                                    <td>{{ skill.name }}</td>
+                                    <td>
+                                        <div class="skills-rating">
+                                            {% for i in range(1, 6) %}
+                                            <i class="bi bi-circle-fill me-1{% if i <= skill.rating %} text-primary{% else %} text-muted opacity-25{% endif %}" style="font-size: 0.7rem;"></i>
+                                            {% endfor %}
+                                            <span class="ms-1 fw-bold small">{{ skill.rating }}/5</span>
+                                            {% if skill.required %}
+                                            <span class="badge bg-info ms-2">Required</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                    <td>{{ skill.notes }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                     {% endif %}
 
-                    {% if current_user.is_recruiter() %}
-                        <div class="d-grid mt-3">
-                            <a href="{{ url_for('jobs.view_application', job_id=job.id, application_id=application.id) }}" class="btn btn-outline-primary">
-                                <i class="bi bi-file-text me-2"></i> View Full Application
-                            </a>
-                        </div>
-                    {% endif %}
-
-                    {% if interview.status == 'scheduled' %}
-                        <div class="mt-3">
-                            <div class="alert alert-info mb-0 d-flex">
-                                <i class="bi bi-info-circle-fill fs-5 me-2"></i>
-                                <div>
-                                    {% if current_user.is_recruiter() %}
-                                        <a href="{{ url_for('interviews.reschedule_interview', interview_id=interview.id) }}">Reschedule this interview</a> if needed.
-                                    {% else %}
-                                        If you need to reschedule, please contact the recruiter directly.
-                                    {% endif %}
-                                </div>
+                    <div class="row g-4">
+                        {% if interview.feedback.strengths %}
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">Strengths</h6>
+                            <div class="p-3 bg-light rounded">
+                                {{ interview.feedback.strengths|nl2br }}
                             </div>
                         </div>
+                        {% endif %}
+                        
+                        {% if interview.feedback.areas_for_improvement %}
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-2">Areas for Improvement</h6>
+                            <div class="p-3 bg-light rounded">
+                                {{ interview.feedback.areas_for_improvement|nl2br }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    {% if interview.feedback.cultural_fit %}
+                    <div class="mt-4">
+                        <h6 class="text-muted mb-2">Cultural Fit Assessment</h6>
+                        <div class="p-3 bg-light rounded">
+                            {{ interview.feedback.cultural_fit|nl2br }}
+                        </div>
+                    </div>
                     {% endif %}
+
+                    {% if interview.feedback.additional_comments %}
+                    <div class="mt-4">
+                        <h6 class="text-muted mb-2">Additional Comments</h6>
+                        <div class="p-3 bg-light rounded">
+                            {{ interview.feedback.additional_comments|nl2br }}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if interview.feedback.is_private %}
+                    <div class="alert alert-info mt-4">
+                        <i class="bi bi-lock-fill me-2"></i>
+                        This feedback is marked as private and is only visible to hiring managers and recruiters.
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-white py-3 d-flex justify-content-between align-items-center">
+                    <div class="text-muted small">
+                        <i class="bi bi-person-fill me-1"></i> Submitted by: {{ interview.feedback.submitted_by.name }}
+                        <span class="ms-3"><i class="bi bi-clock-fill me-1"></i> {{ interview.feedback.submitted_at.strftime('%b %d, %Y at %I:%M %p') }}</span>
+                    </div>
+                    
+                    {% if can_edit_feedback %}
+                    <a href="{{ url_for('interviews.edit_feedback', interview_id=interview.id) }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-pencil me-1"></i> Edit Feedback
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Column: Sidebar -->
+        <div class="col-lg-4">
+            {% if interview.status == 'scheduled' %}
+            <div class="card shadow-sm bg-primary bg-opacity-10 border-primary mb-4">
+                <div class="card-body">
+                    <h5 class="text-primary mb-3"><i class="bi bi-calendar-check me-2"></i> Upcoming Interview</h5>
+                    <p class="mb-4">This interview is scheduled for <strong>{{ interview.scheduled_at.strftime('%B %d, %Y') }}</strong> at <strong>{{ interview.scheduled_at.strftime('%I:%M %p') }}</strong>.</p>
+                    
+                    {% if is_interviewer %}
+                    <div class="alert alert-light mb-3">
+                        <i class="bi bi-info-circle-fill me-2 text-primary"></i>
+                        You are assigned as an interviewer for this interview.
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sendReminderModal" data-interview-id="{{ interview.id }}">
+                            <i class="bi bi-bell me-1"></i> Send Reminder
+                        </button>
+                        {% if interview.calendar_link %}
+                        <a href="{{ interview.calendar_link }}" class="btn btn-outline-primary">
+                            <i class="bi bi-calendar-plus me-1"></i> Add to Calendar
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Application Progress Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">Application Progress</h5>
+                </div>
+                <div class="card-body p-3">
+                    <div class="application-timeline">
+                        {% for stage in application_stages %}
+                        <div class="timeline-item">
+                            <div class="timeline-marker {% if stage.completed %}completed{% endif %}">
+                                {% if stage.current %}
+                                <div class="current-marker"></div>
+                                {% endif %}
+                            </div>
+                            <div class="timeline-content">
+                                <h6 class="mb-1 {% if stage.current %}fw-bold{% endif %}">{{ stage.name }}</h6>
+                                {% if stage.date %}
+                                <div class="small text-muted">{{ stage.date }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="card-footer bg-white py-3">
+                    <a href="{{ url_for('jobs.application', job_id=interview.job.id, application_id=interview.application.id) }}" class="btn btn-sm btn-outline-secondary w-100">
+                        <i class="bi bi-file-earmark-text me-1"></i> View Full Application
+                    </a>
+                </div>
+            </div>
+
+            <!-- Interview Documents -->
+            {% if documents %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">Related Documents</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for doc in documents %}
+                        <a href="{{ url_for('documents.view', document_id=doc.id) }}" class="list-group-item list-group-item-action d-flex align-items-center">
+                            {% if doc.type == 'resume' %}
+                            <i class="bi bi-file-earmark-person text-primary me-2"></i>
+                            {% elif doc.type == 'cover_letter' %}
+                            <i class="bi bi-file-earmark-text text-info me-2"></i>
+                            {% elif doc.type == 'portfolio' %}
+                            <i class="bi bi-briefcase text-success me-2"></i>
+                            {% elif doc.type == 'assessment' %}
+                            <i class="bi bi-file-earmark-check text-warning me-2"></i>
+                            {% else %}
+                            <i class="bi bi-file-earmark me-2"></i>
+                            {% endif %}
+                            <div>
+                                <div>{{ doc.name }}</div>
+                                <small class="text-muted">{{ doc.uploaded_at.strftime('%b %d, %Y') }}</small>
+                            </div>
+                            <i class="bi bi-download ms-auto"></i>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Interview Actions -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">Interview Actions</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% if interview.status == 'scheduled' %}
+                        {% if not interview.video_link and interview.interview_type == 'video' %}
+                        <a href="{{ url_for('interviews.add_video_link', interview_id=interview.id) }}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-camera-video me-2 text-primary"></i> Add Video Conference Link
+                        </a>
+                        {% endif %}
+                        <a href="{{ url_for('interviews.add_interviewers', interview_id=interview.id) }}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-people me-2 text-primary"></i> Manage Interviewers
+                        </a>
+                        <a href="{{ url_for('interviews.prepare', interview_id=interview.id) }}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-journal-check me-2 text-primary"></i> Prepare for Interview
+                        </a>
+                        {% endif %}
+                        <a href="{{ url_for('messages.compose', recipient_id=interview.candidate.id, subject='Interview: ' + interview.job.title) }}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-envelope me-2 text-primary"></i> Message Candidate
+                        </a>
+                        {% if interview.status == 'completed' %}
+                        <a href="{{ url_for('interviews.reschedule', interview_id=interview.id, stage='next') }}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-arrow-right-circle me-2 text-success"></i> Schedule Next Round
+                        </a>
+                        {% endif %}
+                        <a href="{{ url_for('jobs.manage_applications', job_id=interview.job.id) }}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-list-check me-2 text-primary"></i> View All Applicants
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-{% block scripts %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const statusSelect = document.getElementById('status');
-        const resultContainer = document.getElementById('resultContainer');
-        
-        if (statusSelect) {
-            statusSelect.addEventListener('change', function() {
-                if (this.value === 'completed') {
-                    resultContainer.style.display = 'block';
-                } else {
-                    resultContainer.style.display = 'none';
-                }
-            });
-        }
-    });
-</script>
-{% endblock %}
+<!-- Send Reminder Modal -->
+<div class="modal fade" id="sendReminderModal" tabindex="-1" aria-labelledby="sendReminderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="sendReminderModalLabel">Send Interview Reminder</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{{ url_for('interviews.send_reminder') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="interview_id" value="{{ interview.id }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="recipient" class="form-label">Send To</label>
+                        <select class="form-select" id="recipient" name="recipient" required>
+                            <option value="candidate">Candidate Only</option>
+                            <option value="interviewers">Interviewers Only</option>
+                            <option value="all" selected>Both Candidate and Interviewers</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="reminderMessage" class="form-label">Additional Message (Optional)</label>
+                        <textarea class="form-control" id="reminderMessage" name="message" rows="3" placeholder="Add any additional information or instructions..."></textarea>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="includeDetails" name="include_details" value="1" checked>
+                        <label class="form-check-label" for="includeDetails">
+                            Include interview details (date, time, location)
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Send Reminder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Interview Modal -->
+<div class="modal fade" id="cancelInterviewModal" tabindex="-1" aria-labelledby="cancelInterviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancelInterviewModalLabel">Cancel Interview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{{ url_for('interviews.cancel') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="interview_id" value="{{ interview.id }}">
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <strong>Warning:</strong> This action will cancel the interview and notify all participants.
+                    </div>
+                    <div class="mb-3">
+                        <label for="cancellationReason" class="form-label">Cancellation Reason</label>
+                        <textarea class="form-control" id="cancellationReason" name="reason" rows="3" required placeholder="Please provide a reason for cancelling this interview..."></textarea>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="notifyParticipants" name="notify_participants" value="1" checked>
+                        <label class="form-check-label" for="notifyParticipants">
+                            Notify all participants about the cancellation
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Back</button>
+                    <button type="submit" class="btn btn-danger">Cancel Interview</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Timeline styles */
+.application-timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.application-timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 8px;
+    width: 2px;
+    background-color: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -2rem;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: #fff;
+    border: 2px solid #dee2e6;
+    z-index: 1;
+}
+
+.timeline-marker.completed {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.current-marker {
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid #007bff;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7);
+    }
+    
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
+    }
+    
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
+    }
+}
+
+/* Star rating styles */
+.rating .bi-star-fill {
+    font-size: 1.2rem;
+}
+
+/* Custom badge styles */
+.bg-light-success {
+    background-color: rgba(25, 135, 84, 0.15);
+}
+
+.bg-light-danger {
+    background-color: rgba(220, 53, 69, 0.15);
+}
+</style>
 {% endblock %} 

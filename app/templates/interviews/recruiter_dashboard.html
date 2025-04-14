@@ -1,0 +1,381 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Interview Management</h1>
+        <a href="{{ url_for('interviews.schedule_interview') }}" class="btn btn-primary">
+            <i class="bi bi-calendar-plus"></i> Schedule New Interview
+        </a>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" id="interviewTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" type="button" role="tab" aria-controls="upcoming" aria-selected="true">
+                                <i class="bi bi-calendar-event"></i> Upcoming Interviews
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="past-tab" data-bs-toggle="tab" data-bs-target="#past" type="button" role="tab" aria-controls="past" aria-selected="false">
+                                <i class="bi bi-calendar-check"></i> Past Interviews
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab" aria-controls="all" aria-selected="false">
+                                <i class="bi bi-list-ul"></i> All Interviews
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="interviewTabsContent">
+                        <!-- Upcoming Interviews Tab -->
+                        <div class="tab-pane fade show active" id="upcoming" role="tabpanel" aria-labelledby="upcoming-tab">
+                            {% if upcoming_interviews %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Job Position</th>
+                                                <th>Candidate</th>
+                                                <th>Date & Time</th>
+                                                <th>Type</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for interview in upcoming_interviews %}
+                                            <tr>
+                                                <td>{{ interview.job.title }}</td>
+                                                <td>
+                                                    <a href="{{ url_for('profiles.view_profile', user_id=interview.applicant.id) }}">
+                                                        {{ interview.applicant.first_name }} {{ interview.applicant.last_name }}
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    {{ interview.datetime.strftime('%b %d, %Y') }}<br>
+                                                    <small class="text-muted">{{ interview.datetime.strftime('%I:%M %p') }}</small>
+                                                </td>
+                                                <td>{{ interview.interview_type|capitalize }}</td>
+                                                <td>
+                                                    <span class="badge {% if interview.status == 'confirmed' %}bg-success{% elif interview.status == 'scheduled' %}bg-primary{% else %}bg-warning{% endif %}">
+                                                        {{ interview.status|capitalize }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group">
+                                                        <a href="{{ url_for('interviews.view_interview', interview_id=interview.id) }}" class="btn btn-sm btn-outline-primary">
+                                                            <i class="bi bi-eye"></i>
+                                                        </a>
+                                                        <a href="{{ url_for('interviews.edit_interview', interview_id=interview.id) }}" class="btn btn-sm btn-outline-secondary">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </a>
+                                                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelModal{{ interview.id }}">
+                                                            <i class="bi bi-x-circle"></i>
+                                                        </button>
+                                                    </div>
+                                                    
+                                                    <!-- Cancel Interview Modal -->
+                                                    <div class="modal fade" id="cancelModal{{ interview.id }}" tabindex="-1" aria-labelledby="cancelModalLabel{{ interview.id }}" aria-hidden="true">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="cancelModalLabel{{ interview.id }}">Cancel Interview</h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <p>Are you sure you want to cancel the interview with <strong>{{ interview.applicant.first_name }} {{ interview.applicant.last_name }}</strong> for <strong>{{ interview.job.title }}</strong>?</p>
+                                                                    <p class="text-danger">This action cannot be undone.</p>
+                                                                    <form action="{{ url_for('interviews.cancel_interview', interview_id=interview.id) }}" method="post" id="cancelForm{{ interview.id }}">
+                                                                        <div class="mb-3">
+                                                                            <label for="cancellationReason{{ interview.id }}" class="form-label">Reason for cancellation:</label>
+                                                                            <textarea class="form-control" id="cancellationReason{{ interview.id }}" name="cancellation_reason" rows="3" required></textarea>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                    <button type="submit" form="cancelForm{{ interview.id }}" class="btn btn-danger">Cancel Interview</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle"></i> You don't have any upcoming interviews scheduled.
+                                </div>
+                                <p>
+                                    Schedule interviews with qualified candidates for your job openings.
+                                    <a href="{{ url_for('interviews.schedule_interview') }}" class="btn btn-primary">
+                                        <i class="bi bi-calendar-plus"></i> Schedule New Interview
+                                    </a>
+                                </p>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Past Interviews Tab -->
+                        <div class="tab-pane fade" id="past" role="tabpanel" aria-labelledby="past-tab">
+                            {% if past_interviews %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Job Position</th>
+                                                <th>Candidate</th>
+                                                <th>Date & Time</th>
+                                                <th>Type</th>
+                                                <th>Status</th>
+                                                <th>Feedback</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for interview in past_interviews %}
+                                            <tr>
+                                                <td>{{ interview.job.title }}</td>
+                                                <td>
+                                                    <a href="{{ url_for('profiles.view_profile', user_id=interview.applicant.id) }}">
+                                                        {{ interview.applicant.first_name }} {{ interview.applicant.last_name }}
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    {{ interview.datetime.strftime('%b %d, %Y') }}<br>
+                                                    <small class="text-muted">{{ interview.datetime.strftime('%I:%M %p') }}</small>
+                                                </td>
+                                                <td>{{ interview.interview_type|capitalize }}</td>
+                                                <td>
+                                                    <span class="badge {% if interview.status == 'completed' %}bg-success{% elif interview.status == 'cancelled' %}bg-danger{% else %}bg-warning{% endif %}">
+                                                        {{ interview.status|capitalize }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {% if interview.status == 'completed' %}
+                                                        {% if interview.feedback %}
+                                                            <span class="badge bg-success">Provided</span>
+                                                        {% else %}
+                                                            <a href="{{ url_for('interviews.provide_feedback', interview_id=interview.id) }}" class="btn btn-sm btn-warning">
+                                                                <i class="bi bi-star"></i> Add Feedback
+                                                            </a>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">N/A</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <a href="{{ url_for('interviews.view_interview', interview_id=interview.id) }}" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-eye"></i> View
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle"></i> You don't have any past interviews.
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- All Interviews Tab -->
+                        <div class="tab-pane fade" id="all" role="tabpanel" aria-labelledby="all-tab">
+                            {% if all_interviews %}
+                                <div class="mb-3">
+                                    <input type="text" class="form-control" id="interviewSearch" placeholder="Search interviews...">
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="allInterviewsTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Job Position</th>
+                                                <th>Candidate</th>
+                                                <th>Date & Time</th>
+                                                <th>Type</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for interview in all_interviews %}
+                                            <tr>
+                                                <td>{{ interview.job.title }}</td>
+                                                <td>
+                                                    <a href="{{ url_for('profiles.view_profile', user_id=interview.applicant.id) }}">
+                                                        {{ interview.applicant.first_name }} {{ interview.applicant.last_name }}
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    {{ interview.datetime.strftime('%b %d, %Y') }}<br>
+                                                    <small class="text-muted">{{ interview.datetime.strftime('%I:%M %p') }}</small>
+                                                </td>
+                                                <td>{{ interview.interview_type|capitalize }}</td>
+                                                <td>
+                                                    <span class="badge 
+                                                        {% if interview.status == 'completed' %}bg-success
+                                                        {% elif interview.status == 'confirmed' %}bg-success
+                                                        {% elif interview.status == 'scheduled' %}bg-primary
+                                                        {% elif interview.status == 'cancelled' %}bg-danger
+                                                        {% else %}bg-warning{% endif %}">
+                                                        {{ interview.status|capitalize }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <a href="{{ url_for('interviews.view_interview', interview_id=interview.id) }}" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle"></i> You don't have any interviews.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Interview Calendar</h5>
+                </div>
+                <div class="card-body">
+                    <div id="interviewCalendar"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Interview Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6>Scheduled Interviews</h6>
+                        <div class="progress">
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ (upcoming_interviews|length / total_interviews * 100) if total_interviews > 0 else 0 }}%" 
+                                aria-valuenow="{{ upcoming_interviews|length }}" aria-valuemin="0" aria-valuemax="{{ total_interviews }}">
+                                {{ upcoming_interviews|length }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <h6>Completed Interviews</h6>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ (completed_interviews / total_interviews * 100) if total_interviews > 0 else 0 }}%" 
+                                aria-valuenow="{{ completed_interviews }}" aria-valuemin="0" aria-valuemax="{{ total_interviews }}">
+                                {{ completed_interviews }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <h6>Cancelled Interviews</h6>
+                        <div class="progress">
+                            <div class="progress-bar bg-danger" role="progressbar" style="width: {{ (cancelled_interviews / total_interviews * 100) if total_interviews > 0 else 0 }}%" 
+                                aria-valuenow="{{ cancelled_interviews }}" aria-valuemin="0" aria-valuemax="{{ total_interviews }}">
+                                {{ cancelled_interviews }}
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h6>Pending Feedback</h6>
+                        <div class="progress">
+                            <div class="progress-bar bg-warning" role="progressbar" style="width: {{ (pending_feedback / completed_interviews * 100) if completed_interviews > 0 else 0 }}%" 
+                                aria-valuenow="{{ pending_feedback }}" aria-valuemin="0" aria-valuemax="{{ completed_interviews }}">
+                                {{ pending_feedback }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <a href="{{ url_for('interviews.schedule_interview') }}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-calendar-plus"></i> Schedule New Interview
+                        </a>
+                        <a href="{{ url_for('interviews.pending_feedback') }}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-star"></i> Pending Feedback ({{ pending_feedback }})
+                        </a>
+                        <a href="{{ url_for('interviews.export_data') }}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-download"></i> Export Interview Data
+                        </a>
+                        <a href="{{ url_for('jobs.browse_applications') }}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-file-earmark-person"></i> Review Applications
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize FullCalendar
+        fetch('{{ url_for("interviews.calendar_data") }}')
+            .then(response => response.json())
+            .then(data => {
+                const calendarEl = document.getElementById('interviewCalendar');
+                const calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,listWeek'
+                    },
+                    events: data,
+                    eventClick: function(info) {
+                        window.location.href = info.event.url;
+                    }
+                });
+                calendar.render();
+            });
+            
+        // Search functionality for all interviews table
+        const searchInput = document.getElementById('interviewSearch');
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function() {
+                const searchText = this.value.toLowerCase();
+                const rows = document.querySelectorAll('#allInterviewsTable tbody tr');
+                
+                rows.forEach(function(row) {
+                    const text = row.textContent.toLowerCase();
+                    if (text.includes(searchText)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %} 

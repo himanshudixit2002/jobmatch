@@ -1,0 +1,218 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="card-title mb-0">Schedule Interview</h1>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="scheduleInterviewForm">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="{{ form.job_id.id }}" class="form-label">Job Position:</label>
+                                    {{ form.job_id(class="form-select" + (" is-invalid" if form.job_id.errors else "")) }}
+                                    {% for error in form.job_id.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="applicantSelectionSection" class="mb-3">
+                            <div class="form-group">
+                                <label for="{{ form.applicant_id.id }}" class="form-label">Candidate:</label>
+                                {{ form.applicant_id(class="form-select" + (" is-invalid" if form.applicant_id.errors else "")) }}
+                                {% for error in form.applicant_id.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                                <small class="form-text text-muted">Select a candidate who has applied to this job position.</small>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.interview_type.id }}" class="form-label">Interview Type:</label>
+                                    {{ form.interview_type(class="form-select" + (" is-invalid" if form.interview_type.errors else "")) }}
+                                    {% for error in form.interview_type.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.location_type.id }}" class="form-label">Location Type:</label>
+                                    {{ form.location_type(class="form-select" + (" is-invalid" if form.location_type.errors else "")) }}
+                                    {% for error in form.location_type.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="physicalLocationSection" class="mb-3 location-details">
+                            <div class="form-group">
+                                <label for="{{ form.location.id }}" class="form-label">Physical Location:</label>
+                                {{ form.location(class="form-control" + (" is-invalid" if form.location.errors else ""), placeholder="Enter address or meeting location") }}
+                                {% for error in form.location.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div id="virtualLocationSection" class="mb-3 location-details">
+                            <div class="form-group">
+                                <label for="{{ form.virtual_meeting_link.id }}" class="form-label">Meeting Link:</label>
+                                {{ form.virtual_meeting_link(class="form-control" + (" is-invalid" if form.virtual_meeting_link.errors else ""), placeholder="Enter Zoom, Teams, or other meeting link") }}
+                                {% for error in form.virtual_meeting_link.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.date.id }}" class="form-label">Date:</label>
+                                    {{ form.date(class="form-control" + (" is-invalid" if form.date.errors else ""), type="date") }}
+                                    {% for error in form.date.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.time.id }}" class="form-label">Time:</label>
+                                    {{ form.time(class="form-control" + (" is-invalid" if form.time.errors else ""), type="time") }}
+                                    {% for error in form.time.errors %}
+                                        <div class="invalid-feedback">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-group">
+                                <label for="{{ form.duration.id }}" class="form-label">Duration (minutes):</label>
+                                {{ form.duration(class="form-control" + (" is-invalid" if form.duration.errors else ""), type="number", min="15", step="15") }}
+                                {% for error in form.duration.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-group">
+                                <label for="{{ form.interviewers.id }}" class="form-label">Interviewers:</label>
+                                {{ form.interviewers(class="form-select" + (" is-invalid" if form.interviewers.errors else ""), multiple=True) }}
+                                {% for error in form.interviewers.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                                <small class="form-text text-muted">Hold Ctrl (or Cmd on Mac) to select multiple interviewers.</small>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="form-group">
+                                <label for="{{ form.description.id }}" class="form-label">Interview Details:</label>
+                                {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows=4, placeholder="Provide additional details about the interview such as what to prepare, what to expect, etc.") }}
+                                {% for error in form.description.errors %}
+                                    <div class="invalid-feedback">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            {{ form.send_notification(class="form-check-input" + (" is-invalid" if form.send_notification.errors else ""), checked=True) }}
+                            <label class="form-check-label" for="{{ form.send_notification.id }}">
+                                Send email notification to candidate
+                            </label>
+                            {% for error in form.send_notification.errors %}
+                                <div class="invalid-feedback">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('interviews.recruiter_dashboard') }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to Dashboard
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-calendar-check"></i> Schedule Interview
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const locationTypeSelect = document.getElementById('{{ form.location_type.id }}');
+        const physicalLocationSection = document.getElementById('physicalLocationSection');
+        const virtualLocationSection = document.getElementById('virtualLocationSection');
+        const jobSelect = document.getElementById('{{ form.job_id.id }}');
+        const applicantSelect = document.getElementById('{{ form.applicant_id.id }}');
+        
+        // Function to toggle location input based on selected type
+        function toggleLocationFields() {
+            if (locationTypeSelect.value === 'in_person') {
+                physicalLocationSection.style.display = 'block';
+                virtualLocationSection.style.display = 'none';
+            } else if (locationTypeSelect.value === 'virtual') {
+                physicalLocationSection.style.display = 'none';
+                virtualLocationSection.style.display = 'block';
+            } else if (locationTypeSelect.value === 'phone') {
+                physicalLocationSection.style.display = 'none';
+                virtualLocationSection.style.display = 'none';
+            }
+        }
+        
+        // Initial state setup
+        toggleLocationFields();
+        
+        // Event listener for location type changes
+        locationTypeSelect.addEventListener('change', toggleLocationFields);
+        
+        // Function to load applicants for selected job
+        jobSelect.addEventListener('change', function() {
+            const jobId = this.value;
+            if (jobId) {
+                fetch(`{{ url_for('interviews.get_applicants_for_job') }}?job_id=${jobId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Clear current options
+                        applicantSelect.innerHTML = '';
+                        
+                        // Add placeholder option
+                        const placeholderOption = document.createElement('option');
+                        placeholderOption.value = '';
+                        placeholderOption.textContent = 'Select a candidate';
+                        placeholderOption.disabled = true;
+                        placeholderOption.selected = true;
+                        applicantSelect.appendChild(placeholderOption);
+                        
+                        // Add applicant options
+                        data.forEach(applicant => {
+                            const option = document.createElement('option');
+                            option.value = applicant.id;
+                            option.textContent = `${applicant.name} (${applicant.email})`;
+                            applicantSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error loading applicants:', error));
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

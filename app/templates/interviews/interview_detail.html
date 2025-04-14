@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            {% if current_user.is_recruiter %}
+            <li class="breadcrumb-item"><a href="{{ url_for('interviews.recruiter_dashboard') }}">Interviews</a></li>
+            {% else %}
+            <li class="breadcrumb-item"><a href="{{ url_for('interviews.applicant_dashboard') }}">Interviews</a></li>
+            {% endif %}
+            <li class="breadcrumb-item active" aria-current="page">Interview Details</li>
+        </ol>
+    </nav>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="card-title mb-0">
+                {% if current_user.is_recruiter %}
+                Interview with {{ interview.applicant.name }}
+                {% else %}
+                Interview for {{ interview.job.title }}
+                {% endif %}
+            </h3>
+            <span class="badge {% if interview.status == 'scheduled' %}bg-primary{% elif interview.status == 'completed' %}bg-success{% elif interview.status == 'cancelled' %}bg-danger{% else %}bg-warning{% endif %}">
+                {{ interview.status|capitalize }}
+            </span>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>Interview Details</h5>
+                    <table class="table">
+                        <tr>
+                            <th>Job Position:</th>
+                            <td>
+                                <a href="{{ url_for('jobs.view_job', job_id=interview.job.id) }}">
+                                    {{ interview.job.title }} at {{ interview.job.company.name }}
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Date & Time:</th>
+                            <td>{{ interview.datetime.strftime('%B %d, %Y at %I:%M %p') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Type:</th>
+                            <td>{{ interview.interview_type }}</td>
+                        </tr>
+                        <tr>
+                            <th>Duration:</th>
+                            <td>{{ interview.duration }} minutes</td>
+                        </tr>
+                        {% if interview.location %}
+                        <tr>
+                            <th>Location:</th>
+                            <td>{{ interview.location }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if interview.meeting_link %}
+                        <tr>
+                            <th>Meeting Link:</th>
+                            <td>
+                                <a href="{{ interview.meeting_link }}" target="_blank" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-camera-video"></i> Join Meeting
+                                </a>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5>Participants</h5>
+                    <div class="list-group">
+                        {% if current_user.is_recruiter %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ interview.applicant.name }}</h6>
+                                    <p class="mb-1 text-muted">Applicant</p>
+                                </div>
+                                <a href="{{ url_for('profiles.view_profile', user_id=interview.applicant.id) }}" class="btn btn-sm btn-outline-primary">
+                                    View Profile
+                                </a>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% for interviewer in interview.interviewers %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">{{ interviewer.name }}</h6>
+                                    <p class="mb-1 text-muted">{{ interviewer.role }}</p>
+                                </div>
+                                {% if current_user.is_recruiter %}
+                                <a href="{{ url_for('profiles.view_profile', user_id=interviewer.id) }}" class="btn btn-sm btn-outline-secondary">
+                                    View Profile
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            {% if interview.description %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5>Description</h5>
+                    <div class="card">
+                        <div class="card-body">
+                            {{ interview.description|safe }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="row">
+                <div class="col-md-12">
+                    <h5>Actions</h5>
+                    <div class="btn-group">
+                        {% if interview.status == 'scheduled' %}
+                            {% if current_user.is_recruiter %}
+                                <a href="{{ url_for('interviews.reschedule', interview_id=interview.id) }}" class="btn btn-warning">
+                                    <i class="bi bi-calendar-plus"></i> Reschedule
+                                </a>
+                                <a href="{{ url_for('interviews.cancel', interview_id=interview.id) }}" class="btn btn-danger" 
+                                   onclick="return confirm('Are you sure you want to cancel this interview?');">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </a>
+                            {% else %}
+                                <a href="{{ url_for('interviews.confirm', interview_id=interview.id) }}" class="btn btn-success">
+                                    <i class="bi bi-check-circle"></i> Confirm Attendance
+                                </a>
+                                <a href="{{ url_for('interviews.reschedule_request', interview_id=interview.id) }}" class="btn btn-warning">
+                                    <i class="bi bi-calendar-plus"></i> Request Reschedule
+                                </a>
+                            {% endif %}
+                        {% elif interview.status == 'completed' and current_user.is_recruiter %}
+                            <a href="{{ url_for('interviews.add_feedback', interview_id=interview.id) }}" class="btn btn-primary">
+                                <i class="bi bi-pencil"></i> Add Feedback
+                            </a>
+                        {% endif %}
+                        
+                        {% if interview.status == 'scheduled' and interview.interview_type == 'video' %}
+                            <a href="{{ url_for('interviews.test_connection', interview_id=interview.id) }}" class="btn btn-info">
+                                <i class="bi bi-pc-display"></i> Test Connection
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if current_user.is_recruiter and interview.status == 'completed' %}
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Interview Feedback</h4>
+        </div>
+        <div class="card-body">
+            {% if interview.feedback %}
+                <div class="mb-4">
+                    <h5>Overall Assessment</h5>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-{{ 'success' if interview.feedback.rating >= 4 else 'warning' if interview.feedback.rating >= 2 else 'danger' }}" 
+                             role="progressbar" style="width: {{ interview.feedback.rating * 20 }}%;" 
+                             aria-valuenow="{{ interview.feedback.rating }}" aria-valuemin="0" aria-valuemax="5">
+                             {{ interview.feedback.rating }}/5
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5>Skills Assessment</h5>
+                    <div class="row">
+                        {% for skill in interview.feedback.skills %}
+                        <div class="col-md-6 mb-3">
+                            <label>{{ skill.name }}</label>
+                            <div class="progress">
+                                <div class="progress-bar bg-{{ 'success' if skill.rating >= 4 else 'warning' if skill.rating >= 2 else 'danger' }}" 
+                                     role="progressbar" style="width: {{ skill.rating * 20 }}%;" 
+                                     aria-valuenow="{{ skill.rating }}" aria-valuemin="0" aria-valuemax="5">
+                                     {{ skill.rating }}/5
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h5>Comments</h5>
+                    <div class="card">
+                        <div class="card-body">
+                            {{ interview.feedback.comments|safe }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h5>Recommendation</h5>
+                    <div class="alert alert-{{ 'success' if interview.feedback.recommendation == 'hire' else 'danger' if interview.feedback.recommendation == 'reject' else 'warning' }}">
+                        {{ interview.feedback.recommendation|capitalize }}
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i> No feedback has been submitted for this interview yet.
+                </div>
+                <a href="{{ url_for('interviews.add_feedback', interview_id=interview.id) }}" class="btn btn-primary">
+                    <i class="bi bi-pencil"></i> Add Feedback
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if not current_user.is_recruiter and interview.status == 'scheduled' %}
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Preparation Resources</h4>
+        </div>
+        <div class="card-body">
+            <div class="list-group">
+                <a href="#" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Common Interview Questions</h5>
+                        <i class="bi bi-file-earmark-text"></i>
+                    </div>
+                    <p class="mb-1">Review common questions for {{ interview.job.title }} positions</p>
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Company Information</h5>
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <p class="mb-1">Learn more about {{ interview.job.company.name }} and their culture</p>
+                </a>
+                <a href="#" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">Interview Tips</h5>
+                        <i class="bi bi-lightbulb"></i>
+                    </div>
+                    <p class="mb-1">Tips to help you succeed in your {{ interview.interview_type }} interview</p>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

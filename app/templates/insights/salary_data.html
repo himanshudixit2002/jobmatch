@@ -1,0 +1,417 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} | JobMatch{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="insights-header">
+            <h1 class="mb-3">Salary Insights</h1>
+            <p class="text-muted">Explore comprehensive salary data across industries, roles, and experience levels.</p>
+        </div>
+        
+        <!-- Insights Navigation -->
+        <div class="insights-nav">
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('insights.dashboard') }}">Overview</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('insights.trending_skills') }}">Trending Skills</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ url_for('insights.salary_data') }}">Salary Data</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('insights.career_paths') }}">Career Paths</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('insights.job_growth') }}">Job Growth</a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="insights-container mt-4">
+            <!-- Salary Comparison Chart -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0">Salary Comparison by Role</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="chart-container" style="height: 400px;">
+                                <canvas id="salary-comparison-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Salary by Experience -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0">Salary by Experience Level</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="chart-container" style="height: 350px;">
+                                <canvas id="salary-experience-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Regional Salary Comparison -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Regional Salary Insights</h5>
+                            <div class="form-group mb-0">
+                                <select class="form-select" id="roleSelector">
+                                    <option value="software-developer">Software Developer</option>
+                                    <option value="data-scientist">Data Scientist</option>
+                                    <option value="product-manager">Product Manager</option>
+                                    <option value="ux-designer">UX Designer</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Location</th>
+                                            <th>Entry Level</th>
+                                            <th>Mid Level</th>
+                                            <th>Senior Level</th>
+                                            <th>Cost of Living Index</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="fw-medium">San Francisco, CA</td>
+                                            <td>$100,000</td>
+                                            <td>$150,000</td>
+                                            <td>$210,000</td>
+                                            <td><span class="badge bg-danger-subtle text-danger">178.6</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-medium">New York, NY</td>
+                                            <td>$95,000</td>
+                                            <td>$140,000</td>
+                                            <td>$200,000</td>
+                                            <td><span class="badge bg-danger-subtle text-danger">168.3</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-medium">Seattle, WA</td>
+                                            <td>$90,000</td>
+                                            <td>$135,000</td>
+                                            <td>$185,000</td>
+                                            <td><span class="badge bg-warning-subtle text-warning">152.7</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-medium">Austin, TX</td>
+                                            <td>$85,000</td>
+                                            <td>$125,000</td>
+                                            <td>$170,000</td>
+                                            <td><span class="badge bg-success-subtle text-success">115.8</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-medium">Chicago, IL</td>
+                                            <td>$80,000</td>
+                                            <td>$120,000</td>
+                                            <td>$165,000</td>
+                                            <td><span class="badge bg-warning-subtle text-warning">124.2</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-medium">Denver, CO</td>
+                                            <td>$75,000</td>
+                                            <td>$115,000</td>
+                                            <td>$160,000</td>
+                                            <td><span class="badge bg-warning-subtle text-warning">128.4</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Salary Insights Cards -->
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0">Benefits & Compensation</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                    <i class="bi bi-graph-up" style="font-size: 1.25rem;"></i>
+                                </div>
+                                <div>
+                                    <p class="fw-semibold mb-0">Top Benefits Packages</p>
+                                    <small class="text-muted">Beyond base salary</small>
+                                </div>
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item ps-0 border-0">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i> Remote work options (80% of employers)
+                                </li>
+                                <li class="list-group-item ps-0 border-0">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i> Retirement matching (75% of employers)
+                                </li>
+                                <li class="list-group-item ps-0 border-0">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i> Healthcare coverage (92% of employers)
+                                </li>
+                                <li class="list-group-item ps-0 border-0">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i> Annual bonuses (68% of employers)
+                                </li>
+                                <li class="list-group-item ps-0 border-0">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i> Professional development (65% of employers)
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0">Negotiation Insights</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                    <i class="bi bi-chat-quote" style="font-size: 1.25rem;"></i>
+                                </div>
+                                <div>
+                                    <p class="fw-semibold mb-0">Negotiation Success Factors</p>
+                                    <small class="text-muted">What works in salary discussions</small>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Candidate had competing offers</span>
+                                    <span class="text-success">+12%</span>
+                                </div>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: 85%;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Demonstrated in-demand skills</span>
+                                    <span class="text-success">+10%</span>
+                                </div>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: 75%;" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Highlighted achievements</span>
+                                    <span class="text-success">+8%</span>
+                                </div>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: 65%;" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                            <div class="alert alert-info mb-0 mt-3 d-flex align-items-center">
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                                <small>70% of employers expect candidates to negotiate their initial offer.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0">Industry Trends</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-info-subtle text-info rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                    <i class="bi bi-building" style="font-size: 1.25rem;"></i>
+                                </div>
+                                <div>
+                                    <p class="fw-semibold mb-0">Fastest Growing Industries</p>
+                                    <small class="text-muted">Salary growth by sector</small>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Artificial Intelligence</span>
+                                    <span class="text-primary">13.2%</span>
+                                </div>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 95%;" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Healthcare Technology</span>
+                                    <span class="text-primary">10.8%</span>
+                                </div>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 85%;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Renewable Energy</span>
+                                    <span class="text-primary">9.5%</span>
+                                </div>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 75%;" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                            <div class="mb-0">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Cybersecurity</span>
+                                    <span class="text-primary">8.7%</span>
+                                </div>
+                                <div class="progress" style="height: 6px;">
+                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 65%;" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Salary Comparison Chart
+        const salaryCtx = document.getElementById('salary-comparison-chart').getContext('2d');
+        const salaryChart = new Chart(salaryCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Software Developer', 'Data Scientist', 'Product Manager', 'UX Designer', 'DevOps Engineer', 'Marketing Specialist'],
+                datasets: [
+                    {
+                        label: 'Median Salary (USD)',
+                        data: [110000, 125000, 135000, 95000, 120000, 85000],
+                        backgroundColor: [
+                            'rgba(99, 102, 241, 0.7)',
+                            'rgba(14, 165, 233, 0.7)',
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(245, 158, 11, 0.7)',
+                            'rgba(239, 68, 68, 0.7)',
+                            'rgba(139, 92, 246, 0.7)'
+                        ],
+                        borderWidth: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return '$' + context.parsed.y.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Annual Salary (USD)'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Salary by Experience Chart
+        const experienceCtx = document.getElementById('salary-experience-chart').getContext('2d');
+        const experienceChart = new Chart(experienceCtx, {
+            type: 'line',
+            data: {
+                labels: ['Entry Level', '2-3 Years', '4-6 Years', '7-10 Years', '10+ Years', 'Executive'],
+                datasets: [
+                    {
+                        label: 'Software Developer',
+                        data: [85000, 105000, 125000, 150000, 180000, 210000],
+                        borderColor: 'rgba(99, 102, 241, 1)',
+                        backgroundColor: 'rgba(99, 102, 241, 0.05)',
+                        pointBackgroundColor: 'rgba(99, 102, 241, 1)',
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Data Scientist',
+                        data: [90000, 110000, 135000, 165000, 190000, 220000],
+                        borderColor: 'rgba(16, 185, 129, 1)',
+                        backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                        pointBackgroundColor: 'rgba(16, 185, 129, 1)',
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Product Manager',
+                        data: [95000, 115000, 140000, 170000, 200000, 230000],
+                        borderColor: 'rgba(14, 165, 233, 1)',
+                        backgroundColor: 'rgba(14, 165, 233, 0.05)',
+                        pointBackgroundColor: 'rgba(14, 165, 233, 1)',
+                        tension: 0.3,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': $' + context.parsed.y.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        min: 50000,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Annual Salary (USD)'
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <h1 class="h3 mb-4">Interview Feedback</h1>
+                    
+                    <div class="alert alert-info d-flex align-items-center mb-4">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <div>
+                            Your feedback will help determine if the candidate is suitable for the position.
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm me-3">
+                                        {% if interview.candidate.profile_image %}
+                                            <img src="{{ url_for('static', filename='uploads/profile_images/' + interview.candidate.profile_image) }}" alt="{{ interview.candidate.name }}" class="rounded-circle" width="48" height="48">
+                                        {% else %}
+                                            <div class="avatar-initials rounded-circle bg-primary text-white">
+                                                {{ interview.candidate.name|initials }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">{{ interview.candidate.name }}</h6>
+                                        <small class="text-muted">{{ interview.candidate.email }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-light border-0">
+                                    <div class="card-body py-2">
+                                        <div class="mb-1"><strong>Position:</strong> {{ interview.job.title }}</div>
+                                        <div class="mb-1"><strong>Date:</strong> {{ interview.scheduled_time.strftime('%b %d, %Y') }}</div>
+                                        <div><strong>Type:</strong> {{ interview.interview_type|title }} Interview</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="post" action="{{ url_for('interviews.submit_feedback', interview_id=interview.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        
+                        <!-- Overall Rating -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Overall Rating</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for value in range(1, 6) %}
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="overall_rating" id="rating{{ value }}" value="{{ value }}" required {% if form and form.overall_rating.data == value %}checked{% endif %}>
+                                    <label class="form-check-label" for="rating{{ value }}">{{ value }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="form-text d-flex justify-content-between">
+                                <span>Poor</span>
+                                <span>Excellent</span>
+                            </div>
+                        </div>
+
+                        <!-- Skill Assessment -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Skill Assessment</label>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th scope="col">Skill Area</th>
+                                            <th scope="col" class="text-center">Below Expectations</th>
+                                            <th scope="col" class="text-center">Meets Expectations</th>
+                                            <th scope="col" class="text-center">Exceeds Expectations</th>
+                                            <th scope="col" class="text-center">Outstanding</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% set skill_areas = [
+                                            'Technical Knowledge', 
+                                            'Problem Solving', 
+                                            'Communication Skills', 
+                                            'Team Collaboration',
+                                            'Domain Expertise',
+                                            'Learning Ability'
+                                        ] %}
+                                        
+                                        {% for skill in skill_areas %}
+                                        <tr>
+                                            <td>{{ skill }}</td>
+                                            {% for value in range(1, 5) %}
+                                            <td class="text-center">
+                                                <input class="form-check-input" type="radio" name="skill_{{ loop.parent.loop.index }}" id="skill_{{ loop.parent.loop.index }}_{{ value }}" value="{{ value }}" required>
+                                            </td>
+                                            {% endfor %}
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Strengths -->
+                        <div class="mb-4">
+                            <label for="strengths" class="form-label fw-bold">Candidate Strengths</label>
+                            <textarea class="form-control" id="strengths" name="strengths" rows="3" required>{{ form.strengths.data if form else '' }}</textarea>
+                        </div>
+
+                        <!-- Areas for Improvement -->
+                        <div class="mb-4">
+                            <label for="improvement" class="form-label fw-bold">Areas for Improvement</label>
+                            <textarea class="form-control" id="improvement" name="improvement" rows="3" required>{{ form.improvement.data if form else '' }}</textarea>
+                        </div>
+
+                        <!-- Cultural Fit -->
+                        <div class="mb-4">
+                            <label for="cultural_fit" class="form-label fw-bold">Cultural Fit Assessment</label>
+                            <select class="form-select" id="cultural_fit" name="cultural_fit" required>
+                                <option value="" selected disabled>Select an option</option>
+                                <option value="excellent" {% if form and form.cultural_fit.data == 'excellent' %}selected{% endif %}>Excellent fit</option>
+                                <option value="good" {% if form and form.cultural_fit.data == 'good' %}selected{% endif %}>Good fit</option>
+                                <option value="neutral" {% if form and form.cultural_fit.data == 'neutral' %}selected{% endif %}>Neutral</option>
+                                <option value="concerns" {% if form and form.cultural_fit.data == 'concerns' %}selected{% endif %}>Some concerns</option>
+                                <option value="not_fit" {% if form and form.cultural_fit.data == 'not_fit' %}selected{% endif %}>Not a good fit</option>
+                            </select>
+                        </div>
+
+                        <!-- Additional Comments -->
+                        <div class="mb-4">
+                            <label for="additional_comments" class="form-label fw-bold">Additional Comments</label>
+                            <textarea class="form-control" id="additional_comments" name="additional_comments" rows="3">{{ form.additional_comments.data if form else '' }}</textarea>
+                        </div>
+
+                        <!-- Hiring Recommendation -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Hiring Recommendation</label>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="recommendation" id="recommend_strong_yes" value="strong_yes" required {% if form and form.recommendation.data == 'strong_yes' %}checked{% endif %}>
+                                <label class="form-check-label" for="recommend_strong_yes">
+                                    <span class="fw-bold text-success">Strong Yes</span> - Exceptional candidate, hire immediately
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="recommendation" id="recommend_yes" value="yes" required {% if form and form.recommendation.data == 'yes' %}checked{% endif %}>
+                                <label class="form-check-label" for="recommend_yes">
+                                    <span class="fw-bold text-success">Yes</span> - Good candidate, would recommend hiring
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="recommendation" id="recommend_maybe" value="maybe" required {% if form and form.recommendation.data == 'maybe' %}checked{% endif %}>
+                                <label class="form-check-label" for="recommend_maybe">
+                                    <span class="fw-bold text-warning">Maybe</span> - Has potential but some concerns
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="recommendation" id="recommend_no" value="no" required {% if form and form.recommendation.data == 'no' %}checked{% endif %}>
+                                <label class="form-check-label" for="recommend_no">
+                                    <span class="fw-bold text-danger">No</span> - Not a good fit for this position
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="recommendation" id="recommend_strong_no" value="strong_no" required {% if form and form.recommendation.data == 'strong_no' %}checked{% endif %}>
+                                <label class="form-check-label" for="recommend_strong_no">
+                                    <span class="fw-bold text-danger">Strong No</span> - Significant concerns, do not hire
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Submit Visibility Options -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Feedback Visibility</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="share_with_candidate" name="share_with_candidate" value="1" {% if form and form.share_with_candidate.data %}checked{% endif %}>
+                                <label class="form-check-label" for="share_with_candidate">
+                                    Share feedback with candidate (only strengths and improvement areas)
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('interviews.view', interview_id=interview.id) }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to Interview
+                            </a>
+                            <div>
+                                <button type="button" class="btn btn-outline-secondary me-2" data-bs-toggle="modal" data-bs-target="#previewModal">
+                                    Preview
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    Submit Feedback
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="previewModalLabel">Feedback Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="previewContent">
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Loading preview...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const previewModal = document.getElementById('previewModal');
+        previewModal.addEventListener('show.bs.modal', function (event) {
+            const previewContent = document.getElementById('previewContent');
+            
+            // Collect form data
+            const formData = new FormData(document.querySelector('form'));
+            
+            // For demo purposes, we'll just generate a preview based on the form data
+            // In a real implementation, you might want to send this to the server and get a formatted response
+            const overallRating = formData.get('overall_rating') || 'Not provided';
+            const strengths = formData.get('strengths') || 'Not provided';
+            const improvement = formData.get('improvement') || 'Not provided';
+            const recommendation = formData.get('recommendation') || 'Not provided';
+            
+            let recommendationText = '';
+            switch(recommendation) {
+                case 'strong_yes': recommendationText = '<span class="text-success fw-bold">Strong Yes</span> - Exceptional candidate, hire immediately'; break;
+                case 'yes': recommendationText = '<span class="text-success fw-bold">Yes</span> - Good candidate, would recommend hiring'; break;
+                case 'maybe': recommendationText = '<span class="text-warning fw-bold">Maybe</span> - Has potential but some concerns'; break;
+                case 'no': recommendationText = '<span class="text-danger fw-bold">No</span> - Not a good fit for this position'; break;
+                case 'strong_no': recommendationText = '<span class="text-danger fw-bold">Strong No</span> - Significant concerns, do not hire'; break;
+                default: recommendationText = 'Not provided';
+            }
+            
+            // Generate preview HTML
+            const previewHTML = `
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Overall Rating</h5>
+                        <div class="d-flex">
+                            ${Array.from({length: 5}, (_, i) => 
+                                `<i class="bi bi-star${i < overallRating ? '-fill text-warning' : ''} me-1" style="font-size: 1.5rem;"></i>`
+                            ).join('')}
+                            <span class="ms-2 align-self-center">${overallRating}/5</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Candidate Strengths</h5>
+                        <p class="card-text">${strengths}</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Areas for Improvement</h5>
+                        <p class="card-text">${improvement}</p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Hiring Recommendation</h5>
+                        <p class="card-text">${recommendationText}</p>
+                    </div>
+                </div>
+            `;
+            
+            previewContent.innerHTML = previewHTML;
+        });
+    });
+</script>
+{% endblock %} 

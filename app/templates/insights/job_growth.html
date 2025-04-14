@@ -1,0 +1,568 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} | JobMatch{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="insights-header">
+            <h1 class="mb-3">Job Growth Projections</h1>
+            <p class="text-muted">Explore industry growth trends and future job market opportunities to plan your career strategically.</p>
+        </div>
+        
+        <!-- Insights Navigation -->
+        <div class="insights-nav">
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('insights.dashboard') }}">Overview</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('insights.trending_skills') }}">Trending Skills</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('insights.salary_data') }}">Salary Data</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('insights.career_paths') }}">Career Paths</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ url_for('insights.job_growth') }}">Job Growth</a>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="insights-container mt-4">
+            <!-- Industry Growth Chart -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Industry Growth Projections (2023-2028)</h5>
+                            <div class="form-group mb-0">
+                                <select class="form-select" id="timeframeSelector">
+                                    <option value="5-year">5 Year Projection</option>
+                                    <option value="10-year">10 Year Projection</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            <div id="industry-growth-chart" style="height: 400px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Fastest Growing Roles & Declining Roles -->
+            <div class="row mb-4">
+                <div class="col-md-6 mb-4 mb-md-0">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0">Fastest Growing Roles</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Role</th>
+                                            <th>Growth Rate</th>
+                                            <th>New Jobs</th>
+                                            <th>Median Salary</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>AI/ML Engineer</td>
+                                            <td><span class="text-success">+37.4%</span></td>
+                                            <td>32,500</td>
+                                            <td>$145,000</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Cybersecurity Specialist</td>
+                                            <td><span class="text-success">+32.1%</span></td>
+                                            <td>47,100</td>
+                                            <td>$125,000</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Cloud Architect</td>
+                                            <td><span class="text-success">+25.8%</span></td>
+                                            <td>28,900</td>
+                                            <td>$138,000</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Data Scientist</td>
+                                            <td><span class="text-success">+23.6%</span></td>
+                                            <td>35,700</td>
+                                            <td>$128,000</td>
+                                        </tr>
+                                        <tr>
+                                            <td>DevOps Engineer</td>
+                                            <td><span class="text-success">+22.9%</span></td>
+                                            <td>24,300</td>
+                                            <td>$120,000</td>
+                                        </tr>
+                                        <tr>
+                                            <td>AR/VR Developer</td>
+                                            <td><span class="text-success">+21.2%</span></td>
+                                            <td>18,500</td>
+                                            <td>$115,000</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0">Declining Roles</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Role</th>
+                                            <th>Growth Rate</th>
+                                            <th>Lost Jobs</th>
+                                            <th>Transition Paths</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Computer Programmer</td>
+                                            <td><span class="text-danger">-8.1%</span></td>
+                                            <td>21,300</td>
+                                            <td>Software Engineer, DevOps</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Data Entry Specialist</td>
+                                            <td><span class="text-danger">-7.5%</span></td>
+                                            <td>18,900</td>
+                                            <td>Data Analyst, Business Analyst</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Traditional Webmaster</td>
+                                            <td><span class="text-danger">-6.2%</span></td>
+                                            <td>15,400</td>
+                                            <td>Web Developer, UX Designer</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Computer Support Specialist</td>
+                                            <td><span class="text-danger">-4.9%</span></td>
+                                            <td>14,700</td>
+                                            <td>IT Specialist, Cybersecurity</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Telecommunications Engineer</td>
+                                            <td><span class="text-danger">-4.3%</span></td>
+                                            <td>9,800</td>
+                                            <td>Network Engineer, Cloud Engineer</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Desktop Publisher</td>
+                                            <td><span class="text-danger">-3.8%</span></td>
+                                            <td>7,200</td>
+                                            <td>UX Designer, Graphic Designer</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Regional Growth Map -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0">Tech Job Growth by Region</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row">
+                                <div class="col-lg-8 mb-4 mb-lg-0">
+                                    <div id="regional-growth-map" style="height: 400px;"></div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="mb-4">
+                                        <h6 class="mb-3">Top Growth Regions</h6>
+                                        <div class="growth-region">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>Austin, TX</span>
+                                                <span class="text-success">+28.5%</span>
+                                            </div>
+                                            <div class="progress mb-3" style="height: 8px;">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 85%;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                        <div class="growth-region">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>Raleigh-Durham, NC</span>
+                                                <span class="text-success">+25.2%</span>
+                                            </div>
+                                            <div class="progress mb-3" style="height: 8px;">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 76%;" aria-valuenow="76" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                        <div class="growth-region">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>Denver, CO</span>
+                                                <span class="text-success">+23.8%</span>
+                                            </div>
+                                            <div class="progress mb-3" style="height: 8px;">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 71%;" aria-valuenow="71" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                        <div class="growth-region">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>Seattle, WA</span>
+                                                <span class="text-success">+21.9%</span>
+                                            </div>
+                                            <div class="progress mb-3" style="height: 8px;">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 66%;" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                        <div class="growth-region">
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <span>Salt Lake City, UT</span>
+                                                <span class="text-success">+19.5%</span>
+                                            </div>
+                                            <div class="progress mb-3" style="height: 8px;">
+                                                <div class="progress-bar bg-success" role="progressbar" style="width: 59%;" aria-valuenow="59" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-info">
+                                        <i class="bi bi-info-circle-fill me-2"></i>
+                                        Remote work opportunities are projected to grow by 31% over the next 5 years, allowing tech professionals to work from anywhere.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Emerging Trends -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0">Emerging Industry Trends</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row g-4">
+                                <div class="col-md-4">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="icon-box bg-primary-subtle text-primary rounded-circle me-3">
+                                                    <i class="bi bi-robot"></i>
+                                                </div>
+                                                <h5 class="mb-0">AI & Automation</h5>
+                                            </div>
+                                            <p>AI and automation are revolutionizing industries, creating new roles while transforming existing ones.</p>
+                                            <div class="mt-3">
+                                                <h6 class="small text-muted mb-2">Impact on Jobs</h6>
+                                                <div class="impact-meter d-flex justify-content-between">
+                                                    <span class="small text-muted">Low</span>
+                                                    <span class="small text-muted">Medium</span>
+                                                    <span class="small text-muted">High</span>
+                                                </div>
+                                                <div class="progress mt-1" style="height: 8px;">
+                                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 85%;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                            <div class="mt-3">
+                                                <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">AI Engineers</span>
+                                                <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">ML Specialists</span>
+                                                <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">AI Ethics</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="icon-box bg-success-subtle text-success rounded-circle me-3">
+                                                    <i class="bi bi-cloud"></i>
+                                                </div>
+                                                <h5 class="mb-0">Cloud Transformation</h5>
+                                            </div>
+                                            <p>Cloud computing continues to grow as businesses migrate infrastructure and services to cloud platforms.</p>
+                                            <div class="mt-3">
+                                                <h6 class="small text-muted mb-2">Impact on Jobs</h6>
+                                                <div class="impact-meter d-flex justify-content-between">
+                                                    <span class="small text-muted">Low</span>
+                                                    <span class="small text-muted">Medium</span>
+                                                    <span class="small text-muted">High</span>
+                                                </div>
+                                                <div class="progress mt-1" style="height: 8px;">
+                                                    <div class="progress-bar bg-success" role="progressbar" style="width: 78%;" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                            <div class="mt-3">
+                                                <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">Cloud Architects</span>
+                                                <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">DevOps Engineers</span>
+                                                <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">SRE</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card h-100 border-0 shadow-sm">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="icon-box bg-info-subtle text-info rounded-circle me-3">
+                                                    <i class="bi bi-shield-check"></i>
+                                                </div>
+                                                <h5 class="mb-0">Cybersecurity Evolution</h5>
+                                            </div>
+                                            <p>Rising cyber threats drive demand for security professionals across all industries and government sectors.</p>
+                                            <div class="mt-3">
+                                                <h6 class="small text-muted mb-2">Impact on Jobs</h6>
+                                                <div class="impact-meter d-flex justify-content-between">
+                                                    <span class="small text-muted">Low</span>
+                                                    <span class="small text-muted">Medium</span>
+                                                    <span class="small text-muted">High</span>
+                                                </div>
+                                                <div class="progress mt-1" style="height: 8px;">
+                                                    <div class="progress-bar bg-info" role="progressbar" style="width: 82%;" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                            </div>
+                                            <div class="mt-3">
+                                                <span class="badge bg-info-subtle text-info me-2 mb-2 p-2">Security Engineers</span>
+                                                <span class="badge bg-info-subtle text-info me-2 mb-2 p-2">Ethical Hackers</span>
+                                                <span class="badge bg-info-subtle text-info me-2 mb-2 p-2">Risk Analysts</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-body p-4">
+                                        <div class="row align-items-center">
+                                            <div class="col-md-8">
+                                                <h5>Future-Proof Your Career</h5>
+                                                <p class="mb-md-0">Stay ahead of industry trends by focusing on continuous learning and skills development. Tech professionals who adapt to emerging technologies position themselves for long-term career success.</p>
+                                            </div>
+                                            <div class="col-md-4 text-md-end">
+                                                <a href="{{ url_for('profiles.suggested_skills') }}" class="btn btn-primary">View Recommended Skills</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.0/map/js/usa.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Industry Growth Chart
+        const industryGrowthChart = echarts.init(document.getElementById('industry-growth-chart'));
+        
+        const industryOption = {
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
+                }
+            },
+            legend: {
+                data: ['Projected Growth (%)', 'Job Openings (thousands)']
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: [
+                {
+                    type: 'category',
+                    data: ['Tech', 'Healthcare', 'Finance', 'Renewable Energy', 'Manufacturing', 'Retail', 'Education', 'Construction']
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value',
+                    name: 'Growth (%)',
+                    axisLabel: {
+                        formatter: '{value}%'
+                    }
+                },
+                {
+                    type: 'value',
+                    name: 'Jobs (thousands)',
+                    axisLabel: {
+                        formatter: '{value}k'
+                    }
+                }
+            ],
+            series: [
+                {
+                    name: 'Projected Growth (%)',
+                    type: 'bar',
+                    data: [24.3, 18.7, 12.5, 26.2, 8.3, 6.7, 9.8, 11.2],
+                    color: '#6366f1'
+                },
+                {
+                    name: 'Job Openings (thousands)',
+                    type: 'line',
+                    yAxisIndex: 1,
+                    data: [218, 163, 97, 112, 78, 82, 89, 105],
+                    color: '#10b981',
+                    symbol: 'circle',
+                    symbolSize: 8,
+                    lineStyle: {
+                        width: 3
+                    }
+                }
+            ]
+        };
+        
+        industryGrowthChart.setOption(industryOption);
+        
+        // Regional Growth Map
+        const regionalMap = echarts.init(document.getElementById('regional-growth-map'));
+        
+        const mapOption = {
+            title: {
+                text: 'Tech Job Growth by Region',
+                left: 'center',
+                textStyle: {
+                    color: '#333',
+                    fontSize: 16
+                }
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: function(params) {
+                    const value = params.value || 0;
+                    return params.name + ': ' + value + '%';
+                }
+            },
+            visualMap: {
+                left: 'right',
+                min: 0,
+                max: 30,
+                inRange: {
+                    color: ['#eee', '#e6f7ff', '#abd5ff', '#47a0ff', '#1890ff', '#0050b3']
+                },
+                text: ['High', 'Low'],
+                calculable: true
+            },
+            series: [
+                {
+                    name: 'Tech Job Growth',
+                    type: 'map',
+                    map: 'USA',
+                    roam: true,
+                    emphasis: {
+                        label: {
+                            show: true
+                        }
+                    },
+                    data: [
+                        {name: 'Texas', value: 28.5},
+                        {name: 'North Carolina', value: 25.2},
+                        {name: 'Colorado', value: 23.8},
+                        {name: 'Washington', value: 21.9},
+                        {name: 'Utah', value: 19.5},
+                        {name: 'Georgia', value: 18.7},
+                        {name: 'California', value: 17.5},
+                        {name: 'Massachusetts', value: 16.8},
+                        {name: 'Virginia', value: 16.3},
+                        {name: 'Florida', value: 15.9},
+                        {name: 'Arizona', value: 15.7},
+                        {name: 'Oregon', value: 15.2},
+                        {name: 'Tennessee', value: 14.8},
+                        {name: 'Michigan', value: 13.5},
+                        {name: 'New York', value: 13.2},
+                        {name: 'Minnesota', value: 12.8},
+                        {name: 'Illinois', value: 12.3},
+                        {name: 'Pennsylvania', value: 11.9},
+                        {name: 'Ohio', value: 11.2},
+                        {name: 'New Jersey', value: 10.8},
+                        {name: 'Indiana', value: 9.6},
+                        {name: 'Wisconsin', value: 9.3},
+                        {name: 'Missouri', value: 8.7},
+                        {name: 'Maryland', value: 8.5},
+                        {name: 'Nevada', value: 8.2},
+                        {name: 'Idaho', value: 7.9},
+                        {name: 'New Mexico', value: 7.5},
+                        {name: 'Oklahoma', value: 7.3},
+                        {name: 'Alabama', value: 7.1},
+                        {name: 'Kentucky', value: 6.8},
+                        {name: 'South Carolina', value: 6.5},
+                        {name: 'Louisiana', value: 6.2},
+                        {name: 'Iowa', value: 5.9},
+                        {name: 'Connecticut', value: 5.7},
+                        {name: 'Hawaii', value: 5.5},
+                        {name: 'Arkansas', value: 5.3},
+                        {name: 'Nebraska', value: 5.1},
+                        {name: 'West Virginia', value: 4.8},
+                        {name: 'Rhode Island', value: 4.6},
+                        {name: 'Montana', value: 4.5},
+                        {name: 'Delaware', value: 4.3},
+                        {name: 'Maine', value: 4.2},
+                        {name: 'New Hampshire', value: 4.0},
+                        {name: 'South Dakota', value: 3.9},
+                        {name: 'Alaska', value: 3.7},
+                        {name: 'Vermont', value: 3.5},
+                        {name: 'North Dakota', value: 3.3},
+                        {name: 'Wyoming', value: 3.1}
+                    ]
+                }
+            ]
+        };
+        
+        regionalMap.setOption(mapOption);
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            industryGrowthChart.resize();
+            regionalMap.resize();
+        });
+        
+        // Timeframe selector handling
+        document.getElementById('timeframeSelector').addEventListener('change', function() {
+            const timeframe = this.value;
+            if (timeframe === '10-year') {
+                // Update with 10-year projection data
+                industryOption.series[0].data = [38.5, 29.3, 18.7, 42.1, 11.6, 8.9, 14.2, 16.8];
+                industryOption.series[1].data = [345, 278, 152, 189, 103, 112, 131, 158];
+                industryGrowthChart.setOption(industryOption);
+            } else {
+                // Reset to 5-year data
+                industryOption.series[0].data = [24.3, 18.7, 12.5, 26.2, 8.3, 6.7, 9.8, 11.2];
+                industryOption.series[1].data = [218, 163, 97, 112, 78, 82, 89, 105];
+                industryGrowthChart.setOption(industryOption);
+            }
+        });
+        
+        // Add styling for icon boxes
+        document.querySelectorAll('.icon-box').forEach(box => {
+            box.style.cssText = 'width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;';
+        });
+    });
+</script>
+{% endblock %} 
