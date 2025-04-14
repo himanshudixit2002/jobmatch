@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} | JobMatch{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="mb-4">
+        <a href="{{ url_for('interviews.view_interview', interview_id=interview.id) }}" class="text-decoration-none">
+            <i class="bi bi-arrow-left me-2"></i> Back to Interview
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-4" data-aos="fade-up">
+                <div class="card-header bg-white p-4">
+                    <h4 class="mb-0 fw-semibold">Reschedule Interview</h4>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-warning d-flex mb-4">
+                        <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+                        <div>
+                            You are rescheduling an interview for <strong>{{ job.title }}</strong> with <strong>{{ application.applicant.name }}</strong>.
+                            The applicant will be notified about this change.
+                        </div>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('interviews.reschedule_interview', interview_id=interview.id) }}">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="interview_date" class="form-label fw-semibold">New Date</label>
+                                <input type="date" class="form-control" id="interview_date" name="interview_date" 
+                                    required min="{{ now.strftime('%Y-%m-%d') }}" 
+                                    value="{{ interview.scheduled_time.strftime('%Y-%m-%d') }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="interview_time" class="form-label fw-semibold">New Time</label>
+                                <input type="time" class="form-control" id="interview_time" name="interview_time" 
+                                    required value="{{ interview.scheduled_time.strftime('%H:%M') }}">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Current Date & Time</label>
+                            <p class="mb-0 text-muted">
+                                {{ interview.scheduled_time.strftime('%A, %B %d, %Y at %I:%M %p') }}
+                            </p>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('interviews.view_interview', interview_id=interview.id) }}" class="btn btn-outline-secondary me-md-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Confirm Reschedule</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 mb-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-semibold">Interview Details</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="mb-3">
+                        <h6 class="fw-semibold text-muted mb-2">Interview Type</h6>
+                        <p>
+                            {% if interview.interview_type == 'in_person' %}
+                                <i class="bi bi-building me-2 text-primary"></i> In Person
+                            {% elif interview.interview_type == 'video' %}
+                                <i class="bi bi-camera-video me-2 text-info"></i> Video Interview
+                            {% elif interview.interview_type == 'phone' %}
+                                <i class="bi bi-telephone me-2 text-success"></i> Phone Interview
+                            {% else %}
+                                <i class="bi bi-calendar-event me-2"></i> {{ interview.interview_type }}
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="fw-semibold text-muted mb-2">Location</h6>
+                        <p>{{ interview.location or 'No location specified' }}</p>
+                    </div>
+
+                    {% if interview.notes %}
+                        <div class="mb-3">
+                            <h6 class="fw-semibold text-muted mb-2">Notes</h6>
+                            <p class="small">{{ interview.notes|truncate(100)|nl2br }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 mb-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-semibold">Job & Applicant</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                            <i class="bi bi-briefcase"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">{{ job.title }}</h6>
+                            <small class="text-muted">{{ job.recruiter.company }}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center">
+                        <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                            <i class="bi bi-person"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">{{ application.applicant.name }}</h6>
+                            <small class="text-muted">{{ application.applicant.email }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set min date to today for interview date picker
+        const dateInput = document.getElementById('interview_date');
+        if (dateInput) {
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.setAttribute('min', today);
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %} 

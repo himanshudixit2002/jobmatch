@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} | JobMatch{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="mb-4">
+        <a href="{{ url_for('interviews.list_interviews') }}" class="text-decoration-none">
+            <i class="bi bi-arrow-left me-2"></i> Back to Interviews
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-4" data-aos="fade-up">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center p-4">
+                    <h4 class="mb-0 fw-semibold">Interview Details</h4>
+                    <div>
+                        {% if interview.status == 'scheduled' %}
+                            <span class="badge bg-warning-subtle text-warning px-3 py-2">Scheduled</span>
+                        {% elif interview.status == 'completed' %}
+                            {% if interview.result == 'passed' %}
+                                <span class="badge bg-success-subtle text-success px-3 py-2">Passed</span>
+                            {% elif interview.result == 'failed' %}
+                                <span class="badge bg-danger-subtle text-danger px-3 py-2">Not Selected</span>
+                            {% else %}
+                                <span class="badge bg-secondary-subtle text-secondary px-3 py-2">Completed</span>
+                            {% endif %}
+                        {% elif interview.status == 'cancelled' %}
+                            <span class="badge bg-danger-subtle text-danger px-3 py-2">Cancelled</span>
+                        {% elif interview.status == 'rescheduled' %}
+                            <span class="badge bg-info-subtle text-info px-3 py-2">Rescheduled</span>
+                        {% else %}
+                            <span class="badge bg-secondary-subtle text-secondary px-3 py-2">{{ interview.status }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="fw-semibold text-muted mb-2">Date & Time</h6>
+                            <p class="mb-0 fs-5">{{ interview.scheduled_time.strftime('%A, %B %d, %Y') }}</p>
+                            <p class="mb-0 fs-5">{{ interview.scheduled_time.strftime('%I:%M %p') }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-semibold text-muted mb-2">Interview Type</h6>
+                            <p class="mb-0 fs-5">
+                                {% if interview.interview_type == 'in_person' %}
+                                    <i class="bi bi-building me-2 text-primary"></i> In Person
+                                {% elif interview.interview_type == 'video' %}
+                                    <i class="bi bi-camera-video me-2 text-info"></i> Video Interview
+                                {% elif interview.interview_type == 'phone' %}
+                                    <i class="bi bi-telephone me-2 text-success"></i> Phone Interview
+                                {% else %}
+                                    <i class="bi bi-calendar-event me-2"></i> {{ interview.interview_type }}
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="fw-semibold text-muted mb-2">Location</h6>
+                        <p class="mb-0">{{ interview.location or 'No location specified' }}</p>
+                    </div>
+
+                    {% if interview.notes %}
+                        <div class="mb-4">
+                            <h6 class="fw-semibold text-muted mb-2">Notes</h6>
+                            <div class="p-3 bg-light rounded">{{ interview.notes|nl2br }}</div>
+                        </div>
+                    {% endif %}
+
+                    {% if interview.feedback and (current_user.is_recruiter() or interview.status == 'completed') %}
+                        <div class="mb-4">
+                            <h6 class="fw-semibold text-muted mb-2">Feedback</h6>
+                            <div class="p-3 bg-light rounded">{{ interview.feedback|nl2br }}</div>
+                        </div>
+                    {% endif %}
+
+                    {% if current_user.is_recruiter() and job.recruiter_id == current_user.id and interview.status == 'scheduled' %}
+                        <hr class="my-4">
+                        <h5 class="fw-semibold mb-3">Update Interview Status</h5>
+                        <form id="updateStatusForm" method="POST" action="{{ url_for('interviews.update_interview_status', interview_id=interview.id) }}">
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select class="form-select" id="status" name="status" required>
+                                        <option value="">-- Select Status --</option>
+                                        <option value="completed">Completed</option>
+                                        <option value="cancelled">Cancelled</option>
+                                        <option value="rescheduled">Rescheduled</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-8" id="resultContainer" style="display: none;">
+                                    <label for="result" class="form-label">Result</label>
+                                    <select class="form-select" id="result" name="result">
+                                        <option value="">-- Select Result --</option>
+                                        <option value="passed">Passed</option>
+                                        <option value="failed">Failed</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="feedback" class="form-label">Feedback</label>
+                                <textarea class="form-control" id="feedback" name="feedback" rows="4" placeholder="Provide feedback about the interview..."></textarea>
+                            </div>
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <button type="submit" class="btn btn-primary">Update Status</button>
+                            </div>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 mb-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-semibold">Job Details</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                            <i class="bi bi-briefcase fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-semibold mb-1">{{ job.title }}</h6>
+                            <p class="text-muted mb-0">{{ job.location }}</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-building me-2 text-muted"></i>
+                            <span>{{ job.recruiter.company }}</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-person me-2 text-muted"></i>
+                            <span>{{ job.recruiter.name }}</span>
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <a href="{{ url_for('jobs.view_job', job_id=job.id) }}" class="btn btn-outline-primary">
+                            <i class="bi bi-eye me-2"></i> View Job Posting
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 mb-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-semibold">{% if current_user.is_recruiter() %}Applicant{% else %}Your Application{% endif %}</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                            <i class="bi bi-person fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-semibold mb-1">{{ application.applicant.name }}</h6>
+                            <p class="text-muted mb-0">{{ application.applicant.email }}</p>
+                        </div>
+                    </div>
+
+                    {% if application.cover_letter %}
+                        <div class="mt-3">
+                            <h6 class="fw-semibold mb-2">Cover Letter</h6>
+                            <div class="p-3 bg-light rounded small">
+                                {{ application.cover_letter|truncate(200)|nl2br }}
+                                {% if application.cover_letter|length > 200 %}
+                                    <a href="{{ url_for('jobs.view_application', job_id=job.id, application_id=application.id) if current_user.is_recruiter() else '#' }}" class="text-primary">Read more</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if current_user.is_recruiter() %}
+                        <div class="d-grid mt-3">
+                            <a href="{{ url_for('jobs.view_application', job_id=job.id, application_id=application.id) }}" class="btn btn-outline-primary">
+                                <i class="bi bi-file-text me-2"></i> View Full Application
+                            </a>
+                        </div>
+                    {% endif %}
+
+                    {% if interview.status == 'scheduled' %}
+                        <div class="mt-3">
+                            <div class="alert alert-info mb-0 d-flex">
+                                <i class="bi bi-info-circle-fill fs-5 me-2"></i>
+                                <div>
+                                    {% if current_user.is_recruiter() %}
+                                        <a href="{{ url_for('interviews.reschedule_interview', interview_id=interview.id) }}">Reschedule this interview</a> if needed.
+                                    {% else %}
+                                        If you need to reschedule, please contact the recruiter directly.
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusSelect = document.getElementById('status');
+        const resultContainer = document.getElementById('resultContainer');
+        
+        if (statusSelect) {
+            statusSelect.addEventListener('change', function() {
+                if (this.value === 'completed') {
+                    resultContainer.style.display = 'block';
+                } else {
+                    resultContainer.style.display = 'none';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
+{% endblock %} 

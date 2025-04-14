@@ -1,0 +1,435 @@
+{% extends "base.html" %}
+
+{% block title %}Job Market Insights | JobMatch{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.css">
+<style>
+    .insights-container {
+        padding: 2rem 0;
+    }
+    
+    .insight-card {
+        height: 100%;
+        transition: all 0.3s ease;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    }
+    
+    .insight-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--box-shadow);
+    }
+    
+    .insight-card .card-header {
+        background: rgba(var(--bs-primary-rgb), 0.05);
+        border-bottom: none;
+    }
+    
+    .insight-card .card-body {
+        position: relative;
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 250px;
+        width: 100%;
+    }
+    
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .stat-label {
+        font-size: 1rem;
+        color: var(--gray);
+    }
+    
+    .insights-header {
+        margin-bottom: 2rem;
+    }
+    
+    .insights-nav {
+        margin-bottom: 2rem;
+    }
+    
+    .insights-nav .nav-link {
+        color: var(--dark);
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius);
+        font-weight: 500;
+    }
+    
+    .insights-nav .nav-link.active {
+        background: var(--gradient-primary);
+        color: white !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="py-5">
+    <div class="container">
+        <div class="insights-header">
+            <h1 class="mb-3">Job Market Insights</h1>
+            <p class="text-muted">Access real-time data and trends about the job market to make informed career decisions.</p>
+        </div>
+        
+        <div class="insights-nav">
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <a class="nav-link active" href="{{ url_for('insights.dashboard') }}">Overview</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('insights.trending_skills') }}">Trending Skills</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('insights.salary_data') }}">Salary Data</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('insights.career_paths') }}">Career Paths</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('insights.job_growth') }}">Job Growth</a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="insights-container">
+            <!-- Key Stats Row -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-4">
+                    <div class="card insight-card">
+                        <div class="card-body text-center p-4">
+                            <i class="bi bi-graph-up text-primary mb-3" style="font-size: 2rem;"></i>
+                            <div class="stat-value" id="stat-job-growth">5.2%</div>
+                            <div class="stat-label">Job Market Growth</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="card insight-card">
+                        <div class="card-body text-center p-4">
+                            <i class="bi bi-briefcase text-primary mb-3" style="font-size: 2rem;"></i>
+                            <div class="stat-value" id="stat-open-positions">23.5K</div>
+                            <div class="stat-label">Open Positions</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="card insight-card">
+                        <div class="card-body text-center p-4">
+                            <i class="bi bi-currency-dollar text-primary mb-3" style="font-size: 2rem;"></i>
+                            <div class="stat-value" id="stat-avg-salary">$86K</div>
+                            <div class="stat-label">Average Salary</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <div class="card insight-card">
+                        <div class="card-body text-center p-4">
+                            <i class="bi bi-person-check text-primary mb-3" style="font-size: 2rem;"></i>
+                            <div class="stat-value" id="stat-companies-hiring">2.8K</div>
+                            <div class="stat-label">Companies Hiring</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Charts Row -->
+            <div class="row mb-4">
+                <div class="col-lg-6 mb-4">
+                    <div class="card insight-card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Top In-Demand Skills</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="skills-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="card insight-card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Salary Range by Role</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="salary-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- More Charts Row -->
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="card insight-card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Job Growth by Industry</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="industry-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="card insight-card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Your Skill Gap Analysis</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="skill-gap-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load chart data from API endpoints
+        fetchTopSkillsData();
+        fetchSalaryRangeData();
+        fetchJobGrowthData();
+        fetchUserSkillGapData();
+        
+        // Add some animation to stats
+        animateStats();
+    });
+    
+    function fetchTopSkillsData() {
+        fetch('{{ url_for("insights.trending_skills_data") }}')
+            .then(response => response.json())
+            .then(data => {
+                createSkillsChart(data);
+            })
+            .catch(error => console.error('Error fetching skills data:', error));
+    }
+    
+    function fetchSalaryRangeData() {
+        fetch('{{ url_for("insights.salary_range_data") }}')
+            .then(response => response.json())
+            .then(data => {
+                createSalaryChart(data);
+            })
+            .catch(error => console.error('Error fetching salary data:', error));
+    }
+    
+    function fetchJobGrowthData() {
+        fetch('{{ url_for("insights.job_market_growth_data") }}')
+            .then(response => response.json())
+            .then(data => {
+                createIndustryChart(data);
+            })
+            .catch(error => console.error('Error fetching job growth data:', error));
+    }
+    
+    function fetchUserSkillGapData() {
+        fetch('{{ url_for("insights.user_skill_gap") }}')
+            .then(response => response.json())
+            .then(data => {
+                createSkillGapChart(data);
+            })
+            .catch(error => console.error('Error fetching skill gap data:', error));
+    }
+    
+    function createSkillsChart(data) {
+        const ctx = document.getElementById('skills-chart').getContext('2d');
+        
+        // Take only top 7 skills for better visualization
+        const slicedData = {
+            skills: data.skills.slice(0, 7),
+            job_counts: data.job_counts.slice(0, 7),
+            growth_rate: data.growth_rate.slice(0, 7)
+        };
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: slicedData.skills,
+                datasets: [{
+                    label: 'Job Listings',
+                    data: slicedData.job_counts,
+                    backgroundColor: '#6366f1',
+                    borderColor: '#6366f1',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Job Listings'
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    function createSalaryChart(data) {
+        const ctx = document.getElementById('salary-chart').getContext('2d');
+        
+        // Take only top 5 roles for better visualization
+        const slicedData = {
+            roles: data.roles.slice(0, 5),
+            median_salary: data.median_salary.slice(0, 5),
+            salary_range_low: data.salary_range_low.slice(0, 5),
+            salary_range_high: data.salary_range_high.slice(0, 5)
+        };
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: slicedData.roles,
+                datasets: [{
+                    label: 'Median Salary ($)',
+                    data: slicedData.median_salary,
+                    backgroundColor: '#0ea5e9',
+                    borderColor: '#0ea5e9',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Salary ($)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    function createIndustryChart(data) {
+        const ctx = document.getElementById('industry-chart').getContext('2d');
+        
+        // Take only top 5 industries for better visualization
+        const slicedData = {
+            industries: data.industries.slice(0, 5),
+            growth_percentage: data.growth_percentage.slice(0, 5)
+        };
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: slicedData.industries,
+                datasets: [{
+                    label: 'Growth (%)',
+                    data: slicedData.growth_percentage,
+                    backgroundColor: '#10b981',
+                    borderColor: '#10b981',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Growth Percentage (%)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    function createSkillGapChart(data) {
+        const ctx = document.getElementById('skill-gap-chart').getContext('2d');
+        
+        // Extract user skills and their market demand
+        const userSkills = data.user_skills;
+        const marketDemand = userSkills.map(skill => data.market_demand[skill]);
+        
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: userSkills,
+                datasets: [{
+                    label: 'Your Skills vs Market Demand',
+                    data: marketDemand,
+                    backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                    borderColor: '#6366f1',
+                    borderWidth: 2,
+                    pointBackgroundColor: '#6366f1'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        min: 0,
+                        max: 100,
+                        ticks: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    function animateStats() {
+        // Animate statistics with counter effect
+        const stats = [
+            { id: 'stat-job-growth', finalValue: '5.2%', prefix: '', suffix: '%' },
+            { id: 'stat-open-positions', finalValue: '23.5K', prefix: '', suffix: 'K' },
+            { id: 'stat-avg-salary', finalValue: '$86K', prefix: '$', suffix: 'K' },
+            { id: 'stat-companies-hiring', finalValue: '2.8K', prefix: '', suffix: 'K' }
+        ];
+        
+        stats.forEach(stat => {
+            const element = document.getElementById(stat.id);
+            const numericValue = parseFloat(stat.finalValue.replace(/[^0-9.]/g, ''));
+            let currentValue = 0;
+            const duration = 1500; // milliseconds
+            const interval = 50; // milliseconds
+            const steps = duration / interval;
+            const increment = numericValue / steps;
+            
+            const counter = setInterval(() => {
+                currentValue += increment;
+                if (currentValue >= numericValue) {
+                    clearInterval(counter);
+                    element.textContent = stat.finalValue;
+                } else {
+                    element.textContent = `${stat.prefix}${currentValue.toFixed(1)}${stat.suffix}`;
+                }
+            }, interval);
+        });
+    }
+</script>
+{% endblock %} 

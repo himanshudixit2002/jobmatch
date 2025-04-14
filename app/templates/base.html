@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{% block title %}{% if title %}{{ title }} - {% endif %}JobMatch{% endblock %}</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -595,6 +596,7 @@
                 height: 50px;
             }
         }
+
     </style>
 </head>
 <body>
@@ -618,6 +620,11 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('jobs.browse_jobs') }}">
                         <i class="bi bi-briefcase"></i> Browse Jobs
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('insights.dashboard') }}">
+                        <i class="bi bi-graph-up"></i> Market Insights
                     </a>
                 </li>
                 {% if current_user.is_authenticated %}
@@ -720,50 +727,22 @@
 <footer>
     <div class="container">
         <div class="row">
-            <div class="col-lg-4 mb-4 mb-lg-0">
+            <div class="col-lg-6 mb-4 mb-lg-0">
                 <h5>About JobMatch</h5>
                 <p class="text-muted">JobMatch connects talented professionals with top companies. Find your dream job or the perfect candidate with our advanced matching algorithm.</p>
                 <div class="social-links mt-4">
-                    <a href="#"><i class="bi bi-facebook"></i></a>
-                    <a href="#"><i class="bi bi-twitter"></i></a>
-                    <a href="#"><i class="bi bi-linkedin"></i></a>
-                    <a href="#"><i class="bi bi-instagram"></i></a>
+                    <a href="https://www.instagram.com/himanshu.dixitt?igsh=MXExMWI4ZzIxNDA4cw==" target="_blank" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+                    <a href="https://www.linkedin.com/in/himanshudixit2406/" target="_blank" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+                    <a href="https://github.com/himanshudixit2002" target="_blank" aria-label="GitHub"><i class="bi bi-github"></i></a>
                 </div>
             </div>
-            <div class="col-lg-2 col-md-4 mb-4 mb-md-0">
-                <h5>For Job Seekers</h5>
+            <div class="col-lg-6 col-md-6 mb-4 mb-md-0">
+                <h5>Quick Links</h5>
                 <ul>
+                    <li><a href="{{ url_for('main.index') }}">Home</a></li>
                     <li><a href="{{ url_for('jobs.browse_jobs') }}">Browse Jobs</a></li>
-                    <li><a href="#">Career Advice</a></li>
-                    <li><a href="#">Resume Tips</a></li>
-                    <li><a href="#">Interview Prep</a></li>
-                </ul>
-            </div>
-            <div class="col-lg-2 col-md-4 mb-4 mb-md-0">
-                <h5>For Employers</h5>
-                <ul>
-                    <li><a href="{{ url_for('jobs.create_job') }}">Post a Job</a></li>
-                    <li><a href="#">Talent Search</a></li>
-                    <li><a href="#">Pricing</a></li>
-                    <li><a href="#">Success Stories</a></li>
-                </ul>
-            </div>
-            <div class="col-lg-2 col-md-4 mb-4 mb-md-0">
-                <h5>Resources</h5>
-                <ul>
-                    <li><a href="#">Help Center</a></li>
-                    <li><a href="#">Blog</a></li>
-                    <li><a href="#">Webinars</a></li>
-                    <li><a href="#">Podcasts</a></li>
-                </ul>
-            </div>
-            <div class="col-lg-2 col-md-4">
-                <h5>Company</h5>
-                <ul>
-                    <li><a href="#">About Us</a></li>
-                    <li><a href="#">Contact</a></li>
-                    <li><a href="#">Privacy Policy</a></li>
-                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="{{ url_for('auth.login') }}">Sign In</a></li>
+                    <li><a href="{{ url_for('auth.register') }}">Sign Up</a></li>
                 </ul>
             </div>
         </div>
@@ -773,7 +752,7 @@
                 <p class="text-muted mb-0">&copy; {{ now.year }} JobMatch. All rights reserved.</p>
             </div>
             <div class="col-md-6 text-center text-md-end">
-                <p class="text-muted mb-0">Made with <i class="bi bi-heart-fill text-danger"></i> for job seekers and employers</p>
+                <p class="text-muted mb-0">Developed by Himanshu Dixit</p>
             </div>
         </div>
     </div>
@@ -803,5 +782,6 @@
     });
 </script>
 {% block scripts %}{% endblock %}
+
 </body>
 </html>

@@ -9,25 +9,53 @@ A web application that matches job applicants with recruiters based on skills an
 - Automatic applicant recommendations for jobs
 - Application tracking
 
+## Advanced Features
+
+JobMatch now includes several advanced features to enhance the job matching experience:
+
+### AI-Powered Skill Matching
+
+Our system uses advanced natural language processing and machine learning to analyze job requirements and candidate skills, providing highly accurate match scores:
+
+- Semantic matching instead of simple keyword matching
+- Skills synonym recognition (e.g., "Python" = "py" = "python3")
+- Experience-weighted scoring
+
+### Intelligent Skill Gap Analysis
+
+The platform can analyze the gap between a candidate's skills and job requirements:
+
+- Identification of missing skills required for specific roles
+- Classification of skills by category
+- Estimation of learning time to close skill gaps
+
+### Learning Recommendations
+
+Based on skill gap analysis, JobMatch provides personalized learning recommendations:
+
+- Course recommendations from top learning platforms
+- Learning paths customized to each user's career goals
+- Prioritized skills based on market demand
+
+### Job Market Insights Dashboard
+
+Access real-time data and analytics about the job market:
+
+- Trending skills and their growth rates
+- Salary data by role and industry
+- Job growth by industry and location
+- Personal skill gap visualizations
+
+### Automated Interview Scheduling
+
+Streamline the interview process with our integrated scheduling system:
+
+- Calendar integration for recruiters and candidates
+- Email notifications for interview scheduling and changes
+- Video conferencing integration
+- Interview feedback tracking
+
 ## Setup
 
 1. Install the dependencies:
 ```
-pip install -r requirements.txt
-```
-
-2. Initialize the database:
-```
-python init_db.py
-```
-
-3. Run the application:
-```
-python run.py
-```
-
-4. Access the application at: http://localhost:5000
-
-## User Types
-- **Applicants**: Can create profiles, add skills, and view recommended jobs
-- **Recruiters**: Can post jobs, view applicant recommendations, and manage applications 

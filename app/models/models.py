@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from flask_login import UserMixin
+import uuid
 
 db = SQLAlchemy()
 
@@ -160,4 +161,130 @@ class RecruiterNote(db.Model):
     applicant = db.relationship('User', foreign_keys=[applicant_id], backref='applicant_notes')
     
     def __repr__(self):
-        return f'<RecruiterNote {self.id}>' 
+        return f'<RecruiterNote {self.id}>'
+
+class Interview(db.Model):
+    """Model for job interviews between recruiters and applicants"""
+    __tablename__ = 'interviews'
+    
+    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    job_id = db.Column(db.Integer, db.ForeignKey('jobs.id'), nullable=False)
+    recruiter_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    applicant_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
+    end_time = db.Column(db.DateTime, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    status = db.Column(db.String(20), default='scheduled')  # scheduled, completed, cancelled, rescheduled
+    interview_type = db.Column(db.String(20), nullable=False)  # in_person, phone, video
+    location = db.Column(db.String(255), nullable=True)  # For in-person interviews
+    video_link = db.Column(db.String(255), nullable=True)  # For video interviews
+    notes = db.Column(db.Text, nullable=True)
+    cancellation_reason = db.Column(db.Text, nullable=True)  # If interview is cancelled
+    
+    # Define relationships
+    job = db.relationship('Job', backref=db.backref('interviews', lazy=True))
+    recruiter = db.relationship('User', foreign_keys=[recruiter_id], backref=db.backref('interviews_as_recruiter', lazy=True))
+    applicant = db.relationship('User', foreign_keys=[applicant_id], backref=db.backref('interviews_as_applicant', lazy=True))
+    
+    def __repr__(self):
+        return f'<Interview {self.id}: {self.job_id}, {self.applicant_id}>'
+        
+    def serialize(self):
+        """Return object data in easily serializable format"""
+        return {
+            'id': self.id,
+            'job_id': self.job_id,
+            'recruiter_id': self.recruiter_id,
+            'applicant_id': self.applicant_id,
+            'start_time': self.start_time.isoformat(),
+            'end_time': self.end_time.isoformat(),
+            'status': self.status,
+            'interview_type': self.interview_type,
+            'location': self.location,
+            'video_link': self.video_link,
+            'notes': self.notes
+        }
+
+class ChatMessage(db.Model):
+    """Model for storing chat conversations"""
+    __tablename__ = 'chat_messages'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)  # Nullable for guest users
+    session_id = db.Column(db.String(100), nullable=False)  # To group conversations
+    message = db.Column(db.Text, nullable=False)
+    is_bot = db.Column(db.Boolean, default=False)  # True for bot messages, False for user messages
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    context = db.Column(db.JSON, nullable=True)  # For storing conversation context
+    
+    # Relationship
+    user = db.relationship('User', backref=db.backref('chat_messages', lazy=True))
+    
+    def __repr__(self):
+        return f'<ChatMessage {self.id}: {"Bot" if self.is_bot else "User"}>'
+    
+    def serialize(self):
+        """Return message in serializable format"""
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'session_id': self.session_id,
+            'message': self.message,
+            'is_bot': self.is_bot,
+            'created_at': self.created_at.isoformat(),
+            'context': self.context
+        }
+
+class ChatbotIntent(db.Model):
+    """Model for chatbot predefined intents and responses"""
+    __tablename__ = 'chatbot_intents'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    intent_name = db.Column(db.String(100), unique=True, nullable=False)
+    keywords = db.Column(db.JSON, nullable=False)  # Array of keywords that trigger this intent
+    response_template = db.Column(db.Text, nullable=False)  # Can include variables with {var_name} syntax
+    follow_up_questions = db.Column(db.JSON, nullable=True)  # Potential follow-up questions to show
+    
+    def __repr__(self):
+        return f'<ChatbotIntent {self.intent_name}>'
+    
+    def serialize(self):
+        """Return intent in serializable format"""
+        return {
+            'id': self.id,
+            'intent_name': self.intent_name,
+            'keywords': self.keywords,
+            'response_template': self.response_template,
+            'follow_up_questions': self.follow_up_questions
+        }
+
+class UserChatPreference(db.Model):
+    """Model for storing user chatbot preferences"""
+    __tablename__ = 'user_chat_preferences'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    auto_suggestions = db.Column(db.Boolean, default=True)
+    chat_history_enabled = db.Column(db.Boolean, default=True)
+    notification_enabled = db.Column(db.Boolean, default=True)
+    theme = db.Column(db.String(20), default='light')  # light or dark
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationship
+    user = db.relationship('User', backref=db.backref('chat_preference', uselist=False, lazy=True))
+    
+    def __repr__(self):
+        return f'<UserChatPreference {self.user_id}>'
+    
+    def serialize(self):
+        """Return preferences in serializable format"""
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'auto_suggestions': self.auto_suggestions,
+            'chat_history_enabled': self.chat_history_enabled,
+            'notification_enabled': self.notification_enabled,
+            'theme': self.theme
+        } 

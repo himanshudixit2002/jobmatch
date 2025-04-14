@@ -44,11 +44,15 @@ def create_app():
     from app.routes.main import main
     from app.routes.jobs import jobs
     from app.routes.profiles import profiles
+    from app.routes.insights import insights
+    from app.routes.interviews import interviews
     
     app.register_blueprint(auth)
     app.register_blueprint(main)
     app.register_blueprint(jobs)
     app.register_blueprint(profiles)
+    app.register_blueprint(insights)
+    app.register_blueprint(interviews)
     
     return app
 

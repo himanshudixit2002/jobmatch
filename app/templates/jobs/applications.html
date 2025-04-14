@@ -114,6 +114,10 @@
                                         <a href="{{ url_for('profiles.view_applicant_profile', applicant_id=applicant.id) }}" class="btn btn-outline-primary btn-sm w-100 mb-3">
                                             <i class="bi bi-person me-1"></i> View Full Profile
                                         </a>
+                                        
+                                        <a href="{{ url_for('interviews.schedule_interview', application_id=application.id) }}" class="btn btn-primary btn-sm w-100 mb-3">
+                                            <i class="bi bi-calendar-plus me-1"></i> Schedule Interview
+                                        </a>
                                     </div>
                                     
                                     <div class="mb-2">

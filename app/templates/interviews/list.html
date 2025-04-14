@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} | JobMatch{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold" data-aos="fade-right">{{ title }}</h1>
+    </div>
+
+    {% if interviews %}
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card shadow-sm border-0" data-aos="fade-up">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4">Job Position</th>
+                                        <th>{% if current_user.is_recruiter() %}Applicant{% else %}Company{% endif %}</th>
+                                        <th>Date & Time</th>
+                                        <th>Type</th>
+                                        <th>Status</th>
+                                        <th class="text-end pe-4">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for interview in interviews %}
+                                    {% set application = interview.application %}
+                                    {% set job = application.job %}
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                                    <i class="bi bi-briefcase"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0">{{ job.title }}</h6>
+                                                    <small class="text-muted">{{ job.location }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if current_user.is_recruiter() %}
+                                                {{ application.applicant.name }}
+                                            {% else %}
+                                                {{ job.recruiter.company }}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div>{{ interview.scheduled_time.strftime('%b %d, %Y') }}</div>
+                                            <small class="text-muted">{{ interview.scheduled_time.strftime('%I:%M %p') }}</small>
+                                        </td>
+                                        <td>
+                                            {% if interview.interview_type == 'in_person' %}
+                                                <span class="badge bg-primary-subtle text-primary">In Person</span>
+                                            {% elif interview.interview_type == 'video' %}
+                                                <span class="badge bg-info-subtle text-info">Video</span>
+                                            {% elif interview.interview_type == 'phone' %}
+                                                <span class="badge bg-success-subtle text-success">Phone</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary-subtle text-secondary">{{ interview.interview_type }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if interview.status == 'scheduled' %}
+                                                <span class="badge bg-warning-subtle text-warning">Scheduled</span>
+                                            {% elif interview.status == 'completed' %}
+                                                {% if interview.result == 'passed' %}
+                                                    <span class="badge bg-success-subtle text-success">Passed</span>
+                                                {% elif interview.result == 'failed' %}
+                                                    <span class="badge bg-danger-subtle text-danger">Not Selected</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary-subtle text-secondary">Completed</span>
+                                                {% endif %}
+                                            {% elif interview.status == 'cancelled' %}
+                                                <span class="badge bg-danger-subtle text-danger">Cancelled</span>
+                                            {% elif interview.status == 'rescheduled' %}
+                                                <span class="badge bg-info-subtle text-info">Rescheduled</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary-subtle text-secondary">{{ interview.status }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <a href="{{ url_for('interviews.view_interview', interview_id=interview.id) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-eye me-1"></i> View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="card shadow-sm border-0" data-aos="fade-up">
+            <div class="card-body p-5 text-center">
+                <div class="py-4">
+                    <i class="bi bi-calendar-event text-primary" style="font-size: 3rem;"></i>
+                    <h3 class="mt-4">No Interviews Yet</h3>
+                    {% if current_user.is_recruiter() %}
+                        <p class="text-muted">You haven't scheduled any interviews yet. Schedule interviews for qualified applicants from your job postings.</p>
+                        <a href="{{ url_for('jobs.manage_jobs') }}" class="btn btn-primary mt-3">
+                            <i class="bi bi-briefcase me-2"></i> Manage Jobs
+                        </a>
+                    {% else %}
+                        <p class="text-muted">You don't have any upcoming or past interviews. Keep applying to jobs to get interview opportunities.</p>
+                        <a href="{{ url_for('jobs.browse_jobs') }}" class="btn btn-primary mt-3">
+                            <i class="bi bi-search me-2"></i> Browse Jobs
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %} 
