@@ -1,17 +1,159 @@
 {% extends "base.html" %}
 
-{% block title %}{{ title }} | JobMatch{% endblock %}
+{% block title %}Tech Career Paths in India | JobMatch{% endblock %}
+
+{% block styles %}
+<style>
+    .career-card {
+        transition: all 0.3s ease;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        height: 100%;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    }
+    
+    .career-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--box-shadow);
+    }
+    
+    .career-card .card-header {
+        background: rgba(var(--bs-primary-rgb), 0.05);
+        border-bottom: none;
+    }
+    
+    .path-step {
+        position: relative;
+        padding-left: 2rem;
+        padding-bottom: 1.5rem;
+        border-left: 2px dashed #e5e7eb;
+    }
+    
+    .path-step:last-child {
+        border-left: 2px dashed transparent;
+        padding-bottom: 0;
+    }
+    
+    .path-step::before {
+        content: '';
+        position: absolute;
+        width: 1rem;
+        height: 1rem;
+        border-radius: 50%;
+        background-color: var(--bs-primary);
+        left: -0.5rem;
+        top: 0;
+    }
+    
+    .path-step-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .path-step-title {
+        font-weight: 600;
+        margin-right: 1rem;
+        margin-bottom: 0;
+    }
+    
+    .path-step-years {
+        font-size: 0.85rem;
+        color: var(--bs-secondary);
+    }
+    
+    .path-step-salary {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        background-color: rgba(var(--bs-primary-rgb), 0.1);
+        color: var(--bs-primary);
+    }
+    
+    .skill-tag {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        background-color: #f3f4f6;
+        color: #4b5563;
+        transition: all 0.2s ease;
+    }
+    
+    .skill-tag:hover {
+        background-color: var(--bs-primary);
+        color: white;
+    }
+    
+    .transition-arrow {
+        display: flex;
+        justify-content: center;
+        margin: 1rem 0;
+        color: var(--bs-primary);
+    }
+    
+    .stat-card {
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        background-color: #fff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        text-align: center;
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--box-shadow);
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--bs-primary);
+    }
+    
+    .stat-label {
+        color: var(--bs-secondary);
+        font-size: 0.9rem;
+    }
+    
+    .company-logo {
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+        border-radius: var(--border-radius);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        margin-right: 1rem;
+    }
+    
+    .growth-badge {
+        position: relative;
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        background-color: rgba(16, 185, 129, 0.1);
+        color: rgb(16, 185, 129);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <section class="py-5">
     <div class="container">
         <div class="insights-header">
-            <h1 class="mb-3">Career Paths Analysis</h1>
-            <p class="text-muted">Discover career progression opportunities and make informed decisions about your professional journey.</p>
+            <h1 class="mb-3">Tech Career Paths in India</h1>
+            <p class="text-muted">Explore common career trajectories, growth opportunities, and transition paths in the Indian tech industry.</p>
         </div>
         
-        <!-- Insights Navigation -->
-        <div class="insights-nav">
+        <div class="insights-nav mb-4">
             <ul class="nav nav-pills">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('insights.dashboard') }}">Overview</a>
@@ -31,81 +173,422 @@
             </ul>
         </div>
         
-        <!-- Main Content -->
-        <div class="insights-container mt-4">
-            <!-- Career Path Visualizer -->
+        <!-- Career Path Stats -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-4 mb-md-0">
+                <div class="stat-card">
+                    <i class="bi bi-arrow-up-right-circle mb-3 text-primary fs-1"></i>
+                    <div class="stat-value">3.5 Years</div>
+                    <div class="stat-label">Average Promotion Time in Indian Tech Companies</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4 mb-md-0">
+                <div class="stat-card">
+                    <i class="bi bi-briefcase mb-3 text-primary fs-1"></i>
+                    <div class="stat-value">2.8 Years</div>
+                    <div class="stat-label">Average Job Tenure at a Tech Company in India</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4 mb-md-0">
+                <div class="stat-card">
+                    <i class="bi bi-graph-up-arrow mb-3 text-primary fs-1"></i>
+                    <div class="stat-value">42%</div>
+                    <div class="stat-label">Salary Growth for Those Who Switch Companies Every 2-3 Years</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="bi bi-mortarboard mb-3 text-primary fs-1"></i>
+                    <div class="stat-value">92%</div>
+                    <div class="stat-label">Professionals Who Upskilled for Career Advancement</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Common Career Paths -->
             <div class="row mb-4">
-                <div class="col-12">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Career Path Visualizer</h5>
-                            <div class="form-group mb-0">
-                                <select class="form-select" id="careerPathSelector">
-                                    <option value="software-engineer">Software Engineer</option>
-                                    <option value="data-scientist">Data Scientist</option>
-                                    <option value="ux-designer">UX Designer</option>
-                                    <option value="product-manager">Product Manager</option>
-                                </select>
+            <div class="col-12 mb-4">
+                <div class="card career-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Software Development Career Path in India</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="path-step">
+                            <div class="path-step-header">
+                                <h6 class="path-step-title">Junior Developer</h6>
+                                <span class="path-step-years">0-2 years</span>
+                            </div>
+                            <p class="text-muted mb-2">Entry-level positions at Indian tech companies and startups with focus on coding and learning development processes.</p>
+                            <p class="mb-2"><span class="path-step-salary">₹4-8L per annum</span></p>
+                            <div>
+                                <span class="skill-tag">Core Programming</span>
+                                <span class="skill-tag">Basic Web Dev</span>
+                                <span class="skill-tag">Version Control</span>
+                                <span class="skill-tag">Basic Testing</span>
                             </div>
                         </div>
-                        <div class="card-body p-4">
-                            <div id="career-path-visualization" style="height: 400px;" class="career-path-container">
-                                <!-- Career path visualization goes here -->
-                                <div class="career-path-visualization">
-                                    <div class="timeline">
-                                        <div class="timeline-bar"></div>
-                                        <div class="timeline-nodes">
-                                            <div class="timeline-node active">
-                                                <div class="node-circle">
-                                                    <i class="bi bi-person-badge"></i>
+                        <div class="path-step">
+                            <div class="path-step-header">
+                                <h6 class="path-step-title">Software Developer</h6>
+                                <span class="path-step-years">2-4 years</span>
                                                 </div>
-                                                <div class="node-content">
-                                                    <h6>Junior Software Engineer</h6>
-                                                    <p class="text-muted">0-2 years</p>
-                                                    <p>Entry level position focused on code implementation under supervision.</p>
+                            <p class="text-muted mb-2">Handling more complex tasks, participating in planning, and contributing to architectural decisions.</p>
+                            <p class="mb-2"><span class="path-step-salary">₹8-15L per annum</span></p>
+                            <div>
+                                <span class="skill-tag">Advanced Programming</span>
+                                <span class="skill-tag">Framework Expertise</span>
+                                <span class="skill-tag">DB Management</span>
+                                <span class="skill-tag">APIs</span>
                                                 </div>
                                             </div>
-                                            <div class="timeline-node">
-                                                <div class="node-circle">
-                                                    <i class="bi bi-code-square"></i>
+                        <div class="path-step">
+                            <div class="path-step-header">
+                                <h6 class="path-step-title">Senior Developer</h6>
+                                <span class="path-step-years">4-8 years</span>
                                                 </div>
-                                                <div class="node-content">
-                                                    <h6>Software Engineer</h6>
-                                                    <p class="text-muted">2-4 years</p>
-                                                    <p>Independent development with deeper technical expertise.</p>
-                                                </div>
-                                            </div>
-                                            <div class="timeline-node">
-                                                <div class="node-circle">
-                                                    <i class="bi bi-diagram-3"></i>
-                                                </div>
-                                                <div class="node-content">
-                                                    <h6>Senior Software Engineer</h6>
-                                                    <p class="text-muted">4-8 years</p>
-                                                    <p>Leading technical initiatives and mentoring junior developers.</p>
+                            <p class="text-muted mb-2">Leading development efforts, mentoring juniors, and contributing to technical architecture and best practices.</p>
+                            <p class="mb-2"><span class="path-step-salary">₹15-28L per annum</span></p>
+                            <div>
+                                <span class="skill-tag">System Design</span>
+                                <span class="skill-tag">Code Review</span>
+                                <span class="skill-tag">Technical Leadership</span>
+                                <span class="skill-tag">Optimization</span>
                                                 </div>
                                             </div>
-                                            <div class="timeline-node">
-                                                <div class="node-circle">
-                                                    <i class="bi bi-people"></i>
+                        <div class="path-step">
+                            <div class="path-step-header">
+                                <h6 class="path-step-title">Tech Lead / Lead Developer</h6>
+                                <span class="path-step-years">8-12 years</span>
                                                 </div>
-                                                <div class="node-content">
-                                                    <h6>Lead Engineer / Tech Lead</h6>
-                                                    <p class="text-muted">8-12 years</p>
-                                                    <p>Overseeing complex projects and team technical guidance.</p>
+                            <p class="text-muted mb-2">Providing technical direction for projects or products, managing development teams, and ensuring delivery quality.</p>
+                            <p class="mb-2"><span class="path-step-salary">₹25-40L per annum</span></p>
+                            <div>
+                                <span class="skill-tag">Team Leadership</span>
+                                <span class="skill-tag">Project Planning</span>
+                                <span class="skill-tag">Architecture</span>
+                                <span class="skill-tag">Technical Strategy</span>
                                                 </div>
                                             </div>
-                                            <div class="timeline-node">
-                                                <div class="node-circle">
-                                                    <i class="bi bi-building-gear"></i>
+                        <div class="path-step">
+                            <div class="path-step-header">
+                                <h6 class="path-step-title">Architect / Engineering Manager</h6>
+                                <span class="path-step-years">12+ years</span>
                                                 </div>
-                                                <div class="node-content">
-                                                    <h6>Engineering Manager / CTO</h6>
-                                                    <p class="text-muted">12+ years</p>
-                                                    <p>Strategic leadership and organizational technology direction.</p>
+                            <p class="text-muted mb-2">Designing complex systems, setting technical standards, and overseeing multiple projects or entire technical domains.</p>
+                            <p class="mb-2"><span class="path-step-salary">₹35-60L+ per annum</span></p>
+                            <div>
+                                <span class="skill-tag">Enterprise Architecture</span>
+                                <span class="skill-tag">Technology Roadmap</span>
+                                <span class="skill-tag">Cross-functional Leadership</span>
+                                <span class="skill-tag">Strategic Planning</span>
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+            
+            <div class="col-lg-6 mb-4">
+                <div class="card career-card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">Data Science Career Path</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="path-step">
+                            <div class="path-step-header">
+                                <h6 class="path-step-title">Data Analyst</h6>
+                                <span class="path-step-years">0-2 years</span>
+                            </div>
+                            <p class="text-muted mb-2">Entry-level position analyzing data sets, creating reports, and assisting in business decision-making.</p>
+                            <p class="mb-2"><span class="path-step-salary">₹5-10L per annum</span></p>
+                            <div>
+                                <span class="skill-tag">SQL</span>
+                                <span class="skill-tag">Excel</span>
+                                <span class="skill-tag">Data Visualization</span>
+                                <span class="skill-tag">Basic Statistics</span>
+                            </div>
+                        </div>
+                        <div class="path-step">
+                            <div class="path-step-header">
+                                <h6 class="path-step-title">Data Scientist</h6>
+                                <span class="path-step-years">2-5 years</span>
+                            </div>
+                            <p class="text-muted mb-2">Building predictive models, conducting advanced analytics, and extracting insights from complex data.</p>
+                            <p class="mb-2"><span class="path-step-salary">₹12-22L per annum</span></p>
+                            <div>
+                                <span class="skill-tag">Python/R</span>
+                                <span class="skill-tag">Machine Learning</span>
+                                <span class="skill-tag">Statistical Analysis</span>
+                                <span class="skill-tag">Big Data Tools</span>
+                            </div>
+                        </div>
+                        <div class="path-step">
+                            <div class="path-step-header">
+                                <h6 class="path-step-title">Senior Data Scientist / ML Engineer</h6>
+                                <span class="path-step-years">5-8 years</span>
+                            </div>
+                            <p class="text-muted mb-2">Leading data initiatives, developing sophisticated models, and implementing production ML systems.</p>
+                            <p class="mb-2"><span class="path-step-salary">₹20-35L per annum</span></p>
+                            <div>
+                                <span class="skill-tag">Advanced ML</span>
+                                <span class="skill-tag">Deep Learning</span>
+                                <span class="skill-tag">MLOps</span>
+                                <span class="skill-tag">Model Optimization</span>
+                            </div>
+                        </div>
+                        <div class="path-step">
+                            <div class="path-step-header">
+                                <h6 class="path-step-title">Lead Data Scientist / AI Architect</h6>
+                                <span class="path-step-years">8+ years</span>
+                            </div>
+                            <p class="text-muted mb-2">Developing data strategy, overseeing teams, and driving business transformation through AI/ML.</p>
+                            <p class="mb-2"><span class="path-step-salary">₹30-60L+ per annum</span></p>
+                            <div>
+                                <span class="skill-tag">AI Strategy</span>
+                                <span class="skill-tag">Leadership</span>
+                                <span class="skill-tag">Advanced AI Architectures</span>
+                                <span class="skill-tag">Business Transformation</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <div class="card career-card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">Product Management Career Path</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="path-step">
+                            <div class="path-step-header">
+                                <h6 class="path-step-title">Associate Product Manager</h6>
+                                <span class="path-step-years">0-2 years</span>
+                            </div>
+                            <p class="text-muted mb-2">Supporting product initiatives, gathering user requirements, and assisting in product roadmap execution.</p>
+                            <p class="mb-2"><span class="path-step-salary">₹6-12L per annum</span></p>
+                            <div>
+                                <span class="skill-tag">Market Research</span>
+                                <span class="skill-tag">User Interviews</span>
+                                <span class="skill-tag">Basic Agile</span>
+                                <span class="skill-tag">Product Documentation</span>
+                            </div>
+                        </div>
+                        <div class="path-step">
+                            <div class="path-step-header">
+                                <h6 class="path-step-title">Product Manager</h6>
+                                <span class="path-step-years">2-5 years</span>
+                            </div>
+                            <p class="text-muted mb-2">Defining and launching products, managing feature releases, and coordinating cross-functional teams.</p>
+                            <p class="mb-2"><span class="path-step-salary">₹15-25L per annum</span></p>
+                            <div>
+                                <span class="skill-tag">Product Strategy</span>
+                                <span class="skill-tag">Agile/Scrum</span>
+                                <span class="skill-tag">Data Analysis</span>
+                                <span class="skill-tag">Stakeholder Management</span>
+                            </div>
+                        </div>
+                        <div class="path-step">
+                            <div class="path-step-header">
+                                <h6 class="path-step-title">Senior Product Manager</h6>
+                                <span class="path-step-years">5-8 years</span>
+                            </div>
+                            <p class="text-muted mb-2">Leading product lines, developing product strategy, and driving business impact through product decisions.</p>
+                            <p class="mb-2"><span class="path-step-salary">₹25-40L per annum</span></p>
+                            <div>
+                                <span class="skill-tag">Strategic Planning</span>
+                                <span class="skill-tag">Metrics & Analytics</span>
+                                <span class="skill-tag">Business Modeling</span>
+                                <span class="skill-tag">Product Design</span>
+                            </div>
+                        </div>
+                        <div class="path-step">
+                            <div class="path-step-header">
+                                <h6 class="path-step-title">Director of Product / CPO</h6>
+                                <span class="path-step-years">8+ years</span>
+                            </div>
+                            <p class="text-muted mb-2">Setting product vision, managing product teams, and aligning product direction with company strategy.</p>
+                            <p class="mb-2"><span class="path-step-salary">₹40-80L+ per annum</span></p>
+                            <div>
+                                <span class="skill-tag">Product Vision</span>
+                                <span class="skill-tag">Team Leadership</span>
+                                <span class="skill-tag">Executive Communication</span>
+                                <span class="skill-tag">Strategic Growth</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Career Transitions and Emerging Roles -->
+        <div class="row mb-4">
+            <div class="col-12 mb-4">
+                <div class="card career-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Popular Career Transitions in Indian Tech</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-4">
+                                <div class="p-3 bg-light rounded-3 h-100">
+                                    <h6 class="mb-3">Backend Developer → DevOps Engineer</h6>
+                                    <div class="mb-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <strong>From:</strong>
+                                            <div class="ms-2">
+                                                <span class="skill-tag">Backend Development</span>
+                                                <span class="skill-tag">APIs</span>
+                                            </div>
+                                        </div>
+                                        <div class="transition-arrow">
+                                            <i class="bi bi-arrow-down fs-3"></i>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <strong>Add:</strong>
+                                            <div class="ms-2">
+                                                <span class="skill-tag">Cloud Platforms</span>
+                                                <span class="skill-tag">CI/CD</span>
+                                                <span class="skill-tag">Infrastructure as Code</span>
+                                    </div>
+                                        </div>
+                                    </div>
+                                    <p class="mb-2"><strong>Potential Salary Increase:</strong> <span class="growth-badge">+25-40%</span></p>
+                                    <p class="text-muted small">This transition is high in demand as India becomes a hub for cloud and DevOps services. Organizations like TCS, Infosys, and startups are actively hiring.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="p-3 bg-light rounded-3 h-100">
+                                    <h6 class="mb-3">Frontend Developer → Full Stack Developer</h6>
+                                    <div class="mb-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <strong>From:</strong>
+                                            <div class="ms-2">
+                                                <span class="skill-tag">HTML/CSS</span>
+                                                <span class="skill-tag">JavaScript/React</span>
+                                            </div>
+                                        </div>
+                                        <div class="transition-arrow">
+                                            <i class="bi bi-arrow-down fs-3"></i>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <strong>Add:</strong>
+                                            <div class="ms-2">
+                                                <span class="skill-tag">Node.js</span>
+                                                <span class="skill-tag">Databases</span>
+                                                <span class="skill-tag">Server Architecture</span>
+                                    </div>
+                                        </div>
+                                    </div>
+                                    <p class="mb-2"><strong>Potential Salary Increase:</strong> <span class="growth-badge">+20-30%</span></p>
+                                    <p class="text-muted small">Very common transition in Indian startups and product companies where versatility is highly valued. Companies like Razorpay, Zerodha and Flipkart value this skillset.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="p-3 bg-light rounded-3 h-100">
+                                    <h6 class="mb-3">Software Engineer → Data Scientist</h6>
+                                    <div class="mb-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <strong>From:</strong>
+                                            <div class="ms-2">
+                                                <span class="skill-tag">Programming</span>
+                                                <span class="skill-tag">Algorithms</span>
+                                            </div>
+                                        </div>
+                                        <div class="transition-arrow">
+                                            <i class="bi bi-arrow-down fs-3"></i>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <strong>Add:</strong>
+                                            <div class="ms-2">
+                                                <span class="skill-tag">Machine Learning</span>
+                                                <span class="skill-tag">Statistics</span>
+                                                <span class="skill-tag">Python for Data</span>
+                                    </div>
+                                        </div>
+                                    </div>
+                                    <p class="mb-2"><strong>Potential Salary Increase:</strong> <span class="growth-badge">+30-50%</span></p>
+                                    <p class="text-muted small">High-value transition in India with companies like Amazon, Walmart Labs, and Microsoft investing heavily in building AI/ML teams in their Indian development centers.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="p-3 bg-light rounded-3 h-100">
+                                    <h6 class="mb-3">QA Engineer → SDET/Automation Engineer</h6>
+                                    <div class="mb-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <strong>From:</strong>
+                                            <div class="ms-2">
+                                                <span class="skill-tag">Manual Testing</span>
+                                                <span class="skill-tag">Test Cases</span>
+                                            </div>
+                                        </div>
+                                        <div class="transition-arrow">
+                                            <i class="bi bi-arrow-down fs-3"></i>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <strong>Add:</strong>
+                                            <div class="ms-2">
+                                                <span class="skill-tag">Test Automation</span>
+                                                <span class="skill-tag">Selenium/Cypress</span>
+                                                <span class="skill-tag">CI Pipelines</span>
+                                    </div>
+                                        </div>
+                                    </div>
+                                    <p class="mb-2"><strong>Potential Salary Increase:</strong> <span class="growth-badge">+25-35%</span></p>
+                                    <p class="text-muted small">Common transition path for QA professionals in India, particularly in product companies like Freshworks, Zoho, and MNCs with development centers.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="p-3 bg-light rounded-3 h-100">
+                                    <h6 class="mb-3">Developer → Product Manager</h6>
+                                    <div class="mb-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <strong>From:</strong>
+                                            <div class="ms-2">
+                                                <span class="skill-tag">Coding</span>
+                                                <span class="skill-tag">Technical Knowledge</span>
+                        </div>
+                    </div>
+                                        <div class="transition-arrow">
+                                            <i class="bi bi-arrow-down fs-3"></i>
+                </div>
+                                        <div class="d-flex align-items-center">
+                                            <strong>Add:</strong>
+                                            <div class="ms-2">
+                                                <span class="skill-tag">User Research</span>
+                                                <span class="skill-tag">Business Acumen</span>
+                                                <span class="skill-tag">Stakeholder Management</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="mb-2"><strong>Potential Salary Increase:</strong> <span class="growth-badge">+15-30%</span></p>
+                                    <p class="text-muted small">Growing transition path in Indian product companies and startups where technical PMs are highly valued. Common in companies like Swiggy, Paytm, and PhonePe.</p>
+                                                    </div>
+                                                </div>
+                            <div class="col-md-4 mb-4">
+                                <div class="p-3 bg-light rounded-3 h-100">
+                                    <h6 class="mb-3">Backend Engineer → Blockchain Developer</h6>
+                                    <div class="mb-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <strong>From:</strong>
+                                            <div class="ms-2">
+                                                <span class="skill-tag">Backend Dev</span>
+                                                <span class="skill-tag">Database Management</span>
+                                            </div>
+                                        </div>
+                                        <div class="transition-arrow">
+                                            <i class="bi bi-arrow-down fs-3"></i>
+                                    </div>
+                                        <div class="d-flex align-items-center">
+                                            <strong>Add:</strong>
+                                            <div class="ms-2">
+                                                <span class="skill-tag">Blockchain Protocols</span>
+                                                <span class="skill-tag">Smart Contracts</span>
+                                                <span class="skill-tag">Web3</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="mb-2"><strong>Potential Salary Increase:</strong> <span class="growth-badge">+50-100%</span></p>
+                                    <p class="text-muted small">Emerging transition path in India with high compensation, though fewer opportunities. Companies like Polygon, CoinDCX and enterprise blockchain initiatives at TCS/Infosys.</p>
                                     </div>
                                 </div>
                             </div>
@@ -114,319 +597,109 @@
                 </div>
             </div>
             
-            <!-- Skills Development -->
-            <div class="row mb-4">
-                <div class="col-md-6 mb-4 mb-md-0">
-                    <div class="card shadow-sm h-100">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0">Critical Skills by Career Stage</h5>
-                        </div>
-                        <div class="card-body p-4">
-                            <ul class="nav nav-tabs mb-3" id="skillsTabs" role="tablist">
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link active" id="junior-tab" data-bs-toggle="tab" data-bs-target="#junior-skills" type="button" role="tab" aria-controls="junior-skills" aria-selected="true">Junior</button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="mid-tab" data-bs-toggle="tab" data-bs-target="#mid-skills" type="button" role="tab" aria-controls="mid-skills" aria-selected="false">Mid-Level</button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="senior-tab" data-bs-toggle="tab" data-bs-target="#senior-skills" type="button" role="tab" aria-controls="senior-skills" aria-selected="false">Senior</button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="leader-tab" data-bs-toggle="tab" data-bs-target="#leader-skills" type="button" role="tab" aria-controls="leader-skills" aria-selected="false">Leadership</button>
-                                </li>
-                            </ul>
-                            <div class="tab-content" id="skillsTabContent">
-                                <div class="tab-pane fade show active" id="junior-skills" role="tabpanel" aria-labelledby="junior-tab">
-                                    <div class="mb-3">
-                                        <h6 class="mb-2">Technical Skills</h6>
-                                        <div class="d-flex flex-wrap">
-                                            <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">JavaScript</span>
-                                            <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">HTML/CSS</span>
-                                            <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">Version Control</span>
-                                            <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">Basic Algorithms</span>
-                                            <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">Testing Fundamentals</span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-2">Soft Skills</h6>
-                                        <div class="d-flex flex-wrap">
-                                            <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">Communication</span>
-                                            <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">Time Management</span>
-                                            <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">Problem-Solving</span>
-                                            <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">Adaptability</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="tab-pane fade" id="mid-skills" role="tabpanel" aria-labelledby="mid-tab">
-                                    <div class="mb-3">
-                                        <h6 class="mb-2">Technical Skills</h6>
-                                        <div class="d-flex flex-wrap">
-                                            <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">Frontend Frameworks</span>
-                                            <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">API Design</span>
-                                            <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">Database Optimization</span>
-                                            <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">CI/CD</span>
-                                            <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">System Design</span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-2">Soft Skills</h6>
-                                        <div class="d-flex flex-wrap">
-                                            <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">Mentoring</span>
-                                            <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">Project Planning</span>
-                                            <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">Cross-Team Collaboration</span>
-                                            <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">Client Communication</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="tab-pane fade" id="senior-skills" role="tabpanel" aria-labelledby="senior-tab">
-                                    <!-- Senior content -->
-                                    <div class="mb-3">
-                                        <h6 class="mb-2">Technical Skills</h6>
-                                        <div class="d-flex flex-wrap">
-                                            <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">Architecture Design</span>
-                                            <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">Technical Decision Making</span>
-                                            <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">Scalability Planning</span>
-                                            <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">Security Practices</span>
-                                            <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">Advanced Debugging</span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-2">Soft Skills</h6>
-                                        <div class="d-flex flex-wrap">
-                                            <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">Team Leadership</span>
-                                            <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">Strategic Thinking</span>
-                                            <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">Mentoring</span>
-                                            <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">Stakeholder Management</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="tab-pane fade" id="leader-skills" role="tabpanel" aria-labelledby="leader-tab">
-                                    <!-- Leadership content -->
-                                    <div class="mb-3">
-                                        <h6 class="mb-2">Technical Skills</h6>
-                                        <div class="d-flex flex-wrap">
-                                            <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">Technology Strategy</span>
-                                            <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">Enterprise Architecture</span>
-                                            <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">Cost-Benefit Analysis</span>
-                                            <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">Technology Roadmapping</span>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-2">Soft Skills</h6>
-                                        <div class="d-flex flex-wrap">
-                                            <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">Executive Communication</span>
-                                            <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">Team Building</span>
-                                            <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">Organizational Leadership</span>
-                                            <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">Strategic Planning</span>
-                                            <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">Business Acumen</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-md-6">
-                    <div class="card shadow-sm h-100">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0">Typical Transition Timeframes</h5>
-                        </div>
-                        <div class="card-body p-4">
-                            <div id="transition-timing-chart" style="height: 350px;"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Alternative Career Paths -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0">Alternative Career Paths</h5>
-                        </div>
-                        <div class="card-body p-4">
-                            <div class="career-paths-grid">
-                                <div class="row">
-                                    <div class="col-md-4 mb-4">
-                                        <div class="card h-100 border-0 shadow-sm">
-                                            <div class="card-body">
-                                                <div class="d-flex align-items-center mb-3">
-                                                    <div class="icon-box bg-primary-subtle text-primary rounded me-3">
-                                                        <i class="bi bi-laptop"></i>
-                                                    </div>
-                                                    <h5 class="mb-0">Technical to Management</h5>
-                                                </div>
-                                                <p class="text-muted">Transition from hands-on development to people and project management.</p>
-                                                <div class="path-steps">
-                                                    <div class="path-step">
-                                                        <span class="step-number">1</span>
-                                                        <span class="step-label">Senior Developer</span>
-                                                    </div>
-                                                    <div class="path-step">
-                                                        <span class="step-number">2</span>
-                                                        <span class="step-label">Team Lead</span>
-                                                    </div>
-                                                    <div class="path-step">
-                                                        <span class="step-number">3</span>
-                                                        <span class="step-label">Engineering Manager</span>
-                                                    </div>
-                                                    <div class="path-step">
-                                                        <span class="step-number">4</span>
-                                                        <span class="step-label">Director of Engineering</span>
-                                                    </div>
-                                                    <div class="path-step">
-                                                        <span class="step-number">5</span>
-                                                        <span class="step-label">CTO</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 mb-4">
-                                        <div class="card h-100 border-0 shadow-sm">
-                                            <div class="card-body">
-                                                <div class="d-flex align-items-center mb-3">
-                                                    <div class="icon-box bg-success-subtle text-success rounded me-3">
-                                                        <i class="bi bi-lightbulb"></i>
-                                                    </div>
-                                                    <h5 class="mb-0">Engineering to Product</h5>
-                                                </div>
-                                                <p class="text-muted">Move from developing products to defining and managing them.</p>
-                                                <div class="path-steps">
-                                                    <div class="path-step">
-                                                        <span class="step-number">1</span>
-                                                        <span class="step-label">Software Engineer</span>
-                                                    </div>
-                                                    <div class="path-step">
-                                                        <span class="step-number">2</span>
-                                                        <span class="step-label">Technical Product Owner</span>
-                                                    </div>
-                                                    <div class="path-step">
-                                                        <span class="step-number">3</span>
-                                                        <span class="step-label">Product Manager</span>
-                                                    </div>
-                                                    <div class="path-step">
-                                                        <span class="step-number">4</span>
-                                                        <span class="step-label">Director of Product</span>
-                                                    </div>
-                                                    <div class="path-step">
-                                                        <span class="step-number">5</span>
-                                                        <span class="step-label">VP of Product</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4 mb-4">
-                                        <div class="card h-100 border-0 shadow-sm">
-                                            <div class="card-body">
-                                                <div class="d-flex align-items-center mb-3">
-                                                    <div class="icon-box bg-info-subtle text-info rounded me-3">
-                                                        <i class="bi bi-person-workspace"></i>
-                                                    </div>
-                                                    <h5 class="mb-0">Individual Contributor Track</h5>
-                                                </div>
-                                                <p class="text-muted">Advance your career while remaining focused on technical work.</p>
-                                                <div class="path-steps">
-                                                    <div class="path-step">
-                                                        <span class="step-number">1</span>
-                                                        <span class="step-label">Software Engineer</span>
-                                                    </div>
-                                                    <div class="path-step">
-                                                        <span class="step-number">2</span>
-                                                        <span class="step-label">Senior Software Engineer</span>
-                                                    </div>
-                                                    <div class="path-step">
-                                                        <span class="step-number">3</span>
-                                                        <span class="step-label">Staff Engineer</span>
-                                                    </div>
-                                                    <div class="path-step">
-                                                        <span class="step-number">4</span>
-                                                        <span class="step-label">Principal Engineer</span>
-                                                    </div>
-                                                    <div class="path-step">
-                                                        <span class="step-number">5</span>
-                                                        <span class="step-label">Distinguished Engineer</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Education & Credentials -->
+        <!-- Top employers section -->
             <div class="row">
-                <div class="col-12">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0">Education & Credentials</h5>
+            <div class="col-lg-6 mb-4">
+                <div class="card career-card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">Top Tech Employers in India: Career Growth Opportunities</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex mb-4">
+                            <img src="https://logo.clearbit.com/tcs.com" alt="TCS Logo" class="company-logo">
+                            <div>
+                                <h6 class="mb-2">Tata Consultancy Services (TCS)</h6>
+                                <p class="text-muted mb-2">India's largest IT services company offers structured career paths with clear progression timelines.</p>
+                                <p class="small mb-0"><strong>Career Growth Rate:</strong> <span class="growth-badge">Moderate</span></p>
+                            </div>
                         </div>
-                        <div class="card-body p-4">
-                            <div class="row g-4">
-                                <div class="col-md-6">
-                                    <h6 class="mb-3">Impact of Education on Career Trajectory</h6>
-                                    <div class="chart-container mb-4" style="height: 250px;">
-                                        <canvas id="education-impact-chart"></canvas>
-                                    </div>
-                                    <div class="alert alert-info d-flex align-items-center">
-                                        <i class="bi bi-info-circle-fill me-2"></i>
-                                        <small>While a degree can accelerate early career growth, experience and demonstrated skills become more important factors for senior positions.</small>
-                                    </div>
+                        <div class="d-flex mb-4">
+                            <img src="https://logo.clearbit.com/wipro.com" alt="Wipro Logo" class="company-logo">
+                            <div>
+                                <h6 class="mb-2">Wipro</h6>
+                                <p class="text-muted mb-2">Known for its leadership development programs and global exposure opportunities.</p>
+                                <p class="small mb-0"><strong>Career Growth Rate:</strong> <span class="growth-badge">Moderate</span></p>
+                            </div>
+                        </div>
+                        <div class="d-flex mb-4">
+                            <img src="https://logo.clearbit.com/amazon.com" alt="Amazon Logo" class="company-logo">
+                            <div>
+                                <h6 class="mb-2">Amazon India</h6>
+                                <p class="text-muted mb-2">Offers fast-paced career growth with advancement based on merit rather than tenure.</p>
+                                <p class="small mb-0"><strong>Career Growth Rate:</strong> <span class="growth-badge">Fast</span></p>
+                            </div>
+                        </div>
+                        <div class="d-flex mb-4">
+                            <img src="https://logo.clearbit.com/microsoft.com" alt="Microsoft Logo" class="company-logo">
+                            <div>
+                                <h6 class="mb-2">Microsoft India</h6>
+                                <p class="text-muted mb-2">Excellent for technical career paths with strong focus on innovation and research.</p>
+                                <p class="small mb-0"><strong>Career Growth Rate:</strong> <span class="growth-badge">Fast</span></p>
+                            </div>
+                        </div>
+                        <div class="d-flex">
+                            <img src="https://logo.clearbit.com/flipkart.com" alt="Flipkart Logo" class="company-logo">
+                            <div>
+                                <h6 class="mb-2">Flipkart</h6>
+                                <p class="text-muted mb-2">India's e-commerce giant offers rapid career advancement and exposure to scale challenges.</p>
+                                <p class="small mb-0"><strong>Career Growth Rate:</strong> <span class="growth-badge">Fast</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 mb-4">
+                <div class="card career-card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">Emerging Roles in the Indian Tech Landscape</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <h6 class="mb-2">Generative AI Engineer</h6>
+                            <p class="text-muted mb-2">Specialists in developing and fine-tuning large language models and generative AI applications.</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="skill-tag">LLMs</span>
+                                    <span class="skill-tag">Prompt Engineering</span>
+                                    <span class="skill-tag">AI Ethics</span>
                                 </div>
-                                <div class="col-md-6">
-                                    <h6 class="mb-3">Valuable Certifications & Credentials</h6>
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>Credential</th>
-                                                    <th>Career Stage</th>
-                                                    <th>Value Rating</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td>AWS Certified Solutions Architect</td>
-                                                    <td>Mid to Senior</td>
-                                                    <td><div class="stars">★★★★★</div></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Google Cloud Professional Architect</td>
-                                                    <td>Mid to Senior</td>
-                                                    <td><div class="stars">★★★★★</div></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Certified Scrum Master</td>
-                                                    <td>Junior to Mid</td>
-                                                    <td><div class="stars">★★★★☆</div></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Certified Kubernetes Administrator</td>
-                                                    <td>Mid to Senior</td>
-                                                    <td><div class="stars">★★★★☆</div></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Project Management Professional (PMP)</td>
-                                                    <td>Senior to Leadership</td>
-                                                    <td><div class="stars">★★★★☆</div></td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Certified Information Systems Security Professional</td>
-                                                    <td>Mid to Senior</td>
-                                                    <td><div class="stars">★★★★★</div></td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                <span class="path-step-salary">₹25-45L</span>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <h6 class="mb-2">Cloud Security Architect</h6>
+                            <p class="text-muted mb-2">Experts in securing cloud infrastructure and applications as Indian enterprises accelerate cloud adoption.</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="skill-tag">Cloud Security</span>
+                                    <span class="skill-tag">Compliance</span>
+                                    <span class="skill-tag">IAM</span>
                                 </div>
+                                <span class="path-step-salary">₹20-40L</span>
+                                    </div>
+                                    </div>
+                        <div class="mb-4">
+                            <h6 class="mb-2">Digital Experience Designer</h6>
+                            <p class="text-muted mb-2">Creating seamless user experiences across platforms with focus on Indian market preferences.</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="skill-tag">UX Research</span>
+                                    <span class="skill-tag">Design Systems</span>
+                                    <span class="skill-tag">Accessibility</span>
+                                </div>
+                                <span class="path-step-salary">₹18-35L</span>
+                            </div>
+                                    </div>
+                        <div class="mb-0">
+                            <h6 class="mb-2">IoT Solutions Architect</h6>
+                            <p class="text-muted mb-2">Developing connected device ecosystems as India pushes for smart cities and industrial IoT adoption.</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="skill-tag">IoT Platforms</span>
+                                    <span class="skill-tag">Edge Computing</span>
+                                    <span class="skill-tag">Embedded Systems</span>
+                                </div>
+                                <span class="path-step-salary">₹18-38L</span>
                             </div>
                         </div>
                     </div>
@@ -435,182 +708,4 @@
         </div>
     </div>
 </section>
-{% endblock %}
-
-{% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Education Impact Chart
-        const educationCtx = document.getElementById('education-impact-chart').getContext('2d');
-        const educationChart = new Chart(educationCtx, {
-            type: 'radar',
-            data: {
-                labels: ['Entry Level Access', 'Early Promotion Rate', 'Mid-Career Salary', 'Senior Role Access', 'Leadership Potential'],
-                datasets: [
-                    {
-                        label: 'Bachelor\'s Degree',
-                        data: [70, 65, 70, 60, 65],
-                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
-                        borderColor: 'rgba(99, 102, 241, 0.8)',
-                        pointBackgroundColor: 'rgba(99, 102, 241, 1)',
-                        pointBorderColor: '#fff',
-                    },
-                    {
-                        label: 'Master\'s Degree',
-                        data: [85, 75, 80, 70, 75],
-                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                        borderColor: 'rgba(16, 185, 129, 0.8)',
-                        pointBackgroundColor: 'rgba(16, 185, 129, 1)',
-                        pointBorderColor: '#fff',
-                    },
-                    {
-                        label: 'Self-Taught/Bootcamp',
-                        data: [60, 60, 65, 60, 65],
-                        backgroundColor: 'rgba(245, 158, 11, 0.2)',
-                        borderColor: 'rgba(245, 158, 11, 0.8)',
-                        pointBackgroundColor: 'rgba(245, 158, 11, 1)',
-                        pointBorderColor: '#fff',
-                    }
-                ]
-            },
-            options: {
-                scales: {
-                    r: {
-                        beginAtZero: true,
-                        max: 100,
-                        ticks: {
-                            display: false
-                        }
-                    }
-                }
-            }
-        });
-        
-        // Transition Timing Chart
-        const transitionChart = echarts.init(document.getElementById('transition-timing-chart'));
-        
-        const transitionOption = {
-            tooltip: {
-                trigger: 'axis',
-                axisPointer: {
-                    type: 'shadow'
-                },
-                formatter: function(params) {
-                    return params[0].name + '<br/>' + 
-                           'Average: ' + params[0].value + ' years<br/>' +
-                           'Range: ' + params[1].value[0] + '-' + params[1].value[1] + ' years';
-                }
-            },
-            grid: {
-                left: '3%',
-                right: '4%',
-                bottom: '3%',
-                containLabel: true
-            },
-            xAxis: {
-                type: 'value',
-                name: 'Years',
-                axisLabel: {
-                    formatter: '{value} yrs'
-                }
-            },
-            yAxis: {
-                type: 'category',
-                data: ['Junior → Mid-level', 'Mid-level → Senior', 'Senior → Lead', 'Lead → Management']
-            },
-            series: [
-                {
-                    name: 'Average',
-                    type: 'bar',
-                    data: [2.5, 3.2, 3.5, 4.1],
-                    color: '#6366f1',
-                    barWidth: '40%',
-                    label: {
-                        show: true,
-                        position: 'right',
-                        formatter: '{c} yrs'
-                    }
-                },
-                {
-                    name: 'Range',
-                    type: 'custom',
-                    renderItem: function(params, api) {
-                        const yValue = api.value(2);
-                        const start = api.coord([api.value(0), yValue]);
-                        const end = api.coord([api.value(1), yValue]);
-                        const height = api.size([0, 1])[1] * 0.6;
-                        
-                        return {
-                            type: 'rect',
-                            shape: {
-                                x: start[0],
-                                y: start[1] - height / 2,
-                                width: end[0] - start[0],
-                                height: height
-                            },
-                            style: {
-                                fill: 'rgba(99, 102, 241, 0.2)'
-                            }
-                        };
-                    },
-                    data: [
-                        [1.5, 3.5, 0, 'Junior → Mid-level'],
-                        [2, 5, 1, 'Mid-level → Senior'],
-                        [2.5, 5.5, 2, 'Senior → Lead'],
-                        [3, 6, 3, 'Lead → Management']
-                    ],
-                    z: 2
-                }
-            ]
-        };
-        
-        transitionChart.setOption(transitionOption);
-        
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            transitionChart.resize();
-        });
-        
-        // Career path selector handling
-        document.getElementById('careerPathSelector').addEventListener('change', function() {
-            const path = this.value;
-            // Here you would update the career path visualization based on the selected path
-            console.log('Selected career path:', path);
-            // This would need backend integration to load different paths
-        });
-        
-        // Add custom timeline styling
-        document.querySelector('.timeline-bar').style.cssText = 'position: absolute; height: 100%; width: 4px; background-color: #e5e7eb; left: 20px; top: 0;';
-        document.querySelectorAll('.timeline-node').forEach((node, index) => {
-            node.style.cssText = 'position: relative; padding-left: 50px; margin-bottom: 30px;';
-            const nodeCircle = node.querySelector('.node-circle');
-            nodeCircle.style.cssText = 'position: absolute; left: 0; width: 40px; height: 40px; background-color: #fff; border: 4px solid #6366f1; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 1;';
-            if (index < document.querySelectorAll('.timeline-node').length - 1) {
-                nodeCircle.style.cssText += ' top: 0;';
-            } else {
-                nodeCircle.style.cssText += ' top: 0;';
-            }
-        });
-        document.querySelectorAll('.node-circle i').forEach(icon => {
-            icon.style.cssText = 'color: #6366f1; font-size: 1.2rem;';
-        });
-        document.querySelectorAll('.path-steps').forEach(steps => {
-            steps.style.cssText = 'margin-top: 20px;';
-        });
-        document.querySelectorAll('.path-step').forEach(step => {
-            step.style.cssText = 'display: flex; align-items: center; margin-bottom: 8px;';
-        });
-        document.querySelectorAll('.step-number').forEach(number => {
-            number.style.cssText = 'display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; background-color: #6366f1; color: white; border-radius: 50%; font-size: 0.8rem; margin-right: 10px;';
-        });
-        document.querySelectorAll('.icon-box').forEach(box => {
-            box.style.cssText = 'width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;';
-        });
-        document.querySelectorAll('.stars').forEach(stars => {
-            stars.style.cssText = 'color: #f59e0b;';
-        });
-    });
-</script>
 {% endblock %} 

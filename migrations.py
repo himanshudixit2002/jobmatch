@@ -13,6 +13,9 @@ from sqlalchemy import inspect, text
 from app import create_app
 from app.models.models import db, User
 
+# Add the app directory to the Python path
+sys.path.insert(0, os.path.abspath(os.getcwd()))
+
 def add_column(engine, table_name, column):
     """Add a column to a table if it doesn't exist"""
     inspector = inspect(engine)
@@ -65,6 +68,17 @@ def run_migrations():
         else:
             print("Column updated_at already exists in users table")
         
+        # Add profile_completed column to users table
+        if 'profile_completed' not in user_columns:
+            print("Adding profile_completed column to users table...")
+            
+            # Add the column with a default value of 0 (false)
+            db.engine.execute(text("ALTER TABLE users ADD COLUMN profile_completed BOOLEAN DEFAULT 0 NOT NULL"))
+            
+            print("Column profile_completed added to users table")
+        else:
+            print("Column profile_completed already exists in users table")
+        
         # Update applications table
         app_columns = [c['name'] for c in inspector.get_columns('applications')]
         if 'updated_at' not in app_columns:
@@ -82,31 +96,7 @@ def run_migrations():
         
         # Fix any null or invalid application status values
         print("Checking for invalid application status values...")
-        try:
-            # Check and fix applications with null status
-            db.engine.execute(text("UPDATE applications SET status = 'pending' WHERE status IS NULL"))
-            
-            # Count status types for logging
-            result = db.session.execute(text("SELECT status, COUNT(*) FROM applications GROUP BY status")).fetchall()
-            
-            status_counts = {}
-            for row in result:
-                status_counts[row[0]] = row[1]
-            
-            print(f"Application status distribution: {status_counts}")
-            
-            # Check for any match scores that are null and could be calculated
-            null_score_count = db.session.execute(text("SELECT COUNT(*) FROM applications WHERE match_score IS NULL")).scalar()
-            if null_score_count > 0:
-                print(f"Found {null_score_count} applications with null match scores")
-                
-                # These will be updated when users view their applications
-                
-        except Exception as e:
-            print(f"Error checking application statuses: {str(e)}")
-        
-        # Commit the changes
-        db.session.commit()
+        db.engine.execute(text("UPDATE applications SET status = 'pending' WHERE status IS NULL OR status = ''"))
         
         print("Database migration completed successfully!")
 

@@ -1,17 +1,160 @@
 {% extends "base.html" %}
 
-{% block title %}{{ title }} | JobMatch{% endblock %}
+{% block title %}Tech Job Growth in India | JobMatch{% endblock %}
+
+{% block styles %}
+<style>
+    .growth-card {
+        transition: all 0.3s ease;
+        border-radius: var(--border-radius);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+        height: 100%;
+    }
+    
+    .growth-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--box-shadow);
+    }
+    
+    .growth-card .card-header {
+        background: rgba(var(--bs-primary-rgb), 0.05);
+        border-bottom: none;
+    }
+    
+    .stat-card {
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        background-color: #fff;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        text-align: center;
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--box-shadow);
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--bs-primary);
+    }
+    
+    .stat-label {
+        color: var(--bs-secondary);
+        font-size: 0.9rem;
+    }
+    
+    .sector-card {
+        transition: all 0.3s ease;
+        margin-bottom: 1rem;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        border: 1px solid #eee;
+    }
+    
+    .sector-card:hover {
+        border-color: var(--bs-primary);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .sector-card .progress {
+        height: 0.6rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .growth-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        background-color: rgba(16, 185, 129, 0.1);
+        color: rgb(16, 185, 129);
+    }
+    
+    .decline-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        background-color: rgba(239, 68, 68, 0.1);
+        color: rgb(239, 68, 68);
+    }
+    
+    .neutral-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        background-color: rgba(107, 114, 128, 0.1);
+        color: rgb(107, 114, 128);
+    }
+    
+    .city-trend {
+        padding: 1rem;
+        border-radius: var(--border-radius);
+        transition: all 0.3s ease;
+        margin-bottom: 1rem;
+        border: 1px solid #eee;
+    }
+    
+    .city-trend:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        border-color: var(--bs-primary);
+    }
+    
+    .market-highlight {
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        border: 1px solid #eee;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .market-highlight:hover {
+        border-color: var(--bs-primary);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .category-legend {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        margin-right: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <section class="py-5">
     <div class="container">
         <div class="insights-header">
-            <h1 class="mb-3">Job Growth Projections</h1>
-            <p class="text-muted">Explore industry growth trends and future job market opportunities to plan your career strategically.</p>
+            <h1 class="mb-3">Tech Job Growth in India</h1>
+            <p class="text-muted">Explore current job growth trends, emerging sectors, and geographic distribution of tech jobs across India.</p>
         </div>
         
-        <!-- Insights Navigation -->
-        <div class="insights-nav">
+        <div class="insights-nav mb-4">
             <ul class="nav nav-pills">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('insights.dashboard') }}">Overview</a>
@@ -31,216 +174,177 @@
             </ul>
         </div>
         
-        <!-- Main Content -->
-        <div class="insights-container mt-4">
-            <!-- Industry Growth Chart -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Industry Growth Projections (2023-2028)</h5>
-                            <div class="form-group mb-0">
-                                <select class="form-select" id="timeframeSelector">
-                                    <option value="5-year">5 Year Projection</option>
-                                    <option value="10-year">10 Year Projection</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="card-body p-4">
-                            <div id="industry-growth-chart" style="height: 400px;"></div>
-                        </div>
-                    </div>
+        <!-- Key Growth Stats -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-4 mb-md-0">
+                <div class="stat-card">
+                    <i class="bi bi-graph-up-arrow mb-3 text-primary fs-1"></i>
+                    <div class="stat-value">22%</div>
+                    <div class="stat-label">YoY Growth in Tech Job Postings Across India</div>
                 </div>
             </div>
-            
-            <!-- Fastest Growing Roles & Declining Roles -->
+            <div class="col-md-3 mb-4 mb-md-0">
+                <div class="stat-card">
+                    <i class="bi bi-building mb-3 text-primary fs-1"></i>
+                    <div class="stat-value">4.5M+</div>
+                    <div class="stat-label">Total IT Professionals in India</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-4 mb-md-0">
+                <div class="stat-card">
+                    <i class="bi bi-briefcase-fill mb-3 text-primary fs-1"></i>
+                    <div class="stat-value">52%</div>
+                    <div class="stat-label">Tech Jobs in Global Capability Centers (GCCs)</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <i class="bi bi-rocket-takeoff mb-3 text-primary fs-1"></i>
+                    <div class="stat-value">9,100+</div>
+                    <div class="stat-label">Tech Startups Created in 2022-2023</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Job Growth by Sector -->
             <div class="row mb-4">
-                <div class="col-md-6 mb-4 mb-md-0">
-                    <div class="card shadow-sm h-100">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0">Fastest Growing Roles</h5>
-                        </div>
-                        <div class="card-body p-4">
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Role</th>
-                                            <th>Growth Rate</th>
-                                            <th>New Jobs</th>
-                                            <th>Median Salary</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>AI/ML Engineer</td>
-                                            <td><span class="text-success">+37.4%</span></td>
-                                            <td>32,500</td>
-                                            <td>$145,000</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Cybersecurity Specialist</td>
-                                            <td><span class="text-success">+32.1%</span></td>
-                                            <td>47,100</td>
-                                            <td>$125,000</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Cloud Architect</td>
-                                            <td><span class="text-success">+25.8%</span></td>
-                                            <td>28,900</td>
-                                            <td>$138,000</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Data Scientist</td>
-                                            <td><span class="text-success">+23.6%</span></td>
-                                            <td>35,700</td>
-                                            <td>$128,000</td>
-                                        </tr>
-                                        <tr>
-                                            <td>DevOps Engineer</td>
-                                            <td><span class="text-success">+22.9%</span></td>
-                                            <td>24,300</td>
-                                            <td>$120,000</td>
-                                        </tr>
-                                        <tr>
-                                            <td>AR/VR Developer</td>
-                                            <td><span class="text-success">+21.2%</span></td>
-                                            <td>18,500</td>
-                                            <td>$115,000</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+            <div class="col-lg-8 mb-4 mb-lg-0">
+                <div class="card growth-card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">Job Growth by Tech Sector in India (2023-2024)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="category-legend mb-3">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: #4f46e5;"></div>
+                                <span>High Growth (>25%)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: #10b981;"></div>
+                                <span>Growing (10-25%)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: #f59e0b;"></div>
+                                <span>Stable (0-10%)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background-color: #ef4444;"></div>
+                                <span>Declining (<0%)</span>
                             </div>
                         </div>
+                        
+                        <div class="sector-card p-3">
+                            <div class="d-flex justify-content-between align-items-baseline mb-1">
+                                <h6 class="mb-0">Cloud Computing</h6>
+                                <span class="growth-badge">+38%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted">Driven by widespread cloud adoption and migration of enterprise infrastructure</small>
+                        </div>
+                        
+                        <div class="sector-card p-3">
+                            <div class="d-flex justify-content-between align-items-baseline mb-1">
+                                <h6 class="mb-0">AI/ML & Data Science</h6>
+                                <span class="growth-badge">+32%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: 95%" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted">Significant demand from both Indian firms and GCCs for AI professionals</small>
+                        </div>
+                        
+                        <div class="sector-card p-3">
+                            <div class="d-flex justify-content-between align-items-baseline mb-1">
+                                <h6 class="mb-0">Cybersecurity</h6>
+                                <span class="growth-badge">+29%</span>
                     </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: 85%" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                            <small class="text-muted">Critical need as digital infrastructure grows across financial and government sectors</small>
+            </div>
+            
+                        <div class="sector-card p-3">
+                            <div class="d-flex justify-content-between align-items-baseline mb-1">
+                                <h6 class="mb-0">DevOps & SRE</h6>
+                                <span class="growth-badge">+24%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 80%" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted">Growing focus on automation and infrastructure reliability</small>
+                        </div>
+                        
+                        <div class="sector-card p-3">
+                            <div class="d-flex justify-content-between align-items-baseline mb-1">
+                                <h6 class="mb-0">Full Stack Development</h6>
+                                <span class="growth-badge">+21%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted">Continued demand from startups and established tech companies</small>
+                        </div>
+                        
+                        <div class="sector-card p-3">
+                            <div class="d-flex justify-content-between align-items-baseline mb-1">
+                                <h6 class="mb-0">Blockchain Development</h6>
+                                <span class="growth-badge">+18%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 65%" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                            <small class="text-muted">Emerging in fintech and enterprise solutions with government backing</small>
                 </div>
                 
-                <div class="col-md-6">
-                    <div class="card shadow-sm h-100">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0">Declining Roles</h5>
-                        </div>
-                        <div class="card-body p-4">
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Role</th>
-                                            <th>Growth Rate</th>
-                                            <th>Lost Jobs</th>
-                                            <th>Transition Paths</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>Computer Programmer</td>
-                                            <td><span class="text-danger">-8.1%</span></td>
-                                            <td>21,300</td>
-                                            <td>Software Engineer, DevOps</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Data Entry Specialist</td>
-                                            <td><span class="text-danger">-7.5%</span></td>
-                                            <td>18,900</td>
-                                            <td>Data Analyst, Business Analyst</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Traditional Webmaster</td>
-                                            <td><span class="text-danger">-6.2%</span></td>
-                                            <td>15,400</td>
-                                            <td>Web Developer, UX Designer</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Computer Support Specialist</td>
-                                            <td><span class="text-danger">-4.9%</span></td>
-                                            <td>14,700</td>
-                                            <td>IT Specialist, Cybersecurity</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Telecommunications Engineer</td>
-                                            <td><span class="text-danger">-4.3%</span></td>
-                                            <td>9,800</td>
-                                            <td>Network Engineer, Cloud Engineer</td>
-                                        </tr>
-                                        <tr>
-                                            <td>Desktop Publisher</td>
-                                            <td><span class="text-danger">-3.8%</span></td>
-                                            <td>7,200</td>
-                                            <td>UX Designer, Graphic Designer</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                        <div class="sector-card p-3">
+                            <div class="d-flex justify-content-between align-items-baseline mb-1">
+                                <h6 class="mb-0">Mobile App Development</h6>
+                                <span class="neutral-badge">+8%</span>
                             </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-warning" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted">Stabilizing after years of explosive growth; shifting toward cross-platform solutions</small>
+                        </div>
+                        
+                        <div class="sector-card p-3">
+                            <div class="d-flex justify-content-between align-items-baseline mb-1">
+                                <h6 class="mb-0">Legacy System Maintenance</h6>
+                                <span class="decline-badge">-5%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-danger" role="progressbar" style="width: 30%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted">Declining as organizations modernize and move away from legacy systems</small>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Regional Growth Map -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0">Tech Job Growth by Region</h5>
-                        </div>
-                        <div class="card-body p-4">
-                            <div class="row">
-                                <div class="col-lg-8 mb-4 mb-lg-0">
-                                    <div id="regional-growth-map" style="height: 400px;"></div>
-                                </div>
                                 <div class="col-lg-4">
-                                    <div class="mb-4">
-                                        <h6 class="mb-3">Top Growth Regions</h6>
-                                        <div class="growth-region">
-                                            <div class="d-flex justify-content-between mb-1">
-                                                <span>Austin, TX</span>
-                                                <span class="text-success">+28.5%</span>
+                <div class="card growth-card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">Indian Tech Job Growth Forecast (2024-2027)</h5>
                                             </div>
-                                            <div class="progress mb-3" style="height: 8px;">
-                                                <div class="progress-bar bg-success" role="progressbar" style="width: 85%;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
-                                            </div>
-                                        </div>
-                                        <div class="growth-region">
-                                            <div class="d-flex justify-content-between mb-1">
-                                                <span>Raleigh-Durham, NC</span>
-                                                <span class="text-success">+25.2%</span>
-                                            </div>
-                                            <div class="progress mb-3" style="height: 8px;">
-                                                <div class="progress-bar bg-success" role="progressbar" style="width: 76%;" aria-valuenow="76" aria-valuemin="0" aria-valuemax="100"></div>
-                                            </div>
-                                        </div>
-                                        <div class="growth-region">
-                                            <div class="d-flex justify-content-between mb-1">
-                                                <span>Denver, CO</span>
-                                                <span class="text-success">+23.8%</span>
-                                            </div>
-                                            <div class="progress mb-3" style="height: 8px;">
-                                                <div class="progress-bar bg-success" role="progressbar" style="width: 71%;" aria-valuenow="71" aria-valuemin="0" aria-valuemax="100"></div>
-                                            </div>
-                                        </div>
-                                        <div class="growth-region">
-                                            <div class="d-flex justify-content-between mb-1">
-                                                <span>Seattle, WA</span>
-                                                <span class="text-success">+21.9%</span>
-                                            </div>
-                                            <div class="progress mb-3" style="height: 8px;">
-                                                <div class="progress-bar bg-success" role="progressbar" style="width: 66%;" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100"></div>
-                                            </div>
-                                        </div>
-                                        <div class="growth-region">
-                                            <div class="d-flex justify-content-between mb-1">
-                                                <span>Salt Lake City, UT</span>
-                                                <span class="text-success">+19.5%</span>
-                                            </div>
-                                            <div class="progress mb-3" style="height: 8px;">
-                                                <div class="progress-bar bg-success" role="progressbar" style="width: 59%;" aria-valuenow="59" aria-valuemin="0" aria-valuemax="100"></div>
-                                            </div>
-                                        </div>
+                    <div class="card-body">
+                        <canvas id="growth-forecast-chart" height="300"></canvas>
+                        <div class="mt-4">
+                            <div class="market-highlight">
+                                <h6>Key Growth Drivers</h6>
+                                <ul class="mb-0">
+                                    <li>GCC expansion by global MNCs in India</li>
+                                    <li>Digital transformation of traditional industries</li>
+                                    <li>Government's Digital India initiatives</li>
+                                    <li>Deeptech & SaaS startup ecosystem</li>
+                                    <li>Global technology talent shortage</li>
+                                </ul>
                                     </div>
                                     <div class="alert alert-info">
                                         <i class="bi bi-info-circle-fill me-2"></i>
-                                        Remote work opportunities are projected to grow by 31% over the next 5 years, allowing tech professionals to work from anywhere.
-                                    </div>
+                                India's tech workforce is projected to reach 6 million by 2027, growing at a CAGR of 10-12%.
                                 </div>
                             </div>
                         </div>
@@ -248,114 +352,95 @@
                 </div>
             </div>
             
-            <!-- Emerging Trends -->
-            <div class="row">
-                <div class="col-12">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0">Emerging Industry Trends</h5>
+        <!-- Geographic Distribution -->
+        <div class="row mb-4">
+            <div class="col-12 mb-4">
+                <div class="card growth-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Tech Employment Hub Distribution Across India</h5>
                         </div>
-                        <div class="card-body p-4">
-                            <div class="row g-4">
-                                <div class="col-md-4">
-                                    <div class="card h-100 border-0 shadow-sm">
                                         <div class="card-body">
-                                            <div class="d-flex align-items-center mb-3">
-                                                <div class="icon-box bg-primary-subtle text-primary rounded-circle me-3">
-                                                    <i class="bi bi-robot"></i>
+                        <div class="row align-items-center">
+                            <div class="col-lg-6 mb-4 mb-lg-0">
+                                <canvas id="india-tech-distribution" height="400"></canvas>
                                                 </div>
-                                                <h5 class="mb-0">AI & Automation</h5>
+                            <div class="col-lg-6">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="city-trend">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0">Bengaluru</h6>
+                                                <span class="growth-badge">+18%</span>
                                             </div>
-                                            <p>AI and automation are revolutionizing industries, creating new roles while transforming existing ones.</p>
-                                            <div class="mt-3">
-                                                <h6 class="small text-muted mb-2">Impact on Jobs</h6>
-                                                <div class="impact-meter d-flex justify-content-between">
-                                                    <span class="small text-muted">Low</span>
-                                                    <span class="small text-muted">Medium</span>
-                                                    <span class="small text-muted">High</span>
-                                                </div>
-                                                <div class="progress mt-1" style="height: 8px;">
-                                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 85%;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
-                                                </div>
-                                            </div>
-                                            <div class="mt-3">
-                                                <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">AI Engineers</span>
-                                                <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">ML Specialists</span>
-                                                <span class="badge bg-primary-subtle text-primary me-2 mb-2 p-2">AI Ethics</span>
+                                            <p class="text-muted mb-1 small">The Silicon Valley of India</p>
+                                            <div class="d-flex justify-content-between small">
+                                                <span>Market Share: 32%</span>
+                                                <span>~1.5M tech jobs</span>
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="city-trend">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0">Hyderabad</h6>
+                                                <span class="growth-badge">+25%</span>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="card h-100 border-0 shadow-sm">
-                                        <div class="card-body">
-                                            <div class="d-flex align-items-center mb-3">
-                                                <div class="icon-box bg-success-subtle text-success rounded-circle me-3">
-                                                    <i class="bi bi-cloud"></i>
-                                                </div>
-                                                <h5 class="mb-0">Cloud Transformation</h5>
+                                            <p class="text-muted mb-1 small">Fastest growing tech hub</p>
+                                            <div class="d-flex justify-content-between small">
+                                                <span>Market Share: 18%</span>
+                                                <span>~850K tech jobs</span>
                                             </div>
-                                            <p>Cloud computing continues to grow as businesses migrate infrastructure and services to cloud platforms.</p>
-                                            <div class="mt-3">
-                                                <h6 class="small text-muted mb-2">Impact on Jobs</h6>
-                                                <div class="impact-meter d-flex justify-content-between">
-                                                    <span class="small text-muted">Low</span>
-                                                    <span class="small text-muted">Medium</span>
-                                                    <span class="small text-muted">High</span>
                                                 </div>
-                                                <div class="progress mt-1" style="height: 8px;">
-                                                    <div class="progress-bar bg-success" role="progressbar" style="width: 78%;" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100"></div>
                                                 </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="city-trend">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0">Delhi-NCR</h6>
+                                                <span class="growth-badge">+16%</span>
                                             </div>
-                                            <div class="mt-3">
-                                                <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">Cloud Architects</span>
-                                                <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">DevOps Engineers</span>
-                                                <span class="badge bg-success-subtle text-success me-2 mb-2 p-2">SRE</span>
+                                            <p class="text-muted mb-1 small">Startup & e-commerce hub</p>
+                                            <div class="d-flex justify-content-between small">
+                                                <span>Market Share: 15%</span>
+                                                <span>~700K tech jobs</span>
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="city-trend">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0">Pune</h6>
+                                                <span class="growth-badge">+14%</span>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="card h-100 border-0 shadow-sm">
-                                        <div class="card-body">
-                                            <div class="d-flex align-items-center mb-3">
-                                                <div class="icon-box bg-info-subtle text-info rounded-circle me-3">
-                                                    <i class="bi bi-shield-check"></i>
-                                                </div>
-                                                <h5 class="mb-0">Cybersecurity Evolution</h5>
+                                            <p class="text-muted mb-1 small">Engineering & R&D focus</p>
+                                            <div class="d-flex justify-content-between small">
+                                                <span>Market Share: 13%</span>
+                                                <span>~600K tech jobs</span>
                                             </div>
-                                            <p>Rising cyber threats drive demand for security professionals across all industries and government sectors.</p>
-                                            <div class="mt-3">
-                                                <h6 class="small text-muted mb-2">Impact on Jobs</h6>
-                                                <div class="impact-meter d-flex justify-content-between">
-                                                    <span class="small text-muted">Low</span>
-                                                    <span class="small text-muted">Medium</span>
-                                                    <span class="small text-muted">High</span>
                                                 </div>
-                                                <div class="progress mt-1" style="height: 8px;">
-                                                    <div class="progress-bar bg-info" role="progressbar" style="width: 82%;" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100"></div>
                                                 </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="city-trend">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0">Mumbai</h6>
+                                                <span class="neutral-badge">+9%</span>
                                             </div>
-                                            <div class="mt-3">
-                                                <span class="badge bg-info-subtle text-info me-2 mb-2 p-2">Security Engineers</span>
-                                                <span class="badge bg-info-subtle text-info me-2 mb-2 p-2">Ethical Hackers</span>
-                                                <span class="badge bg-info-subtle text-info me-2 mb-2 p-2">Risk Analysts</span>
+                                            <p class="text-muted mb-1 small">Fintech & enterprise focus</p>
+                                            <div class="d-flex justify-content-between small">
+                                                <span>Market Share: 10%</span>
+                                                <span>~470K tech jobs</span>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mt-4">
-                                <div class="card border-0 bg-light">
-                                    <div class="card-body p-4">
-                                        <div class="row align-items-center">
-                                            <div class="col-md-8">
-                                                <h5>Future-Proof Your Career</h5>
-                                                <p class="mb-md-0">Stay ahead of industry trends by focusing on continuous learning and skills development. Tech professionals who adapt to emerging technologies position themselves for long-term career success.</p>
+                                    <div class="col-md-6">
+                                        <div class="city-trend">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0">Emerging Hubs</h6>
+                                                <span class="growth-badge">+30%</span>
                                             </div>
-                                            <div class="col-md-4 text-md-end">
-                                                <a href="{{ url_for('profiles.suggested_skills') }}" class="btn btn-primary">View Recommended Skills</a>
+                                            <p class="text-muted mb-1 small">Tier-2 cities gaining momentum</p>
+                                            <div class="d-flex justify-content-between small">
+                                                <span>Market Share: 12%</span>
+                                                <span>~550K tech jobs</span>
                                             </div>
                                         </div>
                                     </div>
@@ -366,203 +451,261 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Emerging Trends -->
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card growth-card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">GCC Expansion in India</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="gcc-growth-chart" height="250"></canvas>
+                        <div class="market-highlight mt-3">
+                            <h6>Key GCC Trends in India</h6>
+                            <ul class="mb-0">
+                                <li>1,500+ GCCs now operating in India (up from 1,000 in 2020)</li>
+                                <li>45% of new GCCs focused on AI/ML & analytics capabilities</li>
+                                <li>GCCs evolving from cost centers to innovation hubs</li>
+                                <li>Non-tech companies (retail, healthcare, manufacturing) establishing tech centers</li>
+                                <li>Tier-2 cities seeing 35% increase in GCC presence</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card growth-card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">Hot Job Categories (Y-o-Y Demand Growth)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="sector-card p-3">
+                            <div class="d-flex justify-content-between align-items-baseline mb-1">
+                                <h6 class="mb-0">GenAI & LLM Engineers</h6>
+                                <span class="growth-badge">+165%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted">Exponential growth as companies race to implement AI solutions</small>
+                        </div>
+                        
+                        <div class="sector-card p-3">
+                            <div class="d-flex justify-content-between align-items-baseline mb-1">
+                                <h6 class="mb-0">Cloud Security Specialists</h6>
+                                <span class="growth-badge">+92%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: 92%" aria-valuenow="92" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted">Critical shortage as cloud adoption outpaces security implementation</small>
+                        </div>
+                        
+                        <div class="sector-card p-3">
+                            <div class="d-flex justify-content-between align-items-baseline mb-1">
+                                <h6 class="mb-0">Data Engineers & Scientists</h6>
+                                <span class="growth-badge">+74%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: 74%" aria-valuenow="74" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted">High demand from GCCs and Indian enterprises building data capabilities</small>
+                        </div>
+                        
+                        <div class="sector-card p-3">
+                            <div class="d-flex justify-content-between align-items-baseline mb-1">
+                                <h6 class="mb-0">DevSecOps Engineers</h6>
+                                <span class="growth-badge">+58%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: 58%" aria-valuenow="58" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted">Integration of security into development processes driving demand</small>
+                        </div>
+                        
+                        <div class="sector-card p-3">
+                            <div class="d-flex justify-content-between align-items-baseline mb-1">
+                                <h6 class="mb-0">Product Managers</h6>
+                                <span class="growth-badge">+45%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: 45%" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <small class="text-muted">Growing need as Indian tech industry shifts from services to products</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 {% endblock %}
 
 {% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.0/map/js/usa.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Industry Growth Chart
-        const industryGrowthChart = echarts.init(document.getElementById('industry-growth-chart'));
-        
-        const industryOption = {
-            tooltip: {
-                trigger: 'axis',
-                axisPointer: {
-                    type: 'shadow'
-                }
-            },
-            legend: {
-                data: ['Projected Growth (%)', 'Job Openings (thousands)']
-            },
-            grid: {
-                left: '3%',
-                right: '4%',
-                bottom: '3%',
-                containLabel: true
-            },
-            xAxis: [
-                {
-                    type: 'category',
-                    data: ['Tech', 'Healthcare', 'Finance', 'Renewable Energy', 'Manufacturing', 'Retail', 'Education', 'Construction']
-                }
-            ],
-            yAxis: [
-                {
-                    type: 'value',
-                    name: 'Growth (%)',
-                    axisLabel: {
-                        formatter: '{value}%'
-                    }
+        // Growth forecast chart
+        const growthForecastChart = new Chart(
+            document.getElementById('growth-forecast-chart'),
+            {
+                type: 'line',
+                data: {
+                    labels: ['2024', '2025', '2026', '2027'],
+                    datasets: [
+                        {
+                            label: 'Software Development',
+                            data: [1.2, 1.35, 1.55, 1.8],
+                            borderColor: '#4f46e5',
+                            backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Data & AI',
+                            data: [0.6, 0.8, 1.1, 1.5],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Cloud & DevOps',
+                            data: [0.5, 0.65, 0.85, 1.1],
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Cybersecurity',
+                            data: [0.3, 0.45, 0.65, 0.9],
+                            borderColor: '#0ea5e9',
+                            backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
                 },
-                {
-                    type: 'value',
-                    name: 'Jobs (thousands)',
-                    axisLabel: {
-                        formatter: '{value}k'
-                    }
-                }
-            ],
-            series: [
-                {
-                    name: 'Projected Growth (%)',
-                    type: 'bar',
-                    data: [24.3, 18.7, 12.5, 26.2, 8.3, 6.7, 9.8, 11.2],
-                    color: '#6366f1'
-                },
-                {
-                    name: 'Job Openings (thousands)',
-                    type: 'line',
-                    yAxisIndex: 1,
-                    data: [218, 163, 97, 112, 78, 82, 89, 105],
-                    color: '#10b981',
-                    symbol: 'circle',
-                    symbolSize: 8,
-                    lineStyle: {
-                        width: 3
-                    }
-                }
-            ]
-        };
-        
-        industryGrowthChart.setOption(industryOption);
-        
-        // Regional Growth Map
-        const regionalMap = echarts.init(document.getElementById('regional-growth-map'));
-        
-        const mapOption = {
-            title: {
-                text: 'Tech Job Growth by Region',
-                left: 'center',
-                textStyle: {
-                    color: '#333',
-                    fontSize: 16
-                }
-            },
-            tooltip: {
-                trigger: 'item',
-                formatter: function(params) {
-                    const value = params.value || 0;
-                    return params.name + ': ' + value + '%';
-                }
-            },
-            visualMap: {
-                left: 'right',
-                min: 0,
-                max: 30,
-                inRange: {
-                    color: ['#eee', '#e6f7ff', '#abd5ff', '#47a0ff', '#1890ff', '#0050b3']
-                },
-                text: ['High', 'Low'],
-                calculable: true
-            },
-            series: [
-                {
-                    name: 'Tech Job Growth',
-                    type: 'map',
-                    map: 'USA',
-                    roam: true,
-                    emphasis: {
-                        label: {
-                            show: true
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.raw + 'M jobs';
+                                }
+                            }
                         }
                     },
-                    data: [
-                        {name: 'Texas', value: 28.5},
-                        {name: 'North Carolina', value: 25.2},
-                        {name: 'Colorado', value: 23.8},
-                        {name: 'Washington', value: 21.9},
-                        {name: 'Utah', value: 19.5},
-                        {name: 'Georgia', value: 18.7},
-                        {name: 'California', value: 17.5},
-                        {name: 'Massachusetts', value: 16.8},
-                        {name: 'Virginia', value: 16.3},
-                        {name: 'Florida', value: 15.9},
-                        {name: 'Arizona', value: 15.7},
-                        {name: 'Oregon', value: 15.2},
-                        {name: 'Tennessee', value: 14.8},
-                        {name: 'Michigan', value: 13.5},
-                        {name: 'New York', value: 13.2},
-                        {name: 'Minnesota', value: 12.8},
-                        {name: 'Illinois', value: 12.3},
-                        {name: 'Pennsylvania', value: 11.9},
-                        {name: 'Ohio', value: 11.2},
-                        {name: 'New Jersey', value: 10.8},
-                        {name: 'Indiana', value: 9.6},
-                        {name: 'Wisconsin', value: 9.3},
-                        {name: 'Missouri', value: 8.7},
-                        {name: 'Maryland', value: 8.5},
-                        {name: 'Nevada', value: 8.2},
-                        {name: 'Idaho', value: 7.9},
-                        {name: 'New Mexico', value: 7.5},
-                        {name: 'Oklahoma', value: 7.3},
-                        {name: 'Alabama', value: 7.1},
-                        {name: 'Kentucky', value: 6.8},
-                        {name: 'South Carolina', value: 6.5},
-                        {name: 'Louisiana', value: 6.2},
-                        {name: 'Iowa', value: 5.9},
-                        {name: 'Connecticut', value: 5.7},
-                        {name: 'Hawaii', value: 5.5},
-                        {name: 'Arkansas', value: 5.3},
-                        {name: 'Nebraska', value: 5.1},
-                        {name: 'West Virginia', value: 4.8},
-                        {name: 'Rhode Island', value: 4.6},
-                        {name: 'Montana', value: 4.5},
-                        {name: 'Delaware', value: 4.3},
-                        {name: 'Maine', value: 4.2},
-                        {name: 'New Hampshire', value: 4.0},
-                        {name: 'South Dakota', value: 3.9},
-                        {name: 'Alaska', value: 3.7},
-                        {name: 'Vermont', value: 3.5},
-                        {name: 'North Dakota', value: 3.3},
-                        {name: 'Wyoming', value: 3.1}
-                    ]
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Jobs (millions)'
+                            },
+                            suggestedMin: 0
+                        }
+                    }
                 }
-            ]
-        };
-        
-        regionalMap.setOption(mapOption);
-        
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            industryGrowthChart.resize();
-            regionalMap.resize();
-        });
-        
-        // Timeframe selector handling
-        document.getElementById('timeframeSelector').addEventListener('change', function() {
-            const timeframe = this.value;
-            if (timeframe === '10-year') {
-                // Update with 10-year projection data
-                industryOption.series[0].data = [38.5, 29.3, 18.7, 42.1, 11.6, 8.9, 14.2, 16.8];
-                industryOption.series[1].data = [345, 278, 152, 189, 103, 112, 131, 158];
-                industryGrowthChart.setOption(industryOption);
-            } else {
-                // Reset to 5-year data
-                industryOption.series[0].data = [24.3, 18.7, 12.5, 26.2, 8.3, 6.7, 9.8, 11.2];
-                industryOption.series[1].data = [218, 163, 97, 112, 78, 82, 89, 105];
-                industryGrowthChart.setOption(industryOption);
             }
-        });
+        );
         
-        // Add styling for icon boxes
-        document.querySelectorAll('.icon-box').forEach(box => {
-            box.style.cssText = 'width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;';
-        });
+        // India tech distribution chart
+        const indiaDistributionChart = new Chart(
+            document.getElementById('india-tech-distribution'),
+            {
+                type: 'pie',
+                data: {
+                    labels: ['Bengaluru', 'Hyderabad', 'Delhi-NCR', 'Pune', 'Mumbai', 'Chennai', 'Tier-2 Cities'],
+                    datasets: [
+                        {
+                            data: [32, 18, 15, 13, 10, 7, 5],
+                            backgroundColor: [
+                                '#4f46e5',
+                                '#10b981',
+                                '#f59e0b',
+                                '#0ea5e9',
+                                '#ec4899',
+                                '#8b5cf6',
+                                '#6b7280'
+                            ],
+                            hoverOffset: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.raw + '% of tech jobs';
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        );
+        
+        // GCC growth chart
+        const gccGrowthChart = new Chart(
+            document.getElementById('gcc-growth-chart'),
+            {
+                type: 'bar',
+                data: {
+                    labels: ['2018', '2020', '2022', '2024', '2026 (Projected)'],
+                    datasets: [
+                        {
+                            label: 'Number of GCCs in India',
+                            data: [800, 1000, 1300, 1500, 1800],
+                            backgroundColor: 'rgba(79, 70, 229, 0.7)'
+                        },
+                        {
+                            label: 'Jobs Created (x100,000)',
+                            data: [12, 14, 18, 22, 28],
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.datasetIndex === 0) {
+                                        return 'GCCs: ' + context.raw;
+                                    } else {
+                                        return 'Jobs: ' + (context.raw * 100000).toLocaleString() + ' jobs';
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'GCCs / Jobs (×100,000)'
+                            }
+                        }
+                    }
+                }
+            }
+        );
     });
 </script>
 {% endblock %} 

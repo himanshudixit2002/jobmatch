@@ -39,9 +39,8 @@ venv.bak/
 *.swp
 *.swo
 
-# Database
-*.db
-*.sqlite3
-
 # Other
 .DS_Store 
+
+# Database
+app/job_recruitment.db 

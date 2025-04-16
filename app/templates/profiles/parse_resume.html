@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="mb-4 text-center">
+                <h1 class="h2 fw-bold mb-3">Resume Analyzer</h1>
+                <p class="text-muted lead">
+                    Extract valuable insights from your resume with our AI-powered analyzer
+                </p>
+                <div class="d-flex justify-content-center">
+                    <div class="badge bg-primary rounded-pill px-3 py-2 me-2">Skills</div>
+                    <div class="badge bg-success rounded-pill px-3 py-2 me-2">Experience</div>
+                    <div class="badge bg-info rounded-pill px-3 py-2 me-2">Education</div>
+                    <div class="badge bg-warning rounded-pill px-3 py-2">History</div>
+                </div>
+            </div>
+            
+            <div class="card shadow-lg border-0 rounded-3 mb-4">
+                <div class="card-header bg-white p-4 border-0">
+                    <h5 class="card-title mb-0 fw-bold">
+                        <i class="bi bi-file-earmark-text me-2 text-primary"></i>Upload or Paste Your Resume
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" enctype="multipart/form-data" id="resumeForm">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-4">
+                            <div class="card bg-light border-0 rounded-3">
+                                <div class="card-body p-4">
+                                    <div class="mb-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="bi bi-cloud-upload me-2 text-primary"></i>
+                                            {{ form.resume_file.label(class="form-label fw-bold mb-0") }}
+                                        </div>
+                                        {% if form.resume_file.errors %}
+                                            {{ form.resume_file(class="form-control form-control-lg is-invalid") }}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.resume_file.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            <div class="file-upload-wrapper">
+                                                {{ form.resume_file(class="form-control form-control-lg", id="resumeFileUpload") }}
+                                                <div class="form-text mt-2">
+                                                    <i class="bi bi-info-circle me-1"></i>
+                                                    Supports .txt, .pdf, and .docx files
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="text-center my-4">
+                                        <div class="divider d-flex align-items-center justify-content-center">
+                                            <span class="text-muted px-3 bg-light">OR</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="bi bi-pencil-square me-2 text-primary"></i>
+                                            {{ form.resume_text.label(class="form-label fw-bold mb-0") }}
+                                        </div>
+                                        {% if form.resume_text.errors %}
+                                            {{ form.resume_text(class="form-control form-control-lg is-invalid", rows=10) }}
+                                            <div class="invalid-feedback">
+                                                {% for error in form.resume_text.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            {{ form.resume_text(class="form-control form-control-lg", rows=10, placeholder="Copy and paste your resume content here...", id="resumeTextArea") }}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4 d-flex align-items-center">
+                            <div class="form-check form-switch">
+                                {{ form.apply_to_profile(class="form-check-input") }}
+                                {{ form.apply_to_profile.label(class="form-check-label fw-medium ms-2") }}
+                            </div>
+                            <div class="ms-2">
+                                <i class="bi bi-question-circle text-muted" data-bs-toggle="tooltip" title="If checked, extracted information will be automatically added to your profile"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            {{ form.submit(class="btn btn-primary btn-lg fw-medium") }}
+                            <a href="{{ url_for('profiles.view_profile') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i> Back to Profile
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            {% if parsed_data and parsed_data.success %}
+            <div class="card shadow-lg border-0 rounded-3 mt-4">
+                <div class="card-header bg-primary text-white p-3">
+                    <h5 class="card-title mb-0 fw-bold">
+                        <i class="bi bi-file-earmark-text me-2"></i>Parsed Resume Data
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 bg-light rounded-3">
+                                <div class="card-body p-4">
+                                    <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                        <i class="bi bi-mortarboard me-2 text-primary"></i>Education
+                                    </h6>
+                                    <p class="mb-0">{{ parsed_data.education }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 bg-light rounded-3">
+                                <div class="card-body p-4">
+                                    <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                        <i class="bi bi-briefcase me-2 text-primary"></i>Experience
+                                    </h6>
+                                    <p class="mb-0">{{ parsed_data.experience }} years</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <div class="card border-0 bg-light rounded-3">
+                                <div class="card-body p-4">
+                                    <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                        <i class="bi bi-tools me-2 text-primary"></i>Extracted Skills
+                                    </h6>
+                                    <div class="d-flex flex-wrap gap-2 mb-0">
+                                        {% for skill in parsed_data.skills %}
+                                        <span class="badge bg-white border text-dark px-3 py-2 rounded-pill">{{ skill }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if parsed_data.job_history %}
+                    <div class="mt-4">
+                        <div class="card border-0 bg-light rounded-3">
+                            <div class="card-body p-4">
+                                <h6 class="fw-bold mb-3 d-flex align-items-center">
+                                    <i class="bi bi-clock-history me-2 text-primary"></i>Job History
+                                </h6>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Company</th>
+                                                <th>Position</th>
+                                                <th>Duration</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for job in parsed_data.job_history %}
+                                            <tr>
+                                                <td class="fw-medium">{{ job.company }}</td>
+                                                <td>{{ job.title }}</td>
+                                                <td>{{ job.duration }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('profiles.view_profile') }}" class="btn btn-success btn-lg">
+                            <i class="bi bi-check-circle me-2"></i> Return to Profile
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.divider {
+    position: relative;
+    text-align: center;
+}
+.divider:before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    height: 1px;
+    background-color: #dee2e6;
+    z-index: 0;
+}
+.rounded-pill {
+    border-radius: 50rem;
+}
+.file-upload-wrapper {
+    position: relative;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+    
+    // File upload enhancement
+    const fileInput = document.getElementById('resumeFileUpload');
+    if (fileInput) {
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                const fileName = this.files[0].name;
+                const fileText = document.querySelector('.form-text');
+                fileText.innerHTML = `<i class="bi bi-check-circle-fill text-success me-1"></i> ${fileName} selected`;
+            }
+        });
+    }
+    
+    // Clear textarea placeholder on focus
+    const textArea = document.getElementById('resumeTextArea');
+    if (textArea) {
+        textArea.addEventListener('focus', function() {
+            this.placeholder = '';
+        });
+        textArea.addEventListener('blur', function() {
+            if (!this.value) {
+                this.placeholder = 'Copy and paste your resume content here...';
+            }
+        });
+    }
+});
+</script>
+{% endblock %} 

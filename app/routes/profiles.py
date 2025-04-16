@@ -1,9 +1,11 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, jsonify
 from flask_login import login_required, current_user
 from app.models.models import db, User, Skill, Application, Job, RecruiterNote
-from app.forms.profile_forms import ProfileForm, SkillForm
+from app.forms.profile_forms import ProfileForm, SkillForm, ResumeParserForm
 from app.utils.resume_parser import parse_resume, extract_skills_from_resume
 from datetime import datetime
+import os
+import io
 
 profiles = Blueprint('profiles', __name__)
 
@@ -381,4 +383,138 @@ def get_applicant_note(applicant_id):
             'success': True,
             'content': '',
             'message': 'No notes found'
-        }) 
+        })
+
+@profiles.route('/profile/parse-resume', methods=['GET', 'POST'])
+@login_required
+def parse_resume_view():
+    """Parse a resume and extract information"""
+    if not current_user.is_applicant():
+        flash('Only applicants can use the resume parser.', 'danger')
+        return redirect(url_for('profiles.view_profile'))
+    
+    form = ResumeParserForm()
+    parsed_data = None
+    
+    if form.validate_on_submit():
+        resume_text = ""
+        
+        # Handle file upload
+        if form.resume_file.data:
+            try:
+                # Read the uploaded file
+                resume_file = form.resume_file.data
+                if resume_file.filename.endswith('.txt'):
+                    resume_text = resume_file.read().decode('utf-8')
+                elif resume_file.filename.endswith('.pdf'):
+                    # Import PyPDF2 for PDF parsing
+                    import PyPDF2
+                    from io import BytesIO
+                    
+                    # Read the PDF file
+                    pdf_reader = PyPDF2.PdfReader(BytesIO(resume_file.read()))
+                    
+                    # Extract text from all pages
+                    for page_num in range(len(pdf_reader.pages)):
+                        page = pdf_reader.pages[page_num]
+                        resume_text += page.extract_text() + "\n"
+                    
+                elif resume_file.filename.endswith('.docx'):
+                    # Import docx for DOCX parsing
+                    import docx
+                    from io import BytesIO
+                    
+                    # Read the DOCX file
+                    doc = docx.Document(BytesIO(resume_file.read()))
+                    
+                    # Extract text from paragraphs
+                    for para in doc.paragraphs:
+                        resume_text += para.text + "\n"
+                else:
+                    flash('Only .txt, .pdf, and .docx files are supported.', 'warning')
+                    return redirect(url_for('profiles.parse_resume_view'))
+            except Exception as e:
+                current_app.logger.error(f"Error reading resume file: {str(e)}")
+                flash(f'Error reading the uploaded file: {str(e)}. Please try again.', 'danger')
+                return redirect(url_for('profiles.parse_resume_view'))
+        # Use pasted text if no file
+        elif form.resume_text.data:
+            resume_text = form.resume_text.data
+        else:
+            flash('Please upload a file or paste resume text.', 'warning')
+            return redirect(url_for('profiles.parse_resume_view'))
+        
+        # Parse the resume
+        try:
+            parsed_data = parse_resume(resume_text)
+            
+            if not parsed_data["success"]:
+                flash(f'Error parsing resume: {parsed_data.get("error", "Unknown error")}', 'danger')
+                return redirect(url_for('profiles.parse_resume_view'))
+                
+            # For debugging
+            current_app.logger.info(f"Parsed data: {parsed_data}")
+            
+        except Exception as e:
+            current_app.logger.error(f"Error in resume parsing: {str(e)}")
+            flash(f'Error parsing resume: {str(e)}', 'danger')
+            return redirect(url_for('profiles.parse_resume_view'))
+        
+        # Apply parsed data if requested
+        if form.apply_to_profile.data:
+            try:
+                # Update user information from parsed data
+                if parsed_data["education"]:
+                    # Convert education to string if it's a dictionary
+                    if isinstance(parsed_data["education"], dict):
+                        education_parts = []
+                        if "degree" in parsed_data["education"]:
+                            education_parts.append(parsed_data["education"]["degree"])
+                        if "field" in parsed_data["education"]:
+                            education_parts.append(parsed_data["education"]["field"])
+                        current_user.education = " in ".join(education_parts)
+                    else:
+                        current_user.education = parsed_data["education"]
+                    
+                if parsed_data["experience"]:
+                    current_user.experience = parsed_data["experience"]
+                
+                # Save resume text
+                current_user.resume = resume_text
+                
+                # Add extracted skills
+                if parsed_data["skills"]:
+                    skills_added = 0
+                    for skill_name in parsed_data["skills"]:
+                        skill_name = skill_name.strip().lower()
+                        if not skill_name:
+                            continue
+                        
+                        # Check if skill already exists in database
+                        existing_skill = Skill.query.filter(Skill.name.ilike(skill_name)).first()
+                        
+                        if existing_skill:
+                            # Add existing skill to user if not already added
+                            if existing_skill not in current_user.skills:
+                                current_user.skills.append(existing_skill)
+                                skills_added += 1
+                        else:
+                            # Create new skill
+                            new_skill = Skill(name=skill_name)
+                            db.session.add(new_skill)
+                            current_user.skills.append(new_skill)
+                            skills_added += 1
+                
+                db.session.commit()
+                flash('Resume parsed and profile updated successfully!', 'success')
+                return redirect(url_for('profiles.view_profile'))
+                
+            except Exception as e:
+                db.session.rollback()
+                current_app.logger.error(f"Error updating profile with parsed data: {str(e)}")
+                flash(f'Error updating profile: {str(e)}', 'danger')
+    
+    return render_template('profiles/parse_resume.html', 
+                          title='Parse Resume', 
+                          form=form,
+                          parsed_data=parsed_data) 

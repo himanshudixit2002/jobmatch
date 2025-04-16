@@ -9,18 +9,57 @@ SQLAlchemy==1.4.23
 bcrypt==3.2.0
 email-validator==1.3.1
 python-dotenv==1.0.0
+gunicorn==20.1.0
+celery==5.2.7
+requests==2.26.0
+
+# Data processing and analysis
+numpy>=1.24.0
+pandas>=2.0.0
+scipy>=1.11.0
+matplotlib>=3.7.0
+
+# Machine learning and NLP
+scikit-learn>=1.3.0
+nltk>=3.8.1
+spacy>=3.7.0
+
+# Resume parsing
+google-generativeai>=0.3.0
+PyPDF2>=3.0.0
+python-docx>=0.8.11
+
+# Real-time communication
+Flask-SocketIO==5.1.1
+
+# Data generation and testing
+Faker>=18.4.0
+tqdm>=4.66.1
+
+# Time handling
+pytz
+
+# UUID handling (used in chatbot and data generation)
+uuid
+
 # Advanced features
 Flask-SocketIO==5.1.1
-scikit-learn==1.0.2
-nltk==3.6.5
-pandas==1.3.4
-matplotlib==3.5.0
+scikit-learn>=1.3.0
+nltk>=3.8.1
+pandas>=2.0.0
+matplotlib>=3.7.0
 gunicorn==20.1.0
 celery==5.2.7
 requests==2.26.0
 # Job matching and skill analysis features
-numpy==1.22.3
-spacy==3.4.1
-scipy==1.8.0
-# Charts and visualization
-chart.js==3.7.1 
+numpy>=1.24.0
+spacy>=3.7.0
+scipy>=1.11.0
+# Resume parsing
+google-generativeai>=0.3.0
+PyPDF2>=3.0.0
+python-docx>=0.8.11
+# Data generation
+Faker>=18.4.0
+tqdm>=4.66.1
+# Chart.js is a JavaScript library and should be included in frontend assets, not installed via pip 

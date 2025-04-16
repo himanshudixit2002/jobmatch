@@ -26,6 +26,7 @@ class User(UserMixin, db.Model):
     user_type = db.Column(db.String(20), nullable=False)  # 'applicant' or 'recruiter'
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    profile_completed = db.Column(db.Boolean, default=False)
     
     # Applicant specific fields
     resume = db.Column(db.Text, nullable=True)

@@ -1,17 +1,237 @@
 {% extends "base.html" %}
 
-{% block title %}{{ title }} | JobMatch{% endblock %}
+{% block title %}India Tech Salary Trends | JobMatch{% endblock %}
+
+{% block styles %}
+<style>
+    .salary-card {
+        height: 100%;
+        transition: all 0.3s ease;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    }
+    
+    .salary-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--box-shadow);
+    }
+    
+    .salary-card .card-header {
+        background: rgba(var(--bs-primary-rgb), 0.05);
+        border-bottom: none;
+        padding: 1rem 1.25rem;
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+    }
+    
+    .stats-card {
+        text-align: center;
+        padding: 1.5rem;
+        border-radius: var(--border-radius);
+        background-color: #fff;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--box-shadow);
+    }
+    
+    .stat-icon-circle {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 1rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(var(--bs-primary-rgb), 0.1);
+        color: var(--bs-primary);
+        font-size: 1.5rem;
+    }
+    
+    .stats-card .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        display: block;
+        margin-bottom: 0.5rem;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .stats-card .stat-label {
+        color: var(--bs-secondary);
+        font-size: 1rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    
+    .city-salary {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        border-radius: var(--border-radius);
+        transition: all 0.2s ease;
+    }
+    
+    .city-salary:hover {
+        background-color: rgba(var(--bs-primary-rgb), 0.05);
+    }
+    
+    .city-salary .city {
+        width: 120px;
+        font-weight: 500;
+    }
+    
+    .city-salary .salary-bar {
+        flex: 1;
+        height: 24px;
+        background: #f1f5f9;
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .city-salary .salary-bar-fill {
+        position: absolute;
+        height: 100%;
+        left: 0;
+        top: 0;
+        background: linear-gradient(90deg, rgba(var(--bs-primary-rgb), 0.8) 0%, rgba(var(--bs-primary-rgb), 1) 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-right: 10px;
+        color: white;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: width 0.8s ease-in-out;
+    }
+    
+    .role-item {
+        padding: 1.25rem;
+        border-radius: var(--border-radius);
+        background: #fff;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+        height: calc(100% - 1rem);
+    }
+    
+    .role-item:hover {
+        box-shadow: var(--box-shadow);
+        transform: translateY(-3px);
+    }
+    
+    .role-title {
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+    
+    .range-bar {
+        height: 6px;
+        background: #f1f5f9;
+        border-radius: 3px;
+        position: relative;
+        margin: 0.75rem 0;
+    }
+    
+    .range-fill {
+        position: absolute;
+        height: 100%;
+        background: rgba(var(--bs-primary-rgb), 0.7);
+        border-radius: 3px;
+        transition: width 0.8s ease-in-out, left 0.8s ease-in-out;
+    }
+    
+    .range-marker {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--bs-primary);
+        top: -3px;
+        margin-left: -6px;
+        transition: left 0.8s ease-in-out;
+    }
+    
+    .range-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: var(--bs-secondary);
+    }
+    
+    .factor-item {
+        transition: all 0.3s ease;
+        border-radius: var(--border-radius);
+        padding: 0.5rem;
+    }
+    
+    .factor-item:hover {
+        background-color: rgba(var(--bs-primary-rgb), 0.05);
+    }
+    
+    .animated-number {
+        transition: all 0.5s ease;
+    }
+    
+    /* Insights navigation styles */
+    .insights-header {
+        margin-bottom: 2rem;
+    }
+    
+    .insights-nav {
+        margin-bottom: 2rem;
+    }
+    
+    .insights-nav .nav-link {
+        color: var(--dark);
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius);
+        font-weight: 500;
+    }
+    
+    .insights-nav .nav-link.active {
+        background: var(--gradient-primary);
+        color: white !important;
+    }
+    
+    @media (max-width: 767.98px) {
+        .city-salary .city {
+            width: 90px;
+            font-size: 0.9rem;
+        }
+        
+        .city-salary .salary-bar-fill {
+            font-size: 0.8rem;
+        }
+        
+        .stats-card .stat-value {
+            font-size: 1.75rem;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <section class="py-5">
     <div class="container">
         <div class="insights-header">
-            <h1 class="mb-3">Salary Insights</h1>
-            <p class="text-muted">Explore comprehensive salary data across industries, roles, and experience levels.</p>
+            <h1 class="mb-3">Indian Tech Salary Trends</h1>
+            <p class="text-muted">Comprehensive salary data for technology professionals across different roles, experience levels, and cities in India.</p>
         </div>
         
-        <!-- Insights Navigation -->
-        <div class="insights-nav">
+        <div class="insights-nav mb-4">
             <ul class="nav nav-pills">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('insights.dashboard') }}">Overview</a>
@@ -31,254 +251,402 @@
             </ul>
         </div>
         
-        <!-- Main Content -->
-        <div class="insights-container mt-4">
-            <!-- Salary Comparison Chart -->
+        <!-- Key Salary Statistics -->
             <div class="row mb-4">
-                <div class="col-12">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0">Salary Comparison by Role</h5>
+            <div class="col-lg-4 mb-4 mb-lg-0">
+                <div class="card h-100">
+                    <div class="card-body p-0">
+                        <div class="stats-card h-100">
+                            <div class="stat-icon-circle mb-3">
+                                <i class="bi bi-cash-stack"></i>
+                            </div>
+                            <h3 class="stat-value animated-number" data-value="13.8">0</h3>
+                            <p class="stat-label">Average Tech Salary</p>
+                            <small class="text-success d-block">+10.4% YoY</small>
                         </div>
-                        <div class="card-body p-4">
-                            <div class="chart-container" style="height: 400px;">
-                                <canvas id="salary-comparison-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4 mb-lg-0">
+                <div class="card h-100">
+                    <div class="card-body p-0">
+                        <div class="stats-card h-100">
+                            <div class="stat-icon-circle mb-3">
+                                <i class="bi bi-graph-up-arrow"></i>
+                            </div>
+                            <h3 class="stat-value animated-number" data-value="15.7">0</h3>
+                            <p class="stat-label">YoY Salary Growth for AI/ML</p>
+                            <small class="text-success d-block">Highest growth sector</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body p-0">
+                        <div class="stats-card h-100">
+                            <div class="stat-icon-circle mb-3">
+                                <i class="bi bi-building"></i>
+                            </div>
+                            <h3 class="stat-value animated-number" data-value="32">0</h3>
+                            <p class="stat-label">Pay Gap: MNCs vs Indian Firms</p>
+                            <small class="text-muted d-block">For similar roles & experience</small>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Salary by Experience -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0">Salary by Experience Level</h5>
+        <!-- Salary by Experience Chart -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card salary-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Salary By Experience Level</h5>
+                        <div class="chart-controls">
+                            <button class="btn btn-sm btn-outline-primary toggle-chart-view" data-chart="experience-salary-chart" data-type="bar">Bar</button>
+                            <button class="btn btn-sm btn-outline-secondary toggle-chart-view" data-chart="experience-salary-chart" data-type="line">Line</button>
                         </div>
-                        <div class="card-body p-4">
-                            <div class="chart-container" style="height: 350px;">
-                                <canvas id="salary-experience-chart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Regional Salary Comparison -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Regional Salary Insights</h5>
-                            <div class="form-group mb-0">
-                                <select class="form-select" id="roleSelector">
-                                    <option value="software-developer">Software Developer</option>
-                                    <option value="data-scientist">Data Scientist</option>
-                                    <option value="product-manager">Product Manager</option>
-                                    <option value="ux-designer">UX Designer</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="card-body p-4">
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Location</th>
-                                            <th>Entry Level</th>
-                                            <th>Mid Level</th>
-                                            <th>Senior Level</th>
-                                            <th>Cost of Living Index</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td class="fw-medium">San Francisco, CA</td>
-                                            <td>$100,000</td>
-                                            <td>$150,000</td>
-                                            <td>$210,000</td>
-                                            <td><span class="badge bg-danger-subtle text-danger">178.6</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="fw-medium">New York, NY</td>
-                                            <td>$95,000</td>
-                                            <td>$140,000</td>
-                                            <td>$200,000</td>
-                                            <td><span class="badge bg-danger-subtle text-danger">168.3</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="fw-medium">Seattle, WA</td>
-                                            <td>$90,000</td>
-                                            <td>$135,000</td>
-                                            <td>$185,000</td>
-                                            <td><span class="badge bg-warning-subtle text-warning">152.7</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="fw-medium">Austin, TX</td>
-                                            <td>$85,000</td>
-                                            <td>$125,000</td>
-                                            <td>$170,000</td>
-                                            <td><span class="badge bg-success-subtle text-success">115.8</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="fw-medium">Chicago, IL</td>
-                                            <td>$80,000</td>
-                                            <td>$120,000</td>
-                                            <td>$165,000</td>
-                                            <td><span class="badge bg-warning-subtle text-warning">124.2</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td class="fw-medium">Denver, CO</td>
-                                            <td>$75,000</td>
-                                            <td>$115,000</td>
-                                            <td>$160,000</td>
-                                            <td><span class="badge bg-warning-subtle text-warning">128.4</span></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Salary Insights Cards -->
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <div class="card shadow-sm h-100">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0">Benefits & Compensation</h5>
-                        </div>
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                                    <i class="bi bi-graph-up" style="font-size: 1.25rem;"></i>
                                 </div>
-                                <div>
-                                    <p class="fw-semibold mb-0">Top Benefits Packages</p>
-                                    <small class="text-muted">Beyond base salary</small>
+                    <div class="card-body">
+                        <div class="chart-container" style="position: relative; height:50vh; max-height: 400px;">
+                            <canvas id="experience-salary-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cities Comparison -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card salary-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Average Tech Salaries by City</h5>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="animateBars" checked>
+                            <label class="form-check-label" for="animateBars">Animate</label>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="city-salary-container">
+                            <div class="city-salary">
+                                <span class="city">Bangalore</span>
+                                <div class="salary-bar">
+                                    <div class="salary-bar-fill" style="width: 0%;" data-width="100%" data-value="16.2">₹16.2L</div>
                                 </div>
                             </div>
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item ps-0 border-0">
-                                    <i class="bi bi-check-circle-fill text-success me-2"></i> Remote work options (80% of employers)
-                                </li>
-                                <li class="list-group-item ps-0 border-0">
-                                    <i class="bi bi-check-circle-fill text-success me-2"></i> Retirement matching (75% of employers)
-                                </li>
-                                <li class="list-group-item ps-0 border-0">
-                                    <i class="bi bi-check-circle-fill text-success me-2"></i> Healthcare coverage (92% of employers)
-                                </li>
-                                <li class="list-group-item ps-0 border-0">
-                                    <i class="bi bi-check-circle-fill text-success me-2"></i> Annual bonuses (68% of employers)
-                                </li>
-                                <li class="list-group-item ps-0 border-0">
-                                    <i class="bi bi-check-circle-fill text-success me-2"></i> Professional development (65% of employers)
-                                </li>
+                            <div class="city-salary">
+                                <span class="city">Hyderabad</span>
+                                <div class="salary-bar">
+                                    <div class="salary-bar-fill" style="width: 0%;" data-width="94%" data-value="15.3">₹15.3L</div>
+                                </div>
+                            </div>
+                            <div class="city-salary">
+                                <span class="city">Pune</span>
+                                <div class="salary-bar">
+                                    <div class="salary-bar-fill" style="width: 0%;" data-width="90%" data-value="14.6">₹14.6L</div>
+                                </div>
+                            </div>
+                            <div class="city-salary">
+                                <span class="city">Gurgaon</span>
+                                <div class="salary-bar">
+                                    <div class="salary-bar-fill" style="width: 0%;" data-width="93%" data-value="15.1">₹15.1L</div>
+                                </div>
+                            </div>
+                            <div class="city-salary">
+                                <span class="city">Mumbai</span>
+                                <div class="salary-bar">
+                                    <div class="salary-bar-fill" style="width: 0%;" data-width="89%" data-value="14.5">₹14.5L</div>
+                                </div>
+                            </div>
+                            <div class="city-salary">
+                                <span class="city">Chennai</span>
+                                <div class="salary-bar">
+                                    <div class="salary-bar-fill" style="width: 0%;" data-width="84%" data-value="13.6">₹13.6L</div>
+                                </div>
+                            </div>
+                            <div class="city-salary">
+                                <span class="city">Noida</span>
+                                <div class="salary-bar">
+                                    <div class="salary-bar-fill" style="width: 0%;" data-width="83%" data-value="13.4">₹13.4L</div>
+                                </div>
+                            </div>
+                            <div class="city-salary">
+                                <span class="city">Kolkata</span>
+                                <div class="salary-bar">
+                                    <div class="salary-bar-fill" style="width: 0%;" data-width="72%" data-value="11.7">₹11.7L</div>
+                                </div>
+                            </div>
+                            <div class="city-salary">
+                                <span class="city">Ahmedabad</span>
+                                <div class="salary-bar">
+                                    <div class="salary-bar-fill" style="width: 0%;" data-width="71%" data-value="11.5">₹11.5L</div>
+                                </div>
+                            </div>
+                            <div class="city-salary">
+                                <span class="city">Indore</span>
+                                <div class="salary-bar">
+                                    <div class="salary-bar-fill" style="width: 0%;" data-width="67%" data-value="10.8">₹10.8L</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button class="btn btn-sm btn-primary" id="resetAnimation">Reset Animation</button>
+                            <button class="btn btn-sm btn-outline-primary ms-2" id="sortBySalary">Sort by Salary</button>
+                            <button class="btn btn-sm btn-outline-primary ms-2" id="sortByCity">Sort by City</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Salary by Role Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card salary-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Salary Ranges by Role in India</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-6 mb-4">
+                                <div class="role-item">
+                                    <h6 class="role-title">Full Stack Developer</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-primary-subtle text-primary">High Demand</span>
+                                        <span class="text-end">Median: ₹13.5L</span>
+                                    </div>
+                                    <div class="range-bar">
+                                        <div class="range-fill" style="left: 0%; width: 0%;" data-left="20%" data-width="60%"></div>
+                                        <div class="range-marker" style="left: 0%;" data-left="50%"></div>
+                                    </div>
+                                    <div class="range-labels">
+                                        <span>₹7L</span>
+                                        <span>₹28L+</span>
+                        </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-4">
+                                <div class="role-item">
+                                    <h6 class="role-title">Data Scientist</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-primary-subtle text-primary">High Demand</span>
+                                        <span class="text-end">Median: ₹16.8L</span>
+                                    </div>
+                                    <div class="range-bar">
+                                        <div class="range-fill" style="left: 0%; width: 0%;" data-left="25%" data-width="60%"></div>
+                                        <div class="range-marker" style="left: 0%;" data-left="55%"></div>
+                                    </div>
+                                    <div class="range-labels">
+                                        <span>₹9L</span>
+                                        <span>₹38L+</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-4">
+                                <div class="role-item">
+                                    <h6 class="role-title">DevOps Engineer</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-primary-subtle text-primary">High Demand</span>
+                                        <span class="text-end">Median: ₹15.2L</span>
+                                    </div>
+                                    <div class="range-bar">
+                                        <div class="range-fill" style="left: 22%; width: 58%;"></div>
+                                        <div class="range-marker" style="left: 52%;"></div>
+                                    </div>
+                                    <div class="range-labels">
+                                        <span>₹8L</span>
+                                        <span>₹32L+</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-4">
+                                <div class="role-item">
+                                    <h6 class="role-title">AI/ML Engineer</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-primary-subtle text-primary">Very High Demand</span>
+                                        <span class="text-end">Median: ₹18.5L</span>
+                                    </div>
+                                    <div class="range-bar">
+                                        <div class="range-fill" style="left: 25%; width: 65%;"></div>
+                                        <div class="range-marker" style="left: 58%;"></div>
+                                    </div>
+                                    <div class="range-labels">
+                                        <span>₹10L</span>
+                                        <span>₹45L+</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-4">
+                                <div class="role-item">
+                                    <h6 class="role-title">Cloud Architect</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-primary-subtle text-primary">High Demand</span>
+                                        <span class="text-end">Median: ₹20.5L</span>
+                                    </div>
+                                    <div class="range-bar">
+                                        <div class="range-fill" style="left: 35%; width: 50%;"></div>
+                                        <div class="range-marker" style="left: 60%;"></div>
+                                    </div>
+                                    <div class="range-labels">
+                                        <span>₹12L</span>
+                                        <span>₹45L+</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-4">
+                                <div class="role-item">
+                                    <h6 class="role-title">Product Manager</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-primary-subtle text-primary">High Demand</span>
+                                        <span class="text-end">Median: ₹22.0L</span>
+                                    </div>
+                                    <div class="range-bar">
+                                        <div class="range-fill" style="left: 30%; width: 60%;"></div>
+                                        <div class="range-marker" style="left: 62%;"></div>
+                                    </div>
+                                    <div class="range-labels">
+                                        <span>₹14L</span>
+                                        <span>₹48L+</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-4">
+                                <div class="role-item">
+                                    <h6 class="role-title">Cybersecurity Engineer</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-primary-subtle text-primary">Very High Demand</span>
+                                        <span class="text-end">Median: ₹17.5L</span>
+                                    </div>
+                                    <div class="range-bar">
+                                        <div class="range-fill" style="left: 28%; width: 55%;"></div>
+                                        <div class="range-marker" style="left: 55%;"></div>
+                                    </div>
+                                    <div class="range-labels">
+                                        <span>₹10L</span>
+                                        <span>₹36L+</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-4">
+                                <div class="role-item">
+                                    <h6 class="role-title">UI/UX Designer</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-primary-subtle text-primary">Moderate Demand</span>
+                                        <span class="text-end">Median: ₹12.5L</span>
+                                    </div>
+                                    <div class="range-bar">
+                                        <div class="range-fill" style="left: 20%; width: 50%;"></div>
+                                        <div class="range-marker" style="left: 45%;"></div>
+                                    </div>
+                                    <div class="range-labels">
+                                        <span>₹6L</span>
+                                        <span>₹28L+</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-4">
+                                <div class="role-item">
+                                    <h6 class="role-title">Blockchain Developer</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-primary-subtle text-primary">Emerging Demand</span>
+                                        <span class="text-end">Median: ₹16.2L</span>
+                                    </div>
+                                    <div class="range-bar">
+                                        <div class="range-fill" style="left: 25%; width: 60%;"></div>
+                                        <div class="range-marker" style="left: 52%;"></div>
+                                    </div>
+                                    <div class="range-labels">
+                                        <span>₹9L</span>
+                                        <span>₹35L+</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-4">
+                                <div class="role-item">
+                                    <h6 class="role-title">Site Reliability Engineer</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-primary-subtle text-primary">High Demand</span>
+                                        <span class="text-end">Median: ₹16.8L</span>
+                                    </div>
+                                    <div class="range-bar">
+                                        <div class="range-fill" style="left: 26%; width: 58%;"></div>
+                                        <div class="range-marker" style="left: 54%;"></div>
+                                    </div>
+                                    <div class="range-labels">
+                                        <span>₹9L</span>
+                                        <span>₹34L+</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Salary Trends and Factors -->
+        <div class="row">
+            <div class="col-lg-7 mb-4">
+                <div class="card salary-card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Salary Growth Trends in Indian Tech</h5>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" id="trendFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                Filter Roles
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="trendFilterDropdown">
+                                <li><a class="dropdown-item" href="#" data-role="all">Show All Roles</a></li>
+                                <li><a class="dropdown-item" href="#" data-role="AI/ML Specialists">AI/ML Specialists</a></li>
+                                <li><a class="dropdown-item" href="#" data-role="Cloud/DevOps Engineers">Cloud/DevOps Engineers</a></li>
+                                <li><a class="dropdown-item" href="#" data-role="Full Stack Developers">Full Stack Developers</a></li>
+                                <li><a class="dropdown-item" href="#" data-role="Overall Tech Average">Overall Tech Average</a></li>
                             </ul>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="card shadow-sm h-100">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0">Negotiation Insights</h5>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="salary-growth-chart"></canvas>
                         </div>
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                                    <i class="bi bi-chat-quote" style="font-size: 1.25rem;"></i>
-                                </div>
-                                <div>
-                                    <p class="fw-semibold mb-0">Negotiation Success Factors</p>
-                                    <small class="text-muted">What works in salary discussions</small>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span>Candidate had competing offers</span>
-                                    <span class="text-success">+12%</span>
-                                </div>
-                                <div class="progress" style="height: 6px;">
-                                    <div class="progress-bar bg-success" role="progressbar" style="width: 85%;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span>Demonstrated in-demand skills</span>
-                                    <span class="text-success">+10%</span>
-                                </div>
-                                <div class="progress" style="height: 6px;">
-                                    <div class="progress-bar bg-success" role="progressbar" style="width: 75%;" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span>Highlighted achievements</span>
-                                    <span class="text-success">+8%</span>
-                                </div>
-                                <div class="progress" style="height: 6px;">
-                                    <div class="progress-bar bg-success" role="progressbar" style="width: 65%;" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                            <div class="alert alert-info mb-0 mt-3 d-flex align-items-center">
-                                <i class="bi bi-info-circle-fill me-2"></i>
-                                <small>70% of employers expect candidates to negotiate their initial offer.</small>
-                            </div>
+                        <div class="mt-3">
+                            <p class="text-muted small">Data source: NASSCOM, Naukri JobSpeak Index, and JobMatch platform analytics for Q1 2024</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4 mb-4">
-                    <div class="card shadow-sm h-100">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0">Industry Trends</h5>
+            </div>
+            <div class="col-lg-5 mb-4">
+                <div class="card salary-card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">Factors Affecting Tech Salaries in India</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="factor-item d-flex mb-3">
+                            <div class="bg-primary text-white rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">1</div>
+                            <div>
+                                <h6 class="mb-1">Company Type</h6>
+                                <p class="text-muted mb-0">Product-based companies offer 30-45% higher salaries than service-based companies. MNCs offer 20-35% higher compensation than Indian companies for similar roles.</p>
+                            </div>
                         </div>
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="bg-info-subtle text-info rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
-                                    <i class="bi bi-building" style="font-size: 1.25rem;"></i>
-                                </div>
-                                <div>
-                                    <p class="fw-semibold mb-0">Fastest Growing Industries</p>
-                                    <small class="text-muted">Salary growth by sector</small>
-                                </div>
+                        <div class="factor-item d-flex mb-3">
+                            <div class="bg-primary text-white rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">2</div>
+                            <div>
+                                <h6 class="mb-1">Skills Premium</h6>
+                                <p class="text-muted mb-0">In-demand skills like generative AI, cybersecurity, and cloud native architecture command 30-45% higher salary compared to more common skills in the same experience bracket.</p>
                             </div>
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span>Artificial Intelligence</span>
-                                    <span class="text-primary">13.2%</span>
-                                </div>
-                                <div class="progress" style="height: 6px;">
-                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 95%;" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
+                        </div>
+                        <div class="factor-item d-flex mb-3">
+                            <div class="bg-primary text-white rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">3</div>
+                            <div>
+                                <h6 class="mb-1">Location Factor</h6>
+                                <p class="text-muted mb-0">Tier 1 cities (Bangalore, Hyderabad, Gurgaon) offer 25-35% higher salaries than Tier 2 cities. Remote work is narrowing this gap, with fully remote roles offering 15-20% premium.</p>
                             </div>
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span>Healthcare Technology</span>
-                                    <span class="text-primary">10.8%</span>
-                                </div>
-                                <div class="progress" style="height: 6px;">
-                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 85%;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span>Renewable Energy</span>
-                                    <span class="text-primary">9.5%</span>
-                                </div>
-                                <div class="progress" style="height: 6px;">
-                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 75%;" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                            <div class="mb-0">
-                                <div class="d-flex justify-content-between mb-1">
-                                    <span>Cybersecurity</span>
-                                    <span class="text-primary">8.7%</span>
-                                </div>
-                                <div class="progress" style="height: 6px;">
-                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 65%;" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
+                        </div>
+                        <div class="factor-item d-flex">
+                            <div class="bg-primary text-white rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">4</div>
+                            <div>
+                                <h6 class="mb-1">Educational Background</h6>
+                                <p class="text-muted mb-0">Graduates from premier institutes (IITs, NITs, IIITs) command 15-25% higher starting salaries. This gap narrows with experience, becoming less significant after 5+ years.</p>
                             </div>
                         </div>
                     </div>
@@ -293,91 +661,122 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Salary Comparison Chart
-        const salaryCtx = document.getElementById('salary-comparison-chart').getContext('2d');
-        const salaryChart = new Chart(salaryCtx, {
+        // Initialize charts
+        const experienceChart = createExperienceSalaryChart();
+        const growthChart = createSalaryGrowthChart();
+        
+        // Animate the stats counters
+        animateNumbers();
+        
+        // Animate the city salary bars
+        animateCitySalaryBars();
+        
+        // Animate role salary ranges
+        animateRoleRanges();
+        
+        // Initialize interactive elements
+        initializeInteractivity(experienceChart, growthChart);
+    });
+    
+    function createExperienceSalaryChart() {
+        const ctx = document.getElementById('experience-salary-chart').getContext('2d');
+        
+        return new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['Software Developer', 'Data Scientist', 'Product Manager', 'UX Designer', 'DevOps Engineer', 'Marketing Specialist'],
-                datasets: [
-                    {
-                        label: 'Median Salary (USD)',
-                        data: [110000, 125000, 135000, 95000, 120000, 85000],
+                labels: ['0-2 Years', '2-4 Years', '4-6 Years', '6-8 Years', '8-10 Years', '10-15 Years', '15+ Years'],
+                datasets: [{
+                    label: 'Average Annual Salary (₹ Lakhs)',
+                    data: [7.2, 11.5, 16.2, 21.8, 27.5, 36.0, 48.5],
                         backgroundColor: [
+                        'rgba(99, 102, 241, 0.5)',
+                        'rgba(99, 102, 241, 0.55)',
+                        'rgba(99, 102, 241, 0.6)',
+                        'rgba(99, 102, 241, 0.65)',
                             'rgba(99, 102, 241, 0.7)',
-                            'rgba(14, 165, 233, 0.7)',
-                            'rgba(16, 185, 129, 0.7)',
-                            'rgba(245, 158, 11, 0.7)',
-                            'rgba(239, 68, 68, 0.7)',
-                            'rgba(139, 92, 246, 0.7)'
-                        ],
-                        borderWidth: 0
-                    }
-                ]
+                        'rgba(99, 102, 241, 0.75)',
+                        'rgba(99, 102, 241, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(99, 102, 241, 1)',
+                        'rgba(99, 102, 241, 1)',
+                        'rgba(99, 102, 241, 1)',
+                        'rgba(99, 102, 241, 1)',
+                        'rgba(99, 102, 241, 1)',
+                        'rgba(99, 102, 241, 1)',
+                        'rgba(99, 102, 241, 1)'
+                    ],
+                    borderWidth: 1
+                }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return '$' + context.parsed.y.toLocaleString();
-                            }
-                        }
-                    }
-                },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + value.toLocaleString();
-                            }
-                        },
                         title: {
                             display: true,
-                            text: 'Annual Salary (USD)'
+                            text: 'Annual Salary (₹ Lakhs)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Experience Level'
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `Avg Salary: ₹${context.raw}L per annum`;
+                            }
                         }
                     }
                 }
             }
         });
+    }
+    
+    function createSalaryGrowthChart() {
+        const ctx = document.getElementById('salary-growth-chart').getContext('2d');
         
-        // Salary by Experience Chart
-        const experienceCtx = document.getElementById('salary-experience-chart').getContext('2d');
-        const experienceChart = new Chart(experienceCtx, {
+        return new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['Entry Level', '2-3 Years', '4-6 Years', '7-10 Years', '10+ Years', 'Executive'],
+                labels: ['2019', '2020', '2021', '2022', '2023', '2024 (Proj)'],
                 datasets: [
                     {
-                        label: 'Software Developer',
-                        data: [85000, 105000, 125000, 150000, 180000, 210000],
+                        label: 'AI/ML Specialists',
+                        data: [14.2, 16.0, 18.5, 22.0, 26.5, 30.8],
                         borderColor: 'rgba(99, 102, 241, 1)',
-                        backgroundColor: 'rgba(99, 102, 241, 0.05)',
-                        pointBackgroundColor: 'rgba(99, 102, 241, 1)',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
                         tension: 0.3,
                         fill: true
                     },
                     {
-                        label: 'Data Scientist',
-                        data: [90000, 110000, 135000, 165000, 190000, 220000],
+                        label: 'Cloud/DevOps Engineers',
+                        data: [12.8, 14.5, 16.8, 19.2, 22.0, 25.5],
                         borderColor: 'rgba(16, 185, 129, 1)',
-                        backgroundColor: 'rgba(16, 185, 129, 0.05)',
-                        pointBackgroundColor: 'rgba(16, 185, 129, 1)',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
                         tension: 0.3,
                         fill: true
                     },
                     {
-                        label: 'Product Manager',
-                        data: [95000, 115000, 140000, 170000, 200000, 230000],
-                        borderColor: 'rgba(14, 165, 233, 1)',
-                        backgroundColor: 'rgba(14, 165, 233, 0.05)',
-                        pointBackgroundColor: 'rgba(14, 165, 233, 1)',
+                        label: 'Full Stack Developers',
+                        data: [11.5, 12.8, 14.0, 15.5, 17.2, 19.5],
+                        borderColor: 'rgba(245, 158, 11, 1)',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Overall Tech Average',
+                        data: [9.2, 9.8, 10.5, 11.8, 13.8, 15.2],
+                        borderColor: 'rgba(99, 102, 241, 0.6)',
+                        backgroundColor: 'rgba(99, 102, 241, 0.05)',
+                        borderDash: [5, 5],
                         tension: 0.3,
                         fill: true
                     }
@@ -385,33 +784,209 @@
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Annual Salary (₹ Lakhs)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Year'
+                        }
+                    }
+                },
                 plugins: {
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                return context.dataset.label + ': $' + context.parsed.y.toLocaleString();
+                                return `${context.dataset.label}: ₹${context.raw}L`;
                             }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: false,
-                        min: 50000,
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + value.toLocaleString();
-                            }
-                        },
-                        title: {
-                            display: true,
-                            text: 'Annual Salary (USD)'
                         }
                     }
                 }
             }
         });
-    });
+    }
+    
+    function animateNumbers() {
+        document.querySelectorAll('.animated-number').forEach(element => {
+            const finalValue = parseFloat(element.getAttribute('data-value'));
+            const duration = 1500;
+            const startTime = Date.now();
+            
+            function updateNumber() {
+                const currentTime = Date.now();
+                const elapsed = currentTime - startTime;
+                
+                if (elapsed < duration) {
+                    const value = (elapsed / duration) * finalValue;
+                    element.textContent = value.toFixed(1);
+                    requestAnimationFrame(updateNumber);
+                } else {
+                    element.textContent = finalValue;
+                }
+            }
+            
+            updateNumber();
+        });
+    }
+    
+    function animateCitySalaryBars() {
+        const salaryBars = document.querySelectorAll('.salary-bar-fill');
+        
+        salaryBars.forEach((bar, index) => {
+            setTimeout(() => {
+                bar.style.width = bar.getAttribute('data-width');
+            }, index * 150);
+        });
+    }
+    
+    function animateRoleRanges() {
+        const rangeFills = document.querySelectorAll('.range-fill');
+        const rangeMarkers = document.querySelectorAll('.range-marker');
+        
+        rangeFills.forEach((fill, index) => {
+            setTimeout(() => {
+                fill.style.left = fill.getAttribute('data-left');
+                fill.style.width = fill.getAttribute('data-width');
+                
+                // Animate the corresponding marker
+                if (rangeMarkers[index]) {
+                    rangeMarkers[index].style.left = rangeMarkers[index].getAttribute('data-left');
+                }
+            }, index * 150);
+        });
+    }
+    
+    function initializeInteractivity(experienceChart, growthChart) {
+        // Toggle chart type
+        document.querySelectorAll('.toggle-chart-view').forEach(button => {
+            button.addEventListener('click', function() {
+                const chartId = this.getAttribute('data-chart');
+                const chartType = this.getAttribute('data-type');
+                
+                // Update button states
+                document.querySelectorAll(`[data-chart="${chartId}"]`).forEach(btn => {
+                    btn.classList.remove('btn-outline-primary', 'btn-primary');
+                    btn.classList.add(btn === this ? 'btn-primary' : 'btn-outline-primary');
+                });
+                
+                // Change chart type
+                if (chartId === 'experience-salary-chart') {
+                    experienceChart.config.type = chartType;
+                    experienceChart.update();
+                }
+            });
+        });
+        
+        // Reset animation button
+        document.getElementById('resetAnimation').addEventListener('click', function() {
+            const salaryBars = document.querySelectorAll('.salary-bar-fill');
+            
+            salaryBars.forEach(bar => {
+                bar.style.width = '0%';
+            });
+            
+            setTimeout(() => {
+                animateCitySalaryBars();
+            }, 200);
+        });
+        
+        // Sort by salary button
+        document.getElementById('sortBySalary').addEventListener('click', function() {
+            const container = document.getElementById('city-salary-container');
+            const items = Array.from(container.querySelectorAll('.city-salary'));
+            
+            items.sort((a, b) => {
+                const valueA = parseFloat(a.querySelector('.salary-bar-fill').getAttribute('data-value'));
+                const valueB = parseFloat(b.querySelector('.salary-bar-fill').getAttribute('data-value'));
+                return valueB - valueA;
+            });
+            
+            // Clear the container
+            container.innerHTML = '';
+            
+            // Re-add the sorted items
+            items.forEach(item => {
+                container.appendChild(item);
+            });
+            
+            // Trigger animation
+            const salaryBars = document.querySelectorAll('.salary-bar-fill');
+            salaryBars.forEach(bar => {
+                bar.style.width = '0%';
+            });
+            
+            setTimeout(() => {
+                animateCitySalaryBars();
+            }, 200);
+        });
+        
+        // Sort by city button
+        document.getElementById('sortByCity').addEventListener('click', function() {
+            const container = document.getElementById('city-salary-container');
+            const items = Array.from(container.querySelectorAll('.city-salary'));
+            
+            items.sort((a, b) => {
+                const cityA = a.querySelector('.city').textContent;
+                const cityB = b.querySelector('.city').textContent;
+                return cityA.localeCompare(cityB);
+            });
+            
+            // Clear the container
+            container.innerHTML = '';
+            
+            // Re-add the sorted items
+            items.forEach(item => {
+                container.appendChild(item);
+            });
+            
+            // Trigger animation
+            const salaryBars = document.querySelectorAll('.salary-bar-fill');
+            salaryBars.forEach(bar => {
+                bar.style.width = '0%';
+            });
+            
+            setTimeout(() => {
+                animateCitySalaryBars();
+            }, 200);
+        });
+        
+        // Filter salary trends
+        document.querySelectorAll('[data-role]').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const role = this.getAttribute('data-role');
+                
+                if (role === 'all') {
+                    growthChart.data.datasets.forEach(dataset => {
+                        dataset.hidden = false;
+                    });
+                } else {
+                    growthChart.data.datasets.forEach(dataset => {
+                        dataset.hidden = dataset.label !== role;
+                    });
+                }
+                
+                growthChart.update();
+            });
+        });
+        
+        // Salary bar animation toggle
+        document.getElementById('animateBars').addEventListener('change', function() {
+            if (this.checked) {
+                document.querySelectorAll('.salary-bar-fill').forEach(bar => {
+                    bar.style.transition = 'width 0.8s ease-in-out';
+                });
+            } else {
+                document.querySelectorAll('.salary-bar-fill').forEach(bar => {
+                    bar.style.transition = 'none';
+                });
+            }
+        });
+    }
 </script>
 {% endblock %} 

@@ -1,17 +1,105 @@
 {% extends "base.html" %}
 
-{% block title %}{{ title }} | JobMatch{% endblock %}
+{% block title %}Trending Tech Skills in India | JobMatch{% endblock %}
+
+{% block styles %}
+<style>
+    .skill-tag {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: var(--border-radius);
+        margin-right: 8px;
+        margin-bottom: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .skill-tag:hover {
+        transform: translateY(-3px);
+    }
+    
+    .skill-card {
+        height: 100%;
+        transition: all 0.3s ease;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+    }
+    
+    .skill-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--box-shadow);
+    }
+    
+    .skill-card .card-header {
+        background: rgba(var(--bs-primary-rgb), 0.05);
+        border-bottom: none;
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+    
+    .skill-growth {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+    
+    .skill-growth .skill-name {
+        width: 140px;
+        font-weight: 500;
+    }
+    
+    .skill-growth .progress {
+        flex: 1;
+        height: 10px;
+    }
+    
+    .skill-growth .percentage {
+        width: 60px;
+        text-align: right;
+        font-weight: 600;
+    }
+    
+    .icon-box {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+    }
+    
+    .course-item {
+        padding: 16px;
+        border-radius: var(--border-radius);
+        margin-bottom: 16px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.08);
+    }
+    
+    .course-item:hover {
+        box-shadow: var(--box-shadow);
+        border-color: transparent;
+    }
+    
+    .course-rating {
+        color: #FFB400;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <section class="py-5">
     <div class="container">
         <div class="insights-header">
-            <h1 class="mb-3">Trending Skills</h1>
-            <p class="text-muted">Stay up-to-date with the most in-demand skills in today's job market.</p>
+            <h1 class="mb-3">Trending Tech Skills in India</h1>
+            <p class="text-muted">Discover the most in-demand technical skills in the Indian job market to boost your employability and earning potential.</p>
         </div>
         
-        <!-- Insights Navigation -->
-        <div class="insights-nav">
+        <div class="insights-nav mb-4">
             <ul class="nav nav-pills">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('insights.dashboard') }}">Overview</a>
@@ -31,192 +119,375 @@
             </ul>
         </div>
         
-        <!-- Main Content -->
-        <div class="insights-container mt-4">
-            <!-- Top Skills Chart -->
+        <!-- Top Skills Overview -->
             <div class="row mb-4">
-                <div class="col-12">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0">Top Skills Demand Trends</h5>
+            <div class="col-lg-8 mb-4">
+                <div class="card skill-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Top Skills by Demand in Indian Tech Market</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="skills-demand-chart"></canvas>
                         </div>
-                        <div class="card-body p-4">
-                            <div class="chart-container" style="height: 400px;">
-                                <canvas id="skills-demand-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4">
+                <div class="card skill-card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">Skills with Highest Salary Premium</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="skill-growth">
+                            <span class="skill-name">Generative AI</span>
+                            <div class="progress">
+                                <div class="progress-bar bg-primary" style="width: 95%"></div>
+                            </div>
+                            <span class="percentage text-primary">+42%</span>
+                        </div>
+                        <div class="skill-growth">
+                            <span class="skill-name">Cloud Architecture</span>
+                            <div class="progress">
+                                <div class="progress-bar bg-primary" style="width: 90%"></div>
+                            </div>
+                            <span class="percentage text-primary">+38%</span>
+                        </div>
+                        <div class="skill-growth">
+                            <span class="skill-name">Cybersecurity</span>
+                            <div class="progress">
+                                <div class="progress-bar bg-primary" style="width: 85%"></div>
+                            </div>
+                            <span class="percentage text-primary">+35%</span>
+                        </div>
+                        <div class="skill-growth">
+                            <span class="skill-name">DevOps/MLOps</span>
+                            <div class="progress">
+                                <div class="progress-bar bg-primary" style="width: 80%"></div>
+                            </div>
+                            <span class="percentage text-primary">+32%</span>
+                        </div>
+                        <div class="skill-growth">
+                            <span class="skill-name">Blockchain</span>
+                            <div class="progress">
+                                <div class="progress-bar bg-primary" style="width: 75%"></div>
+                            </div>
+                            <span class="percentage text-primary">+30%</span>
+                        </div>
+                        <div class="skill-growth">
+                            <span class="skill-name">Data Science</span>
+                            <div class="progress">
+                                <div class="progress-bar bg-primary" style="width: 70%"></div>
+                            </div>
+                            <span class="percentage text-primary">+28%</span>
+                        </div>
+                        <div class="skill-growth">
+                            <span class="skill-name">Edge Computing</span>
+                            <div class="progress">
+                                <div class="progress-bar bg-primary" style="width: 65%"></div>
+                            </div>
+                            <span class="percentage text-primary">+25%</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Top Skills by Category -->
+        <!-- Trending Skills by Industry -->
             <div class="row mb-4">
-                <div class="col-lg-6 mb-4">
-                    <div class="card shadow-sm h-100">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0">Top Technical Skills</h5>
+            <div class="col-12">
+                <div class="card skill-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Most In-Demand Tech Skills by Industry in India</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Industry</th>
+                                        <th>Top Skills</th>
+                                        <th>Growth Rate</th>
+                                        <th>Avg. Annual Salary (₹)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>IT Services & Consulting</strong></td>
+                                        <td>
+                                            <span class="badge bg-primary-subtle text-primary">Cloud Computing</span>
+                                            <span class="badge bg-primary-subtle text-primary">Java</span>
+                                            <span class="badge bg-primary-subtle text-primary">Python</span>
+                                            <span class="badge bg-primary-subtle text-primary">DevOps</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-graph-up text-success me-2"></i>
+                                                <span>27%</span>
+                                            </div>
+                                        </td>
+                                        <td>12-18 LPA</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Banking & Financial Services</strong></td>
+                                        <td>
+                                            <span class="badge bg-primary-subtle text-primary">Data Analytics</span>
+                                            <span class="badge bg-primary-subtle text-primary">Cybersecurity</span>
+                                            <span class="badge bg-primary-subtle text-primary">Blockchain</span>
+                                            <span class="badge bg-primary-subtle text-primary">UPI Integration</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-graph-up text-success me-2"></i>
+                                                <span>32%</span>
+                                            </div>
+                                        </td>
+                                        <td>14-22 LPA</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>E-commerce & Retail</strong></td>
+                                        <td>
+                                            <span class="badge bg-primary-subtle text-primary">Recommendation Systems</span>
+                                            <span class="badge bg-primary-subtle text-primary">React</span>
+                                            <span class="badge bg-primary-subtle text-primary">Node.js</span>
+                                            <span class="badge bg-primary-subtle text-primary">Mobile App Dev</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-graph-up text-success me-2"></i>
+                                                <span>29%</span>
+                                            </div>
+                                        </td>
+                                        <td>12-20 LPA</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Healthcare & Pharma</strong></td>
+                                        <td>
+                                            <span class="badge bg-primary-subtle text-primary">AI in Medicine</span>
+                                            <span class="badge bg-primary-subtle text-primary">Health Data Security</span>
+                                            <span class="badge bg-primary-subtle text-primary">IoMT</span>
+                                            <span class="badge bg-primary-subtle text-primary">FHIR/HL7</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-graph-up text-success me-2"></i>
+                                                <span>26%</span>
+                                            </div>
+                                        </td>
+                                        <td>13-19 LPA</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>EdTech</strong></td>
+                                        <td>
+                                            <span class="badge bg-primary-subtle text-primary">Learning Analytics</span>
+                                            <span class="badge bg-primary-subtle text-primary">Full Stack</span>
+                                            <span class="badge bg-primary-subtle text-primary">Video Streaming</span>
+                                            <span class="badge bg-primary-subtle text-primary">Adaptive Learning</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-graph-up text-success me-2"></i>
+                                                <span>24%</span>
+                                            </div>
+                                        </td>
+                                        <td>10-16 LPA</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Manufacturing & Automotive</strong></td>
+                                        <td>
+                                            <span class="badge bg-primary-subtle text-primary">IoT</span>
+                                            <span class="badge bg-primary-subtle text-primary">Robotics</span>
+                                            <span class="badge bg-primary-subtle text-primary">Embedded Systems</span>
+                                            <span class="badge bg-primary-subtle text-primary">EV Technology</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-graph-up text-success me-2"></i>
+                                                <span>22%</span>
+                                            </div>
+                                        </td>
+                                        <td>11-17 LPA</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="card-body p-4">
-                            <div class="skill-list">
-                                <div class="skill-item mb-3">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <span class="fw-medium">Python</span>
-                                        <span class="text-primary">+15% growth</span>
-                                    </div>
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-primary" role="progressbar" style="width: 92%;" aria-valuenow="92" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>
                                 </div>
-                                <div class="skill-item mb-3">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <span class="fw-medium">React</span>
-                                        <span class="text-primary">+23% growth</span>
-                                    </div>
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-primary" role="progressbar" style="width: 88%;" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100"></div>
                                     </div>
                                 </div>
-                                <div class="skill-item mb-3">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <span class="fw-medium">Cloud Computing (AWS/Azure)</span>
-                                        <span class="text-primary">+18% growth</span>
+        
+        <!-- Emerging Skills Section -->
+        <div class="row mb-4">
+            <div class="col-lg-6 mb-4">
+                <div class="card skill-card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">Emerging Skills in India (2023-2024)</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex mb-4">
+                            <div class="icon-box" style="background-color: rgba(99, 102, 241, 0.1);">
+                                <i class="bi bi-cpu text-primary fs-4"></i>
                                     </div>
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-primary" role="progressbar" style="width: 85%;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div>
+                                <h6 class="mb-1">Generative AI & LLM Engineering</h6>
+                                <p class="text-muted mb-0">The skill with the highest growth rate in India at 215% YoY. Prompt engineering, fine-tuning, and LLM application development are seeing massive demand.</p>
                                     </div>
                                 </div>
-                                <div class="skill-item mb-3">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <span class="fw-medium">Data Science</span>
-                                        <span class="text-primary">+20% growth</span>
+                        <div class="d-flex mb-4">
+                            <div class="icon-box" style="background-color: rgba(16, 185, 129, 0.1);">
+                                <i class="bi bi-hdd-network text-success fs-4"></i>
                                     </div>
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-primary" role="progressbar" style="width: 82%;" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div>
+                                <h6 class="mb-1">Web3 Development</h6>
+                                <p class="text-muted mb-0">India ranks 4th globally in Web3 talent, with skills in Solidity, smart contracts, and DApp development showing 78% growth.</p>
                                     </div>
                                 </div>
-                                <div class="skill-item">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <span class="fw-medium">DevOps</span>
-                                        <span class="text-primary">+25% growth</span>
+                        <div class="d-flex mb-4">
+                            <div class="icon-box" style="background-color: rgba(245, 158, 11, 0.1);">
+                                <i class="bi bi-cloud-check text-warning fs-4"></i>
                                     </div>
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-primary" role="progressbar" style="width: 78%;" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div>
+                                <h6 class="mb-1">Edge Computing</h6>
+                                <p class="text-muted mb-0">With increasing IoT adoption, edge computing skills have grown 62% in demand, especially in telecommunications and manufacturing sectors.</p>
                                     </div>
+                        </div>
+                        <div class="d-flex">
+                            <div class="icon-box" style="background-color: rgba(239, 68, 68, 0.1);">
+                                <i class="bi bi-file-earmark-lock2 text-danger fs-4"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1">Zero Trust Security</h6>
+                                <p class="text-muted mb-0">With rising cybersecurity concerns in India, zero trust architecture skills have seen 55% growth, particularly in BFSI and healthcare.</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="col-lg-6 mb-4">
-                    <div class="card shadow-sm h-100">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0">Top Soft Skills</h5>
+                <div class="card skill-card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">Top Certification Value in Indian Job Market</h5>
                         </div>
-                        <div class="card-body p-4">
-                            <div class="skill-list">
-                                <div class="skill-item mb-3">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <span class="fw-medium">Communication</span>
-                                        <span class="text-primary">+8% growth</span>
-                                    </div>
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-info" role="progressbar" style="width: 95%;" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                </div>
-                                <div class="skill-item mb-3">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <span class="fw-medium">Teamwork</span>
-                                        <span class="text-primary">+5% growth</span>
-                                    </div>
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-info" role="progressbar" style="width: 90%;" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="card-body">
+                        <div class="course-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">AWS Certified Solutions Architect</h6>
+                                    <div class="course-rating mb-2">
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-half"></i>
+                                        <span class="text-muted ms-2">4.5</span>
                                     </div>
                                 </div>
-                                <div class="skill-item mb-3">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <span class="fw-medium">Problem Solving</span>
-                                        <span class="text-primary">+12% growth</span>
+                                <span class="badge bg-success">+35% salary impact</span>
+                            </div>
+                            <p class="text-muted small mb-0">Top cloud certification with 75,000+ open positions across major Indian tech hubs.</p>
                                     </div>
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-info" role="progressbar" style="width: 88%;" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                </div>
-                                <div class="skill-item mb-3">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <span class="fw-medium">Adaptability</span>
-                                        <span class="text-primary">+15% growth</span>
-                                    </div>
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-info" role="progressbar" style="width: 85%;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
-                                </div>
-                                <div class="skill-item">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <span class="fw-medium">Time Management</span>
-                                        <span class="text-primary">+7% growth</span>
-                                    </div>
-                                    <div class="progress" style="height: 8px;">
-                                        <div class="progress-bar bg-info" role="progressbar" style="width: 80%;" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="course-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">Google Professional Data Engineer</h6>
+                                    <div class="course-rating mb-2">
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star"></i>
+                                        <span class="text-muted ms-2">4.0</span>
                                     </div>
                                 </div>
+                                <span class="badge bg-success">+28% salary impact</span>
+                            </div>
+                            <p class="text-muted small mb-0">In high demand among Indian startups and GCCs for data platform development.</p>
+                                    </div>
+                        <div class="course-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">Azure Security Engineer</h6>
+                                    <div class="course-rating mb-2">
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star"></i>
+                                        <span class="text-muted ms-2">4.0</span>
+                                    </div>
+                                </div>
+                                <span class="badge bg-success">+25% salary impact</span>
+                                    </div>
+                            <p class="text-muted small mb-0">Critical security certification with growing demand in BFSI and healthcare sectors.</p>
+                                    </div>
+                        <div class="course-item mb-0">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">Certified Kubernetes Administrator</h6>
+                                    <div class="course-rating mb-2">
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-fill"></i>
+                                        <i class="bi bi-star-half"></i>
+                                        <span class="text-muted ms-2">4.5</span>
+                                    </div>
+                                </div>
+                                <span class="badge bg-success">+23% salary impact</span>
+                            </div>
+                            <p class="text-muted small mb-0">Essential for DevOps roles with high demand in product companies and startups.</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Emerging Skills -->
-            <div class="row mb-4">
+        <!-- Skills Gap Analysis -->
+        <div class="row">
                 <div class="col-12">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0">Emerging Skills to Watch</h5>
+                <div class="card skill-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">India's IT Skills Gap Analysis</h5>
                         </div>
-                        <div class="card-body p-4">
+                    <div class="card-body">
+                        <p class="text-muted mb-4">Based on NASSCOM and industry reports, the following skills have the largest demand-supply gaps in India's tech market:</p>
                             <div class="row">
-                                <div class="col-md-4 mb-4 mb-md-0">
-                                    <div class="emerging-skill text-center p-3 h-100">
-                                        <div class="skill-icon bg-primary-subtle text-primary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
-                                            <i class="bi bi-robot" style="font-size: 1.75rem;"></i>
+                            <div class="col-md-6 mb-4">
+                                <h6>Highest Demand vs. Supply Gap</h6>
+                                <div class="chart-container">
+                                    <canvas id="skills-gap-chart"></canvas>
+                                </div>
                                         </div>
-                                        <h5>Artificial Intelligence</h5>
-                                        <p class="text-muted mb-0">Jobs requiring AI skills have grown 74% in the past year with average salaries 20% higher than similar roles.</p>
+                            <div class="col-md-6 mb-4">
+                                <h6>Indian Tech Talent Recommendations</h6>
+                                <div class="d-flex mb-3">
+                                    <div class="bg-primary text-white rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">1</div>
+                                    <div>
+                                        <h6 class="mb-1">Focus on T-shaped skill development</h6>
+                                        <p class="text-muted mb-0">Develop deep expertise in one domain (e.g., cloud architecture) while maintaining breadth across related technologies.</p>
                                     </div>
                                 </div>
-                                <div class="col-md-4 mb-4 mb-md-0">
-                                    <div class="emerging-skill text-center p-3 h-100">
-                                        <div class="skill-icon bg-success-subtle text-success rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
-                                            <i class="bi bi-shield-check" style="font-size: 1.75rem;"></i>
+                                <div class="d-flex mb-3">
+                                    <div class="bg-primary text-white rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">2</div>
+                                    <div>
+                                        <h6 class="mb-1">Prioritize industry-specific domain expertise</h6>
+                                        <p class="text-muted mb-0">Technical skills paired with domain knowledge (e.g., fintech, healthtech) command 18-25% higher salaries in India.</p>
+                                    </div>
                                         </div>
-                                        <h5>Cybersecurity</h5>
-                                        <p class="text-muted mb-0">Demand for cybersecurity professionals has increased by 35% with an acute shortage of qualified candidates.</p>
+                                <div class="d-flex mb-3">
+                                    <div class="bg-primary text-white rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">3</div>
+                                    <div>
+                                        <h6 class="mb-1">Balance cutting-edge with enterprise skills</h6>
+                                        <p class="text-muted mb-0">While AI/ML are growing rapidly, traditional enterprise technologies still drive 65% of tech hiring in India.</p>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
-                                    <div class="emerging-skill text-center p-3 h-100">
-                                        <div class="skill-icon bg-warning-subtle text-warning rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
-                                            <i class="bi bi-currency-bitcoin" style="font-size: 1.75rem;"></i>
-                                        </div>
-                                        <h5>Blockchain</h5>
-                                        <p class="text-muted mb-0">Blockchain skills are seeing a 30% growth in demand across finance, supply chain, and healthcare sectors.</p>
+                                <div class="d-flex">
+                                    <div class="bg-primary text-white rounded-circle p-2 me-3 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">4</div>
+                                    <div>
+                                        <h6 class="mb-1">Verify skills with real-world projects</h6>
+                                        <p class="text-muted mb-0">72% of Indian employers prioritize demonstrable project experience over certifications alone.</p>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Industry Specific Skills -->
-            <div class="row">
-                <div class="col-12">
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0">Industry-Specific Skills Demand</h5>
-                        </div>
-                        <div class="card-body p-4">
-                            <div class="chart-container" style="height: 350px;">
-                                <canvas id="industry-skills-chart"></canvas>
                             </div>
                         </div>
                     </div>
@@ -231,111 +502,105 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Skills Demand Trend Chart
-        const skillsDemandCtx = document.getElementById('skills-demand-chart').getContext('2d');
-        const skillsDemandChart = new Chart(skillsDemandCtx, {
-            type: 'line',
+        createSkillsDemandChart();
+        createSkillsGapChart();
+    });
+    
+    function createSkillsDemandChart() {
+        const ctx = document.getElementById('skills-demand-chart').getContext('2d');
+        
+        new Chart(ctx, {
+            type: 'bar',
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-                datasets: [
-                    {
-                        label: 'Python',
-                        data: [65, 68, 70, 72, 75, 78, 80, 82, 85, 87, 90, 92],
-                        borderColor: '#6366f1',
-                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                        tension: 0.3,
-                        fill: true
-                    },
-                    {
-                        label: 'React',
-                        data: [55, 60, 63, 67, 70, 72, 74, 77, 80, 83, 86, 88],
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        tension: 0.3,
-                        fill: true
-                    },
-                    {
-                        label: 'Cloud Computing',
-                        data: [45, 50, 53, 57, 60, 65, 68, 72, 76, 80, 82, 85],
-                        borderColor: '#0ea5e9',
-                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
-                        tension: 0.3,
-                        fill: true
-                    }
-                ]
+                labels: ['Cloud Computing', 'Full Stack Dev', 'Data Science', 'DevOps', 'AI/ML', 'Cybersecurity', 'Blockchain', 'Mobile Dev', 'UI/UX', 'IoT'],
+                datasets: [{
+                    label: 'Demand Score',
+                    data: [92, 88, 85, 83, 80, 78, 72, 70, 67, 65],
+                    backgroundColor: [
+                        'rgba(99, 102, 241, 0.8)',
+                        'rgba(99, 102, 241, 0.75)',
+                        'rgba(99, 102, 241, 0.7)',
+                        'rgba(99, 102, 241, 0.65)',
+                        'rgba(99, 102, 241, 0.6)',
+                        'rgba(99, 102, 241, 0.55)',
+                        'rgba(99, 102, 241, 0.5)',
+                        'rgba(99, 102, 241, 0.45)',
+                        'rgba(99, 102, 241, 0.4)',
+                        'rgba(99, 102, 241, 0.35)'
+                    ],
+                    borderWidth: 1
+                }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: 'Skill Demand Growth (Last 12 Months)'
-                    }
-                },
+                indexAxis: 'y',
                 scales: {
-                    y: {
-                        beginAtZero: false,
-                        min: 40,
+                    x: {
+                        beginAtZero: true,
                         max: 100,
                         title: {
                             display: true,
-                            text: 'Demand Index'
+                            text: 'Demand Score (Based on Job Postings)'
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `Demand: ${context.raw}/100`;
+                            }
                         }
                     }
                 }
             }
         });
+    }
+    
+    function createSkillsGapChart() {
+        const ctx = document.getElementById('skills-gap-chart').getContext('2d');
         
-        // Industry Skills Chart
-        const industrySkillsCtx = document.getElementById('industry-skills-chart').getContext('2d');
-        const industrySkillsChart = new Chart(industrySkillsCtx, {
+        new Chart(ctx, {
             type: 'radar',
             data: {
-                labels: ['Tech', 'Healthcare', 'Finance', 'Manufacturing', 'Retail', 'Education'],
-                datasets: [
-                    {
-                        label: 'Technical Skills',
-                        data: [85, 65, 75, 70, 60, 55],
+                labels: ['Cloud Architects', 'Cybersecurity', 'AI/ML', 'Data Engineering', 'Full Stack', 'DevOps'],
+                datasets: [{
+                    label: 'Demand',
+                    data: [90, 85, 95, 75, 80, 78],
+                    borderColor: 'rgba(99, 102, 241, 1)',
                         backgroundColor: 'rgba(99, 102, 241, 0.2)',
-                        borderColor: '#6366f1',
-                        pointBackgroundColor: '#6366f1'
-                    },
-                    {
-                        label: 'Soft Skills',
-                        data: [70, 85, 80, 65, 85, 90],
-                        backgroundColor: 'rgba(14, 165, 233, 0.2)',
-                        borderColor: '#0ea5e9',
-                        pointBackgroundColor: '#0ea5e9'
-                    },
-                    {
-                        label: 'Domain Expertise',
-                        data: [75, 90, 80, 75, 70, 80],
-                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
-                        borderColor: '#10b981',
-                        pointBackgroundColor: '#10b981'
-                    }
-                ]
+                    borderWidth: 2,
+                    pointBackgroundColor: 'rgba(99, 102, 241, 1)'
+                }, {
+                    label: 'Available Talent',
+                    data: [45, 35, 40, 50, 65, 40],
+                    borderColor: 'rgba(245, 158, 11, 1)',
+                    backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                    borderWidth: 2,
+                    pointBackgroundColor: 'rgba(245, 158, 11, 1)'
+                }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
+                elements: {
+                    line: {
+                        tension: 0.1
                     }
                 },
                 scales: {
                     r: {
-                        beginAtZero: true,
+                        angleLines: {
+                            display: true
+                        },
+                        min: 0,
                         max: 100,
+                        ticks: {
+                            stepSize: 20
+                        }
                     }
                 }
             }
         });
-    });
+    }
+</script>
+{% endblock %} 
 </script>
 {% endblock %} 
