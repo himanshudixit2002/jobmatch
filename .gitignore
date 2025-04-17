@@ -25,12 +25,14 @@ instance/
 .webassets-cache
 
 # Environment
+.env
 .venv
 env/
 venv/
 ENV/
 env.bak/
 venv.bak/
+.env.*
 
 # IDE
 .idea/
@@ -39,4 +41,39 @@ venv.bak/
 *.swo
 
 # Other
-.DS_Store 
+.DS_Store
+*.log
+logs/
+tmp/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# AWS
+.aws/
+aws-credentials
+instance_info.txt
+
+# Deployment
+*.pem
+deploy_to_ec2.sh
+jobmatch_deploy.tar.gz
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Node/JavaScript
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Generated files
+app/static/uploads/
+app/static/generated/
+*.pdf
+uploads/ 
