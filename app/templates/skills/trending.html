@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+
+{% block title %}Trending Skills - JobMatch{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold mb-3">AI-Powered Trending Skills</h1>
+            <p class="text-muted">These are the most in-demand skills from recent job postings in the last 30 days. Stay ahead of the curve by developing these skills, identified through intelligent market analysis.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="bi bi-graph-up-arrow text-primary me-2"></i>Hot Skills in the Job Market</h4>
+                    <span class="badge bg-info">AI Analyzed</span>
+                </div>
+                <div class="card-body">
+                    {% if trending_skills %}
+                    <div class="row">
+                        {% for skill in trending_skills %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="card-title mb-0">{{ skill.name }}</h5>
+                                        <span class="badge bg-primary rounded-pill">{{ skill.jobs_count }} jobs</span>
+                                    </div>
+                                    <div class="progress">
+                                        {% set percentage = (skill.jobs_count / trending_skills[0].jobs_count * 100)|round|int %}
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ percentage }}%;" aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100">{{ percentage }}%</div>
+                                    </div>
+                                    <div class="mt-3 d-flex justify-content-end">
+                                        <button class="btn btn-sm btn-info skill-details-btn" data-skill="{{ skill.name }}">
+                                            <i class="bi bi-info-circle me-1"></i> Learn More
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>
+                        <h4 class="mt-3">No Trending Skills Data</h4>
+                        <p class="text-muted">We don't have enough job posting data to determine trending skills at the moment.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mt-4 mt-lg-0">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-robot text-info me-2"></i>AI Insights</h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">Our AI has analyzed current job market trends and identified these key insights:</p>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item border-start border-primary border-3 rounded my-2">
+                            <strong>Most Valuable Skills:</strong> Technical skills that show practical experience are in highest demand.
+                        </li>
+                        <li class="list-group-item border-start border-primary border-3 rounded my-2">
+                            <strong>Hybrid Skillsets:</strong> Employers value candidates with both technical and soft skills.
+                        </li>
+                        <li class="list-group-item border-start border-primary border-3 rounded my-2">
+                            <strong>Continuous Learning:</strong> Frequently updating skills shows adaptability to employers.
+                        </li>
+                    </ul>
+                    <div class="alert alert-info mt-3">
+                        <i class="bi bi-lightbulb-fill me-2"></i> AI tip: Focus on learning skills that complement your existing expertise for maximum impact.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="bi bi-lightbulb text-warning me-2"></i>For You</h5>
+                </div>
+                <div class="card-body">
+                    {% if current_user.is_authenticated and current_user.is_applicant() %}
+                    <p>Want personalized skill recommendations based on your profile and career interests?</p>
+                    <a href="{{ url_for('skills.recommendations') }}" class="btn btn-primary w-100">
+                        <i class="bi bi-person-check me-2"></i>Get Personalized Recommendations
+                    </a>
+                    {% else %}
+                    <p>Sign up as a job seeker to get personalized skill recommendations based on your profile and career interests.</p>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary w-100">
+                        <i class="bi bi-person-plus me-2"></i>Sign Up Now
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Skill Info Modal -->
+<div class="modal fade" id="skillInfoModal" tabindex="-1" aria-labelledby="skillInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="skillInfoModalLabel">Skill Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="skillInfoLoading" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Loading skill information...</p>
+                </div>
+                
+                <div id="skillInfoContent" class="d-none">
+                    <h3 id="modalSkillName" class="mb-3"></h3>
+                    
+                    <div class="mb-4">
+                        <h5 class="text-primary">Description</h5>
+                        <p id="modalSkillDescription"></p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5 class="text-primary">Market Value</h5>
+                        <p id="modalSkillMarketValue"></p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5 class="text-primary">Learning Time</h5>
+                        <p id="modalSkillLearningTime"></p>
+                    </div>
+                    
+                    <div>
+                        <h5 class="text-primary">Learning Resources</h5>
+                        <div id="modalSkillResources"></div>
+                    </div>
+                </div>
+                
+                <div id="skillInfoError" class="d-none">
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-circle me-2"></i>
+                        <span id="modalErrorMessage">Unable to load skill information. Please try again later.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                {% if current_user.is_authenticated and current_user.is_applicant() %}
+                <a href="{{ url_for('skills.recommendations') }}" class="btn btn-primary">
+                    <i class="bi bi-person-check me-1"></i>Get Recommendations
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get CSRF token
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+    // Initialize the modal
+    const skillModal = new bootstrap.Modal(document.getElementById('skillInfoModal'));
+    
+    // Handle skill details buttons
+    document.querySelectorAll('.skill-details-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const skillName = this.getAttribute('data-skill');
+            
+            // Set the modal title
+            document.getElementById('skillInfoModalLabel').textContent = `Skill Information: ${skillName}`;
+            
+            // Reset modal state
+            document.getElementById('skillInfoLoading').classList.remove('d-none');
+            document.getElementById('skillInfoContent').classList.add('d-none');
+            document.getElementById('skillInfoError').classList.add('d-none');
+            
+            // Show the modal
+            skillModal.show();
+            
+            // Create a request to get skill details
+            fetch(`/api/skill-info?name=${encodeURIComponent(skillName)}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('skillInfoLoading').classList.add('d-none');
+                
+                if (data.error) {
+                    // Show error message
+                    document.getElementById('skillInfoError').classList.remove('d-none');
+                    document.getElementById('modalErrorMessage').textContent = data.error;
+                } else {
+                    // Show skill details
+                    document.getElementById('skillInfoContent').classList.remove('d-none');
+                    document.getElementById('modalSkillName').textContent = data.name;
+                    document.getElementById('modalSkillDescription').textContent = data.description;
+                    document.getElementById('modalSkillMarketValue').textContent = data.market_value;
+                    document.getElementById('modalSkillLearningTime').textContent = data.learning_time;
+                    
+                    // Clear and populate resources
+                    const resourcesContainer = document.getElementById('modalSkillResources');
+                    resourcesContainer.innerHTML = '';
+                    
+                    if (data.resources && data.resources.length > 0) {
+                        const resourceList = document.createElement('ul');
+                        resourceList.className = 'list-group';
+                        
+                        data.resources.forEach(resource => {
+                            const listItem = document.createElement('li');
+                            listItem.className = 'list-group-item border-0 ps-0';
+                            
+                            const resourceTitle = document.createElement('h6');
+                            
+                            if (resource.url) {
+                                const link = document.createElement('a');
+                                link.href = resource.url;
+                                link.target = '_blank';
+                                link.textContent = resource.name;
+                                resourceTitle.appendChild(link);
+                            } else {
+                                resourceTitle.textContent = resource.name;
+                            }
+                            
+                            listItem.appendChild(resourceTitle);
+                            
+                            if (resource.description) {
+                                const description = document.createElement('p');
+                                description.className = 'small text-muted mb-0';
+                                description.textContent = resource.description;
+                                listItem.appendChild(description);
+                            }
+                            
+                            resourceList.appendChild(listItem);
+                        });
+                        
+                        resourcesContainer.appendChild(resourceList);
+                    } else {
+                        resourcesContainer.innerHTML = '<p class="text-muted">No specific resources available.</p>';
+                    }
+                }
+            })
+            .catch(error => {
+                // Show error message
+                document.getElementById('skillInfoLoading').classList.add('d-none');
+                document.getElementById('skillInfoError').classList.remove('d-none');
+                console.error('Error:', error);
+            });
+        });
+    });
+});
+</script>
+{% endblock %} 

@@ -1,6 +1,6 @@
 from app.extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask_login import UserMixin
 import uuid
 
@@ -98,8 +98,11 @@ class Job(db.Model):
         exp_score = 0
         if self.experience_required <= user.experience:
             exp_score = 100
-        elif user.experience > 0:
+        elif user.experience > 0 and self.experience_required > 0:
             exp_score = (user.experience / self.experience_required) * 100
+        elif self.experience_required == 0:
+            # If no experience required, give full score
+            exp_score = 100
             
         # Calculate final score (skills are weighted more)
         final_score = (skill_score * 0.7) + (exp_score * 0.3)
@@ -170,8 +173,8 @@ class Interview(db.Model):
     job_id = db.Column(db.Integer, db.ForeignKey('jobs.id'), nullable=False)
     recruiter_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     applicant_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    start_time = db.Column(db.DateTime, nullable=False)
-    end_time = db.Column(db.DateTime, nullable=False)
+    scheduled_at = db.Column(db.DateTime, nullable=False)
+    duration = db.Column(db.Integer, nullable=False, default=60)  # in minutes
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     status = db.Column(db.String(20), default='scheduled')  # scheduled, completed, cancelled, rescheduled
@@ -186,6 +189,16 @@ class Interview(db.Model):
     recruiter = db.relationship('User', foreign_keys=[recruiter_id], backref=db.backref('interviews_as_recruiter', lazy=True))
     applicant = db.relationship('User', foreign_keys=[applicant_id], backref=db.backref('interviews_as_applicant', lazy=True))
     
+    @property
+    def end_time(self):
+        """Calculate the end time based on duration."""
+        return self.scheduled_at + timedelta(minutes=self.duration)
+    
+    @property
+    def start_time(self):
+        """Alias for scheduled_at for backward compatibility."""
+        return self.scheduled_at
+    
     def __repr__(self):
         return f'<Interview {self.id}: {self.job_id}, {self.applicant_id}>'
         
@@ -196,7 +209,8 @@ class Interview(db.Model):
             'job_id': self.job_id,
             'recruiter_id': self.recruiter_id,
             'applicant_id': self.applicant_id,
-            'start_time': self.start_time.isoformat(),
+            'scheduled_at': self.scheduled_at.isoformat(),
+            'duration': self.duration,
             'end_time': self.end_time.isoformat(),
             'status': self.status,
             'interview_type': self.interview_type,
@@ -286,4 +300,38 @@ class UserChatPreference(db.Model):
             'chat_history_enabled': self.chat_history_enabled,
             'notification_enabled': self.notification_enabled,
             'theme': self.theme
+        }
+
+class SkillRecommendation(db.Model):
+    """Model for storing skill recommendations for applicants"""
+    __tablename__ = 'skill_recommendations'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    skill_id = db.Column(db.Integer, db.ForeignKey('skills.id'), nullable=False)
+    relevance_score = db.Column(db.Float, nullable=False)  # Score from 0-100 indicating relevance
+    recommendation_reason = db.Column(db.Text, nullable=False)  # Why this skill is recommended
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_dismissed = db.Column(db.Boolean, default=False)  # If the user has dismissed this recommendation
+    is_acquired = db.Column(db.Boolean, default=False)  # If the user has marked this skill as acquired
+    
+    # Relationships
+    user = db.relationship('User', backref=db.backref('skill_recommendations', lazy=True))
+    skill = db.relationship('Skill', backref=db.backref('skill_recommendations', lazy=True))
+    
+    def __repr__(self):
+        return f'<SkillRecommendation {self.id}: {self.skill.name} for {self.user.name}>'
+    
+    def serialize(self):
+        """Return object data in easily serializable format"""
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'skill_id': self.skill_id,
+            'skill_name': self.skill.name if self.skill else None,
+            'relevance_score': self.relevance_score,
+            'recommendation_reason': self.recommendation_reason,
+            'created_at': self.created_at.isoformat(),
+            'is_dismissed': self.is_dismissed,
+            'is_acquired': self.is_acquired
         } 

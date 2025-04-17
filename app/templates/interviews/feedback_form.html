@@ -1,225 +1,307 @@
 {% extends "base.html" %}
 
+{% block title %}{{ title }} | JobMatch{% endblock %}
+
 {% block content %}
 <div class="container py-4">
-    <div class="row justify-content-center">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('interviews.index') }}">Interviews</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('interviews.view_interview', interview_id=interview.id) }}">Interview Details</a></li>
+            <li class="breadcrumb-item active">Feedback</li>
+        </ol>
+    </nav>
+    
+    <div class="row">
         <div class="col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <h1 class="h3 mb-4">Interview Feedback</h1>
-                    
-                    <div class="alert alert-info d-flex align-items-center mb-4">
-                        <i class="bi bi-info-circle-fill me-2"></i>
+            <!-- Feedback Form -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-clipboard-check me-2 text-primary"></i> Interview Feedback
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-light rounded-circle p-3 me-3">
+                                {% if interview.interview_type == 'video' %}
+                                    <i class="bi bi-camera-video text-primary h5 mb-0"></i>
+                                {% elif interview.interview_type == 'phone' %}
+                                    <i class="bi bi-telephone text-primary h5 mb-0"></i>
+                                {% elif interview.interview_type == 'in-person' %}
+                                    <i class="bi bi-building text-primary h5 mb-0"></i>
+                                {% elif interview.interview_type == 'technical' %}
+                                    <i class="bi bi-code-square text-primary h5 mb-0"></i>
+                                {% else %}
+                                    <i class="bi bi-chat-text text-primary h5 mb-0"></i>
+                                {% endif %}
+                            </div>
                         <div>
-                            Your feedback will help determine if the candidate is suitable for the position.
+                                <h5 class="mb-0">{{ interview.job.title }}</h5>
+                                <p class="text-muted mb-0">Candidate: {{ interview.candidate.name }}</p>
+                                <p class="text-muted mb-0">
+                                    <i class="bi bi-calendar-event me-1"></i>
+                                    {{ interview.scheduled_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                </p>
+                            </div>
                         </div>
                     </div>
 
+                    <form action="{{ url_for('interviews.interview_feedback', interview_id=interview.id) }}" method="post" class="feedback-form">
                     <div class="mb-4">
-                        <div class="row g-2">
-                            <div class="col-md-6">
-                                <div class="d-flex align-items-center">
-                                    <div class="avatar-sm me-3">
-                                        {% if interview.candidate.profile_image %}
-                                            <img src="{{ url_for('static', filename='uploads/profile_images/' + interview.candidate.profile_image) }}" alt="{{ interview.candidate.name }}" class="rounded-circle" width="48" height="48">
-                                        {% else %}
-                                            <div class="avatar-initials rounded-circle bg-primary text-white">
-                                                {{ interview.candidate.name|initials }}
+                            <h6 class="card-subtitle mb-3">Overall Assessment</h6>
+                            
+                            <div class="mb-3">
+                                <label for="overall_rating" class="form-label">Overall Rating <span class="text-danger">*</span></label>
+                                <div class="feedback-rating" id="ratingStars">
+                                    <i class="bi bi-star" data-rating="1"></i>
+                                    <i class="bi bi-star" data-rating="2"></i>
+                                    <i class="bi bi-star" data-rating="3"></i>
+                                    <i class="bi bi-star" data-rating="4"></i>
+                                    <i class="bi bi-star" data-rating="5"></i>
+                                </div>
+                                <input type="hidden" name="overall_rating" id="overall_rating" value="{{ existing_feedback.overall_rating if existing_feedback else '' }}" required>
+                                <div class="form-text mt-2">Click on a star to rate (1-5)</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Recommendation <span class="text-danger">*</span></label>
+                                <div class="recommendation-options">
+                                    <div class="recommendation-choice mb-2 {% if existing_feedback and existing_feedback.recommendation == 'strong_yes' %}selected{% endif %}" data-value="strong_yes">
+                                        <div class="recommendation-label">
+                                            <div class="recommendation-icon rating-strong-yes">
+                                                <i class="bi bi-hand-thumbs-up-fill"></i>
                                             </div>
-                                        {% endif %}
+                                            <div>
+                                                <h6 class="mb-0">Strong Yes</h6>
+                                                <small class="text-muted">Excellent candidate, hire immediately</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="recommendation-choice mb-2 {% if existing_feedback and existing_feedback.recommendation == 'yes' %}selected{% endif %}" data-value="yes">
+                                        <div class="recommendation-label">
+                                            <div class="recommendation-icon rating-yes">
+                                                <i class="bi bi-hand-thumbs-up"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">Yes</h6>
+                                                <small class="text-muted">Good candidate, would recommend hiring</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="recommendation-choice mb-2 {% if existing_feedback and existing_feedback.recommendation == 'maybe' %}selected{% endif %}" data-value="maybe">
+                                        <div class="recommendation-label">
+                                            <div class="recommendation-icon rating-maybe">
+                                                <i class="bi bi-question-circle"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">Maybe</h6>
+                                                <small class="text-muted">Some strengths and weaknesses, could be a fit</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="recommendation-choice mb-2 {% if existing_feedback and existing_feedback.recommendation == 'no' %}selected{% endif %}" data-value="no">
+                                        <div class="recommendation-label">
+                                            <div class="recommendation-icon rating-no">
+                                                <i class="bi bi-hand-thumbs-down"></i>
                                     </div>
                                     <div>
-                                        <h6 class="mb-0">{{ interview.candidate.name }}</h6>
-                                        <small class="text-muted">{{ interview.candidate.email }}</small>
+                                                <h6 class="mb-0">No</h6>
+                                                <small class="text-muted">Not a good fit for this position</small>
+                                            </div>
+                                        </div>
                                     </div>
+                                    <div class="recommendation-choice mb-2 {% if existing_feedback and existing_feedback.recommendation == 'strong_no' %}selected{% endif %}" data-value="strong_no">
+                                        <div class="recommendation-label">
+                                            <div class="recommendation-icon rating-strong-no">
+                                                <i class="bi bi-hand-thumbs-down-fill"></i>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">Strong No</h6>
+                                                <small class="text-muted">Definite reject, not suitable for the role</small>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="card bg-light border-0">
-                                    <div class="card-body py-2">
-                                        <div class="mb-1"><strong>Position:</strong> {{ interview.job.title }}</div>
-                                        <div class="mb-1"><strong>Date:</strong> {{ interview.scheduled_time.strftime('%b %d, %Y') }}</div>
-                                        <div><strong>Type:</strong> {{ interview.interview_type|title }} Interview</div>
                                     </div>
+                                    <input type="hidden" name="recommendation" id="recommendation" value="{{ existing_feedback.recommendation if existing_feedback else '' }}" required>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <form method="post" action="{{ url_for('interviews.submit_feedback', interview_id=interview.id) }}">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         
-                        <!-- Overall Rating -->
                         <div class="mb-4">
-                            <label class="form-label fw-bold">Overall Rating</label>
-                            <div class="d-flex flex-wrap gap-2">
-                                {% for value in range(1, 6) %}
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="overall_rating" id="rating{{ value }}" value="{{ value }}" required {% if form and form.overall_rating.data == value %}checked{% endif %}>
-                                    <label class="form-check-label" for="rating{{ value }}">{{ value }}</label>
-                                </div>
-                                {% endfor %}
+                            <h6 class="card-subtitle mb-3">Feedback Details</h6>
+                            
+                            <div class="mb-3">
+                                <label for="strengths" class="form-label">Strengths <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="strengths" name="strengths" rows="3" required>{{ existing_feedback.strengths if existing_feedback else '' }}</textarea>
+                                <div class="form-text">What did the candidate do well? Highlight key strengths and positive behaviors.</div>
                             </div>
-                            <div class="form-text d-flex justify-content-between">
-                                <span>Poor</span>
-                                <span>Excellent</span>
+                            
+                            <div class="mb-3">
+                                <label for="areas_for_improvement" class="form-label">Areas for Improvement <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="areas_for_improvement" name="areas_for_improvement" rows="3" required>{{ existing_feedback.areas_for_improvement if existing_feedback else '' }}</textarea>
+                                <div class="form-text">What could the candidate improve? Note specific areas where they could develop.</div>
+                                </div>
+                            
+                            <div class="mb-3">
+                                <label for="cultural_fit" class="form-label">Cultural Fit</label>
+                                <textarea class="form-control" id="cultural_fit" name="cultural_fit" rows="3">{{ existing_feedback.cultural_fit if existing_feedback else '' }}</textarea>
+                                <div class="form-text">How well would the candidate fit with the company culture and team?</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="additional_comments" class="form-label">Additional Comments</label>
+                                <textarea class="form-control" id="additional_comments" name="additional_comments" rows="3">{{ existing_feedback.additional_comments if existing_feedback else '' }}</textarea>
+                                <div class="form-text">Any other observations or comments about the candidate.</div>
                             </div>
                         </div>
 
-                        <!-- Skill Assessment -->
+                        {% if candidate_skills %}
                         <div class="mb-4">
-                            <label class="form-label fw-bold">Skill Assessment</label>
+                            <h6 class="card-subtitle mb-3">Skills Assessment</h6>
+                            <p class="text-muted small mb-3">Rate the candidate's proficiency in each skill mentioned in their profile.</p>
+                            
                             <div class="table-responsive">
-                                <table class="table table-bordered">
-                                    <thead class="table-light">
+                                <table class="table">
+                                    <thead>
                                         <tr>
-                                            <th scope="col">Skill Area</th>
-                                            <th scope="col" class="text-center">Below Expectations</th>
-                                            <th scope="col" class="text-center">Meets Expectations</th>
-                                            <th scope="col" class="text-center">Exceeds Expectations</th>
-                                            <th scope="col" class="text-center">Outstanding</th>
+                                            <th>Skill</th>
+                                            <th>Rating</th>
+                                            <th>Comments</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% set skill_areas = [
-                                            'Technical Knowledge', 
-                                            'Problem Solving', 
-                                            'Communication Skills', 
-                                            'Team Collaboration',
-                                            'Domain Expertise',
-                                            'Learning Ability'
-                                        ] %}
-                                        
-                                        {% for skill in skill_areas %}
+                                        {% for skill in candidate_skills %}
+                                        {% set skill_assessment = existing_feedback.skills_assessment.get(skill.id|string, {}) if existing_feedback and existing_feedback.skills_assessment else {} %}
                                         <tr>
-                                            <td>{{ skill }}</td>
-                                            {% for value in range(1, 5) %}
-                                            <td class="text-center">
-                                                <input class="form-check-input" type="radio" name="skill_{{ loop.parent.loop.index }}" id="skill_{{ loop.parent.loop.index }}_{{ value }}" value="{{ value }}" required>
+                                            <td>
+                                                <input type="hidden" name="skill_name_{{ skill.id }}" value="{{ skill.name }}">
+                                                <span class="fw-medium">{{ skill.name }}</span>
                                             </td>
-                                            {% endfor %}
+                                            <td>
+                                                <select class="form-select form-select-sm" name="skill_rating_{{ skill.id }}">
+                                                    <option value="">Not assessed</option>
+                                                    <option value="1" {% if skill_assessment.get('rating') == 1 %}selected{% endif %}>1 - Novice</option>
+                                                    <option value="2" {% if skill_assessment.get('rating') == 2 %}selected{% endif %}>2 - Basic</option>
+                                                    <option value="3" {% if skill_assessment.get('rating') == 3 %}selected{% endif %}>3 - Intermediate</option>
+                                                    <option value="4" {% if skill_assessment.get('rating') == 4 %}selected{% endif %}>4 - Advanced</option>
+                                                    <option value="5" {% if skill_assessment.get('rating') == 5 %}selected{% endif %}>5 - Expert</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm" name="skill_comments_{{ skill.id }}" placeholder="Optional comments" value="{{ skill_assessment.get('comments', '') }}">
+                                            </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
                             </div>
                         </div>
+                        {% endif %}
 
-                        <!-- Strengths -->
                         <div class="mb-4">
-                            <label for="strengths" class="form-label fw-bold">Candidate Strengths</label>
-                            <textarea class="form-control" id="strengths" name="strengths" rows="3" required>{{ form.strengths.data if form else '' }}</textarea>
+                            <h6 class="card-subtitle mb-3">Options</h6>
+                            
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="is_draft" name="is_draft" value="true" {% if existing_feedback and existing_feedback.is_draft %}checked{% endif %}>
+                                <label class="form-check-label" for="is_draft">
+                                    Save as draft
+                                </label>
+                                <div class="form-text">Save this feedback as a draft to complete later.</div>
                         </div>
 
-                        <!-- Areas for Improvement -->
-                        <div class="mb-4">
-                            <label for="improvement" class="form-label fw-bold">Areas for Improvement</label>
-                            <textarea class="form-control" id="improvement" name="improvement" rows="3" required>{{ form.improvement.data if form else '' }}</textarea>
-                        </div>
-
-                        <!-- Cultural Fit -->
-                        <div class="mb-4">
-                            <label for="cultural_fit" class="form-label fw-bold">Cultural Fit Assessment</label>
-                            <select class="form-select" id="cultural_fit" name="cultural_fit" required>
-                                <option value="" selected disabled>Select an option</option>
-                                <option value="excellent" {% if form and form.cultural_fit.data == 'excellent' %}selected{% endif %}>Excellent fit</option>
-                                <option value="good" {% if form and form.cultural_fit.data == 'good' %}selected{% endif %}>Good fit</option>
-                                <option value="neutral" {% if form and form.cultural_fit.data == 'neutral' %}selected{% endif %}>Neutral</option>
-                                <option value="concerns" {% if form and form.cultural_fit.data == 'concerns' %}selected{% endif %}>Some concerns</option>
-                                <option value="not_fit" {% if form and form.cultural_fit.data == 'not_fit' %}selected{% endif %}>Not a good fit</option>
-                            </select>
-                        </div>
-
-                        <!-- Additional Comments -->
-                        <div class="mb-4">
-                            <label for="additional_comments" class="form-label fw-bold">Additional Comments</label>
-                            <textarea class="form-control" id="additional_comments" name="additional_comments" rows="3">{{ form.additional_comments.data if form else '' }}</textarea>
-                        </div>
-
-                        <!-- Hiring Recommendation -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Hiring Recommendation</label>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="recommendation" id="recommend_strong_yes" value="strong_yes" required {% if form and form.recommendation.data == 'strong_yes' %}checked{% endif %}>
-                                <label class="form-check-label" for="recommend_strong_yes">
-                                    <span class="fw-bold text-success">Strong Yes</span> - Exceptional candidate, hire immediately
-                                </label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="recommendation" id="recommend_yes" value="yes" required {% if form and form.recommendation.data == 'yes' %}checked{% endif %}>
-                                <label class="form-check-label" for="recommend_yes">
-                                    <span class="fw-bold text-success">Yes</span> - Good candidate, would recommend hiring
-                                </label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="recommendation" id="recommend_maybe" value="maybe" required {% if form and form.recommendation.data == 'maybe' %}checked{% endif %}>
-                                <label class="form-check-label" for="recommend_maybe">
-                                    <span class="fw-bold text-warning">Maybe</span> - Has potential but some concerns
-                                </label>
-                            </div>
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="recommendation" id="recommend_no" value="no" required {% if form and form.recommendation.data == 'no' %}checked{% endif %}>
-                                <label class="form-check-label" for="recommend_no">
-                                    <span class="fw-bold text-danger">No</span> - Not a good fit for this position
-                                </label>
-                            </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="recommendation" id="recommend_strong_no" value="strong_no" required {% if form and form.recommendation.data == 'strong_no' %}checked{% endif %}>
-                                <label class="form-check-label" for="recommend_strong_no">
-                                    <span class="fw-bold text-danger">Strong No</span> - Significant concerns, do not hire
+                                <input class="form-check-input" type="checkbox" id="is_private" name="is_private" value="true" {% if existing_feedback and existing_feedback.is_private %}checked{% endif %}>
+                                <label class="form-check-label" for="is_private">
+                                    Private feedback
                                 </label>
+                                <div class="form-text">Make this feedback visible only to recruiters and hiring managers, not to the candidate.</div>
                             </div>
                         </div>
 
-                        <!-- Submit Visibility Options -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">Feedback Visibility</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="share_with_candidate" name="share_with_candidate" value="1" {% if form and form.share_with_candidate.data %}checked{% endif %}>
-                                <label class="form-check-label" for="share_with_candidate">
-                                    Share feedback with candidate (only strengths and improvement areas)
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-between">
-                            <a href="{{ url_for('interviews.view', interview_id=interview.id) }}" class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-left"></i> Back to Interview
-                            </a>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{{ url_for('interviews.view_interview', interview_id=interview.id) }}" class="btn btn-outline-secondary">Cancel</a>
                             <div>
-                                <button type="button" class="btn btn-outline-secondary me-2" data-bs-toggle="modal" data-bs-target="#previewModal">
-                                    Preview
-                                </button>
-                                <button type="submit" class="btn btn-primary">
-                                    Submit Feedback
-                                </button>
+                                <button type="submit" name="draft" value="true" class="btn btn-outline-primary me-2">Save as Draft</button>
+                                <button type="submit" class="btn btn-primary">Submit Feedback</button>
                             </div>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
+        
+        <div class="col-lg-4">
+            <!-- Tips -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightbulb me-2 text-warning"></i> Feedback Tips
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item border-0 ps-0">
+                            <h6 class="mb-1"><i class="bi bi-check-circle text-success me-2"></i> Be specific</h6>
+                            <p class="text-muted small mb-0">Provide concrete examples to support your assessment.</p>
+                        </div>
+                        <div class="list-group-item border-0 ps-0">
+                            <h6 class="mb-1"><i class="bi bi-check-circle text-success me-2"></i> Be balanced</h6>
+                            <p class="text-muted small mb-0">Highlight both strengths and areas for development.</p>
+                        </div>
+                        <div class="list-group-item border-0 ps-0">
+                            <h6 class="mb-1"><i class="bi bi-check-circle text-success me-2"></i> Be objective</h6>
+                            <p class="text-muted small mb-0">Focus on behaviors and skills, not personality.</p>
+                        </div>
+                        <div class="list-group-item border-0 ps-0">
+                            <h6 class="mb-1"><i class="bi bi-check-circle text-success me-2"></i> Be constructive</h6>
+                            <p class="text-muted small mb-0">Provide actionable feedback that helps the candidate grow.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Candidate Profile Summary -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person me-2 text-primary"></i> Candidate Profile
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        {% if interview.candidate.profile_image %}
+                        <img src="{{ interview.candidate.profile_image }}" class="rounded-circle me-3" width="64" height="64" alt="{{ interview.candidate.name }}">
+                        {% else %}
+                        <div class="avatar-placeholder rounded-circle bg-primary bg-opacity-10 me-3 d-flex align-items-center justify-content-center" style="width:64px;height:64px;">
+                            <span class="text-primary fw-bold">{{ interview.candidate.name[:1] }}</span>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <h5 class="mb-0">{{ interview.candidate.name }}</h5>
+                            <p class="text-muted mb-0">{{ interview.candidate.email }}</p>
     </div>
 </div>
 
-<!-- Preview Modal -->
-<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="previewModalLabel">Feedback Preview</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <hr>
+                    
+                    {% if candidate_skills %}
+                    <div class="mb-3">
+                        <h6 class="card-subtitle mb-2">Skills</h6>
+                        <div>
+                            {% for skill in candidate_skills %}
+                            <span class="badge bg-light text-dark me-2 mb-2 py-2 px-3">{{ skill.name }}</span>
+                            {% endfor %}
+                        </div>
             </div>
-            <div class="modal-body" id="previewContent">
-                <div class="text-center">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
+                    {% endif %}
+                    
+                    <div class="mt-3">
+                        <a href="{{ url_for('profiles.view_candidate', user_id=interview.candidate.id) }}" class="btn btn-outline-primary btn-sm w-100">
+                            <i class="bi bi-person-badge me-1"></i> View Full Profile
+                        </a>
                     </div>
-                    <p>Loading preview...</p>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -227,67 +309,73 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const previewModal = document.getElementById('previewModal');
-        previewModal.addEventListener('show.bs.modal', function (event) {
-            const previewContent = document.getElementById('previewContent');
+    // Star rating functionality
+    const stars = document.querySelectorAll('#ratingStars i');
+    const ratingInput = document.getElementById('overall_rating');
             
-            // Collect form data
-            const formData = new FormData(document.querySelector('form'));
-            
-            // For demo purposes, we'll just generate a preview based on the form data
-            // In a real implementation, you might want to send this to the server and get a formatted response
-            const overallRating = formData.get('overall_rating') || 'Not provided';
-            const strengths = formData.get('strengths') || 'Not provided';
-            const improvement = formData.get('improvement') || 'Not provided';
-            const recommendation = formData.get('recommendation') || 'Not provided';
-            
-            let recommendationText = '';
-            switch(recommendation) {
-                case 'strong_yes': recommendationText = '<span class="text-success fw-bold">Strong Yes</span> - Exceptional candidate, hire immediately'; break;
-                case 'yes': recommendationText = '<span class="text-success fw-bold">Yes</span> - Good candidate, would recommend hiring'; break;
-                case 'maybe': recommendationText = '<span class="text-warning fw-bold">Maybe</span> - Has potential but some concerns'; break;
-                case 'no': recommendationText = '<span class="text-danger fw-bold">No</span> - Not a good fit for this position'; break;
-                case 'strong_no': recommendationText = '<span class="text-danger fw-bold">Strong No</span> - Significant concerns, do not hire'; break;
-                default: recommendationText = 'Not provided';
+    // Set initial stars based on value
+    if (ratingInput.value) {
+        updateStars(parseInt(ratingInput.value));
+    }
+    
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = this.getAttribute('data-rating');
+            ratingInput.value = rating;
+            updateStars(rating);
+        });
+    });
+    
+    function updateStars(rating) {
+        stars.forEach(star => {
+            const starRating = parseInt(star.getAttribute('data-rating'));
+            if (starRating <= rating) {
+                star.classList.remove('bi-star');
+                star.classList.add('bi-star-fill');
+            } else {
+                star.classList.remove('bi-star-fill');
+                star.classList.add('bi-star');
             }
+        });
+    }
+    
+    // Recommendation selection
+    const recommendationChoices = document.querySelectorAll('.recommendation-choice');
+    const recommendationInput = document.getElementById('recommendation');
+    
+    recommendationChoices.forEach(choice => {
+        choice.addEventListener('click', function() {
+            // Remove selected class from all choices
+            recommendationChoices.forEach(c => c.classList.remove('selected'));
             
-            // Generate preview HTML
-            const previewHTML = `
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">Overall Rating</h5>
-                        <div class="d-flex">
-                            ${Array.from({length: 5}, (_, i) => 
-                                `<i class="bi bi-star${i < overallRating ? '-fill text-warning' : ''} me-1" style="font-size: 1.5rem;"></i>`
-                            ).join('')}
-                            <span class="ms-2 align-self-center">${overallRating}/5</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">Candidate Strengths</h5>
-                        <p class="card-text">${strengths}</p>
-                    </div>
-                </div>
-                
-                <div class="card mb-3">
-                    <div class="card-body">
-                        <h5 class="card-title">Areas for Improvement</h5>
-                        <p class="card-text">${improvement}</p>
-                    </div>
-                </div>
-                
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Hiring Recommendation</h5>
-                        <p class="card-text">${recommendationText}</p>
-                    </div>
-                </div>
-            `;
+            // Add selected class to clicked choice
+            this.classList.add('selected');
             
-            previewContent.innerHTML = previewHTML;
+            // Update hidden input
+            const value = this.getAttribute('data-value');
+            recommendationInput.value = value;
+        });
+    });
+    
+    // Handle draft checkbox
+    const draftCheckbox = document.getElementById('is_draft');
+    const submitBtn = document.querySelector('button[type="submit"]:not([name="draft"])');
+    
+    draftCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            submitBtn.textContent = 'Save Draft';
+        } else {
+            submitBtn.textContent = 'Submit Feedback';
+        }
+    });
+    
+    // Form validation override for drafts
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        if (draftCheckbox.checked) {
+            // Allow form submission without validation for drafts
+            return true;
+        }
         });
     });
 </script>

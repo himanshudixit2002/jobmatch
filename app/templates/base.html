@@ -8,7 +8,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -21,6 +21,382 @@
     {% if request.endpoint and 'insights' in request.endpoint %}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.css">
     {% endif %}
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --primary-light: #818cf8;
+            --secondary: #0ea5e9;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #64748b;
+            --gray-light: #e2e8f0;
+            --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --border-radius: 0.5rem;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: var(--dark);
+            background-color: #f9fafb;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+        }
+
+        /* Navbar Styling */
+        .navbar {
+            padding: 0.75rem 0;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .navbar.scrolled {
+            box-shadow: var(--shadow-md);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            margin-right: 1.5rem;
+        }
+
+        .brand-text {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-img {
+            height: 36px;
+            width: auto;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+            transition: transform 0.3s ease;
+        }
+
+        .navbar-brand:hover .logo-img {
+            transform: scale(1.05);
+        }
+
+        .nav-link {
+            font-weight: 500;
+            padding: 0.5rem 0.75rem;
+            color: var(--dark);
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            margin: 0 0.125rem;
+            white-space: nowrap;
+            font-size: 0.95rem;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+            background-color: rgba(79, 70, 229, 0.05);
+            transform: translateY(-1px);
+        }
+
+        .nav-link.active {
+            color: var(--primary);
+            background-color: rgba(79, 70, 229, 0.1);
+        }
+
+        .nav-link i {
+            transition: transform 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .nav-link:hover i {
+            transform: translateY(-2px);
+        }
+
+        .navbar .btn {
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            white-space: nowrap;
+            margin: 0 0.25rem;
+        }
+
+        .navbar .btn-outline-primary {
+            border-color: var(--primary);
+            color: var(--primary);
+            background-color: transparent;
+        }
+
+        .navbar .btn-outline-primary:hover {
+            background-color: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+        }
+
+        .navbar .btn-primary {
+            background: var(--gradient-primary);
+            border: none;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+            color: white;
+        }
+
+        .navbar .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Make navbar more compact and ensure items stay on one line */
+        .navbar-nav {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+        }
+        
+        .navbar-nav .nav-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Fixed navbar for mobile devices */
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                max-height: 85vh;
+                overflow-y: auto;
+            }
+            
+            .navbar .navbar-nav {
+                padding: 1rem 0;
+                flex-wrap: wrap;
+            }
+            
+            .navbar .btn {
+                margin-top: 0.5rem;
+                width: 100%;
+                text-align: center;
+            }
+            
+            .nav-link {
+                padding: 0.75rem 1rem;
+                width: 100%;
+                display: flex;
+                align-items: center;
+            }
+            
+            .nav-link i {
+                margin-right: 0.5rem;
+                width: 20px;
+                text-align: center;
+            }
+        }
+
+        /* Dropdown menu styling */
+        .dropdown-menu {
+            border: none;
+            box-shadow: var(--shadow-lg);
+            border-radius: var(--border-radius);
+            margin-top: 0.5rem;
+            padding: 0.75rem;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dropdown-item {
+            padding: 0.6rem 1rem;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-bottom: 0.2rem;
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(79, 70, 229, 0.08);
+            color: var(--primary);
+            transform: translateX(5px);
+        }
+
+        .dropdown-item i {
+            opacity: 0.8;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover i {
+            opacity: 1;
+            color: var(--primary);
+        }
+
+        /* Footer styling */
+        footer {
+            background-color: white;
+            padding: 4rem 0 2rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            position: relative;
+            margin-top: 4rem;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%234f46e5' fill-opacity='0.02' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-primary);
+        }
+
+        footer h5 {
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
+            position: relative;
+            display: inline-block;
+        }
+
+        footer h5::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--gradient-primary);
+            border-radius: 3px;
+        }
+
+        footer ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        footer ul li {
+            margin-bottom: 0.75rem;
+            transition: transform 0.3s ease;
+        }
+
+        footer ul li:hover {
+            transform: translateX(5px);
+        }
+
+        footer ul li a {
+            color: var(--gray);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+            display: inline-block;
+            padding-left: 0.5rem;
+        }
+
+        footer ul li a::before {
+            content: '→';
+            position: absolute;
+            left: -5px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        footer ul li a:hover {
+            color: var(--primary);
+            padding-left: 1rem;
+        }
+
+        footer ul li a:hover::before {
+            opacity: 1;
+            left: 0;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background-color: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background: var(--gradient-primary);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.2);
+        }
+
+        footer hr {
+            background-color: rgba(0, 0, 0, 0.05);
+            height: 1px;
+            opacity: 0.5;
+        }
+
+        footer .text-muted {
+            color: var(--gray) !important;
+            font-size: 0.9rem;
+        }
+
+        footer .text-primary {
+            color: var(--primary) !important;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            position: relative;
+        }
+
+        footer .text-primary::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-primary);
+            transition: width 0.3s ease;
+        }
+
+        footer .text-primary:hover {
+            color: var(--primary-dark) !important;
+        }
+
+        footer .text-primary:hover::after {
+            width: 100%;
+        }
+
+        @media (max-width: 767.98px) {
+            footer {
+                padding: 3rem 0 1.5rem;
+            }
+            
+            footer h5::after {
+                width: 30px;
+            }
+        }
+    </style>
     <!-- No template-specific styles block - all CSS should be in style.css -->
 </head>
 <body>
@@ -35,7 +411,7 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <ul class="navbar-nav me-auto">
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('main.index') }}">
                         <i class="bi bi-house-door"></i> Home
@@ -43,41 +419,59 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('jobs.browse_jobs') }}">
-                        <i class="bi bi-briefcase"></i> Browse Jobs
+                        <i class="bi bi-briefcase"></i> Jobs
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('insights.dashboard') }}">
-                        <i class="bi bi-graph-up"></i> Market Insights
+                        <i class="bi bi-graph-up"></i> Insights
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('skills.trending_skills') }}">
+                        <i class="bi bi-trophy"></i> Skills
                     </a>
                 </li>
                 {% if current_user.is_authenticated %}
                     {% if current_user.is_recruiter() %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('jobs.recruiter_dashboard') }}">
-                                <i class="bi bi-speedometer2"></i> Dashboard
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="recruiterDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-speedometer2"></i> Recruiter
                             </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('jobs.manage_jobs') }}">
-                                <i class="bi bi-list-check"></i> Manage Jobs
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('jobs.create_job') }}">
-                                <i class="bi bi-plus-circle"></i> Post Job
-                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="recruiterDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('jobs.recruiter_dashboard') }}">
+                                    <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('jobs.manage_jobs') }}">
+                                    <i class="bi bi-list-check me-2"></i> Manage Jobs
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('interviews.index') }}">
+                                    <i class="bi bi-calendar-event me-2"></i> Manage Interviews
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('jobs.create_job') }}">
+                                    <i class="bi bi-plus-circle me-2"></i> Post Job
+                                </a></li>
+                            </ul>
                         </li>
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('profiles.manage_skills') }}">
-                                <i class="bi bi-tools"></i> Manage Skills
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="applicantDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-person-badge"></i> Applicant
                             </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('profiles.view_applications') }}">
-                                <i class="bi bi-file-earmark-text"></i> My Applications
-                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="applicantDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('skills.recommendations') }}">
+                                    <i class="bi bi-lightbulb me-2"></i> Skill Recommendations
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('interviews.index') }}">
+                                    <i class="bi bi-calendar-event me-2"></i> My Interviews
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('profiles.manage_skills') }}">
+                                    <i class="bi bi-tools me-2"></i> Manage Skills
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('profiles.view_applications') }}">
+                                    <i class="bi bi-file-earmark-text me-2"></i> My Applications
+                                </a></li>
+                            </ul>
                         </li>
                     {% endif %}
                 {% endif %}
@@ -107,14 +501,14 @@
                         </ul>
                     </li>
                 {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link btn btn-outline-primary me-2" href="{{ url_for('auth.login') }}">
-                            <i class="bi bi-box-arrow-in-right"></i> Login
+                    <li class="nav-item me-2">
+                        <a class="btn btn-outline-primary" href="{{ url_for('auth.login') }}">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Login
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link btn btn-primary text-white" href="{{ url_for('auth.register') }}">
-                            <i class="bi bi-person-plus"></i> Register
+                        <a class="btn btn-primary" href="{{ url_for('auth.register') }}">
+                            <i class="bi bi-person-plus me-1"></i> Register
                         </a>
                     </li>
                 {% endif %}
@@ -156,32 +550,42 @@
 <footer>
     <div class="container">
         <div class="row">
-            <div class="col-lg-6 mb-4 mb-lg-0">
+            <div class="col-lg-5 mb-4 mb-lg-0">
                 <h5>About JobMatch</h5>
-                <p class="text-muted">JobMatch connects talented professionals with top companies. Find your dream job or the perfect candidate with our advanced matching algorithm.</p>
-                <div class="social-links mt-4">
+                <p class="text-muted mb-4">JobMatch connects talented professionals with top companies. Find your dream job or the perfect candidate with our advanced matching algorithm.</p>
+                <div class="social-links mt-3">
                     <a href="https://www.instagram.com/himanshu.dixitt?igsh=MXExMWI4ZzIxNDA4cw==" target="_blank" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
                     <a href="https://www.linkedin.com/in/himanshudixit2406/" target="_blank" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
                     <a href="https://github.com/himanshudixit2002" target="_blank" aria-label="GitHub"><i class="bi bi-github"></i></a>
+                    <a href="mailto:contact@jobmatch.com" aria-label="Email"><i class="bi bi-envelope"></i></a>
                 </div>
             </div>
-            <div class="col-lg-6 col-md-6 mb-4 mb-md-0">
+            <div class="col-md-4 col-lg-3 mb-4 mb-md-0">
                 <h5>Quick Links</h5>
                 <ul>
                     <li><a href="{{ url_for('main.index') }}">Home</a></li>
                     <li><a href="{{ url_for('jobs.browse_jobs') }}">Browse Jobs</a></li>
+                    <li><a href="{{ url_for('insights.dashboard') }}">Market Insights</a></li>
+                    <li><a href="{{ url_for('skills.trending_skills') }}">Trending Skills</a></li>
+                </ul>
+            </div>
+            <div class="col-md-4 col-lg-4">
+                <h5>Join Us</h5>
+                <ul>
                     <li><a href="{{ url_for('auth.login') }}">Sign In</a></li>
                     <li><a href="{{ url_for('auth.register') }}">Sign Up</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
                 </ul>
             </div>
         </div>
         <hr class="my-4">
-        <div class="row">
+        <div class="row align-items-center">
             <div class="col-md-6 text-center text-md-start">
-                <p class="text-muted mb-0">&copy; {{ now.year }} JobMatch. All rights reserved.</p>
+                <p class="text-muted mb-md-0">&copy; {{ now.year }} JobMatch. All rights reserved.</p>
             </div>
             <div class="col-md-6 text-center text-md-end">
-                <p class="text-muted mb-0">Developed by Himanshu Dixit</p>
+                <p class="text-muted mb-0">Designed & Developed by <a href="https://github.com/himanshudixit2002" target="_blank" class="text-primary">Himanshu Dixit</a></p>
             </div>
         </div>
     </div>
@@ -195,7 +599,8 @@
     AOS.init({
         duration: 800,
         easing: 'ease-in-out',
-        once: true
+        once: true,
+        offset: 100
     });
 
     // Add active class to current nav item
@@ -207,6 +612,41 @@
             if (link.getAttribute('href') === currentLocation) {
                 link.classList.add('active');
             }
+        });
+        
+        // Add scrolled class to navbar on scroll
+        const navbar = document.querySelector('.navbar');
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 10) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+        
+        // Add animation to dropdown menu
+        const dropdownMenus = document.querySelectorAll('.dropdown-menu');
+        dropdownMenus.forEach(menu => {
+            menu.style.opacity = '0';
+            menu.style.transform = 'translateY(10px)';
+            menu.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        });
+        
+        const dropdowns = document.querySelectorAll('.dropdown');
+        dropdowns.forEach(dropdown => {
+            dropdown.addEventListener('show.bs.dropdown', function() {
+                const menu = dropdown.querySelector('.dropdown-menu');
+                setTimeout(() => {
+                    menu.style.opacity = '1';
+                    menu.style.transform = 'translateY(0)';
+                }, 0);
+            });
+            
+            dropdown.addEventListener('hide.bs.dropdown', function() {
+                const menu = dropdown.querySelector('.dropdown-menu');
+                menu.style.opacity = '0';
+                menu.style.transform = 'translateY(10px)';
+            });
         });
     });
 </script>

@@ -25,12 +25,14 @@ JobMatch is a modern web application that connects job applicants with recruiter
 - **Skill Gap Analysis:** Identify missing skills required for specific roles
 - **Interview Management:** Scheduling, feedback, and candidate evaluation
 - **Job Market Insights:** Access trends in skills and demand
+- **AI-Powered Skill Recommendations:** Get personalized skill recommendations using Google's Gemini AI
 
 ## Tech Stack
 - **Backend:** Flask, SQLAlchemy, Python
 - **Frontend:** Bootstrap, jQuery, HTML/CSS
 - **Database:** SQLite (development), PostgreSQL (production)
 - **Machine Learning:** scikit-learn, NLTK, spaCy
+- **AI:** Google Gemini API for skill recommendations and insights
 
 ## Setup Instructions
 
@@ -176,3 +178,19 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - FontAwesome for icons
 - Bootstrap for UI components
 - Flask community for excellent documentation
+
+## Using AI-Powered Skill Recommendations
+
+The platform includes AI-powered skill recommendations using Google's Gemini API. To use this feature:
+
+1. Get a Google Gemini API key from https://ai.google.dev/
+2. Create a `.env` file in the project root (copy from `.env.example`)
+3. Add your API key to the `.env` file: `GEMINI_API_KEY=your-api-key-here`
+4. Restart the application
+
+With the API key configured, the system will:
+- Generate personalized skill recommendations based on your profile and job market trends
+- Provide detailed information about each skill, including learning resources
+- Show AI-powered insights about trending skills in the job market
+
+Note: If no API key is provided, the system will fall back to the basic recommendation algorithm based on job skill frequency.

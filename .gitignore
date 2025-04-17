@@ -25,7 +25,6 @@ instance/
 .webassets-cache
 
 # Environment
-.env
 .venv
 env/
 venv/
@@ -41,6 +40,3 @@ venv.bak/
 
 # Other
 .DS_Store 
-
-# Database
-app/job_recruitment.db 

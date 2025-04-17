@@ -1,244 +1,387 @@
 {% extends "base.html" %}
 
+{% block title %}{{ title }} | JobMatch{% endblock %}
+
 {% block content %}
 <div class="container py-4">
-    <h1 class="mb-4">My Interviews</h1>
-    
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <ul class="nav nav-tabs card-header-tabs" id="interviewTabs" role="tablist">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">My Interviews</h1>
+            <p class="text-muted">Track and prepare for your job interviews</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column: Interview List -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <ul class="nav nav-tabs card-header-tabs" id="interviewsTab" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" type="button" role="tab" aria-controls="upcoming" aria-selected="true">
-                                <i class="bi bi-calendar-event"></i> Upcoming Interviews
+                                <i class="bi bi-calendar-check me-1"></i> Upcoming 
+                                <span class="badge bg-primary rounded-pill ms-1">{{ upcoming_interviews|length }}</span>
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="past-tab" data-bs-toggle="tab" data-bs-target="#past" type="button" role="tab" aria-controls="past" aria-selected="false">
-                                <i class="bi bi-calendar-check"></i> Past Interviews
+                                <i class="bi bi-clock-history me-1"></i> Past 
+                                <span class="badge bg-secondary rounded-pill ms-1">{{ past_interviews|length }}</span>
                             </button>
                         </li>
                     </ul>
                 </div>
-                <div class="card-body">
-                    <div class="tab-content" id="interviewTabsContent">
+                <div class="card-body p-0">
+                    <div class="tab-content" id="interviewsTabContent">
+                        <!-- Upcoming Interviews Tab -->
                         <div class="tab-pane fade show active" id="upcoming" role="tabpanel" aria-labelledby="upcoming-tab">
                             {% if upcoming_interviews %}
-                                <div class="list-group">
-                                    {% for interview in upcoming_interviews %}
-                                    <a href="{{ url_for('interviews.view_interview', interview_id=interview.id) }}" class="list-group-item list-group-item-action">
-                                        <div class="d-flex w-100 justify-content-between">
-                                            <h5 class="mb-1">{{ interview.job.title }} at {{ interview.job.company.name }}</h5>
-                                            <span class="badge {% if interview.status == 'confirmed' %}bg-success{% else %}bg-primary{% endif %}">
-                                                {{ interview.status|capitalize }}
+                                <div class="interview-filters p-3 bg-light border-bottom">
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <div class="input-group input-group-sm" style="max-width: 250px;">
+                                            <span class="input-group-text bg-white">
+                                                <i class="bi bi-search"></i>
                                             </span>
+                                            <input type="text" class="form-control" id="filterInterviews" placeholder="Filter interviews...">
                                         </div>
-                                        <div class="d-flex w-100 justify-content-between">
-                                            <p class="mb-1">
-                                                <i class="bi bi-calendar"></i> {{ interview.datetime.strftime('%B %d, %Y') }} |
-                                                <i class="bi bi-clock"></i> {{ interview.datetime.strftime('%I:%M %p') }} |
-                                                <i class="bi bi-person-badge"></i> {{ interview.interview_type|capitalize }} Interview
-                                            </p>
-                                            <small class="text-muted">
-                                                {% set days_remaining = ((interview.datetime - now).days) %}
-                                                {% if days_remaining == 0 %}
-                                                    Today
-                                                {% elif days_remaining == 1 %}
-                                                    Tomorrow
+                                        
+                                        <select class="form-select form-select-sm" id="filterTypeUpcoming" style="max-width: 150px;">
+                                            <option value="">All Types</option>
+                                            <option value="video">Video</option>
+                                            <option value="phone">Phone</option>
+                                            <option value="in-person">In-Person</option>
+                                            <option value="technical">Technical</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="list-group list-group-flush interview-list">
+                                    {% for interview in upcoming_interviews %}
+                                        <a href="{{ url_for('interviews.view_interview', interview_id=interview.id) }}" class="list-group-item list-group-item-action py-3 interview-item" 
+                                           data-job="{{ interview.job.title if interview.job and interview.job.title else 'Untitled Job' }}" 
+                                           data-type="{{ interview.interview_type }}">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <div class="d-flex align-items-center mb-1">
+                                                        <div class="interview-type-icon me-2">
+                                                            {% if interview.interview_type == 'video' %}
+                                                                <i class="bi bi-camera-video text-primary"></i>
+                                                            {% elif interview.interview_type == 'phone' %}
+                                                                <i class="bi bi-telephone text-success"></i>
+                                                            {% elif interview.interview_type == 'in-person' %}
+                                                                <i class="bi bi-building text-info"></i>
+                                                            {% elif interview.interview_type == 'technical' %}
+                                                                <i class="bi bi-code-square text-danger"></i>
                                                 {% else %}
-                                                    In {{ days_remaining }} days
+                                                                <i class="bi bi-chat-text text-secondary"></i>
                                                 {% endif %}
-                                            </small>
+                                                        </div>
+                                                        <h6 class="mb-0">{{ interview.job.title if interview.job and interview.job.title else 'Untitled Job' }}</h6>
+                                                        <span class="badge bg-primary bg-opacity-10 text-primary ms-2">{{ interview.interview_type|capitalize }}</span>
+                                                    </div>
+                                                    <p class="mb-0 text-muted small">{% if interview.job and interview.job.company %}{{ interview.job.company }}{% endif %}</p>
+                                                </div>
+                                                <div class="text-end">
+                                                    <div class="text-nowrap mb-1">
+                                                        <i class="bi bi-calendar-event me-1 text-muted"></i>
+                                                        <span class="small">{{ interview.start_time.strftime('%b %d, %Y') }}</span>
+                                                    </div>
+                                                    <div class="text-nowrap">
+                                                        <i class="bi bi-clock me-1 text-muted"></i>
+                                                        <span class="small">{{ interview.start_time.strftime('%I:%M %p') }}</span>
+                                                    </div>
+                                                </div>
                                         </div>
                                     </a>
                                     {% endfor %}
                                 </div>
                             {% else %}
-                                <div class="alert alert-info">
-                                    <i class="bi bi-info-circle"></i> You don't have any upcoming interviews.
+                                <div class="text-center py-5">
+                                    <div class="mb-3">
+                                        <i class="bi bi-calendar-x text-muted" style="font-size: 3rem;"></i>
                                 </div>
-                                <p>
-                                    Continue applying for jobs to increase your chances of getting interviews.
-                                    <a href="{{ url_for('jobs.browse_jobs') }}" class="btn btn-primary">
-                                        <i class="bi bi-search"></i> Browse Jobs
+                                    <h5>No upcoming interviews</h5>
+                                    <p class="text-muted">When you receive interview invitations, they will appear here</p>
+                                    <a href="{{ url_for('jobs.browse_jobs') }}" class="btn btn-primary mt-2">
+                                        <i class="bi bi-briefcase me-1"></i> Browse Jobs
                                     </a>
-                                </p>
+                                </div>
                             {% endif %}
                         </div>
+                        
+                        <!-- Past Interviews Tab -->
                         <div class="tab-pane fade" id="past" role="tabpanel" aria-labelledby="past-tab">
                             {% if past_interviews %}
-                                <div class="list-group">
-                                    {% for interview in past_interviews %}
-                                    <a href="{{ url_for('interviews.view_interview', interview_id=interview.id) }}" class="list-group-item list-group-item-action">
-                                        <div class="d-flex w-100 justify-content-between">
-                                            <h5 class="mb-1">{{ interview.job.title }} at {{ interview.job.company.name }}</h5>
-                                            <span class="badge {% if interview.status == 'completed' %}bg-success{% elif interview.status == 'cancelled' %}bg-danger{% else %}bg-warning{% endif %}">
-                                                {{ interview.status|capitalize }}
+                                <div class="interview-filters p-3 bg-light border-bottom">
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <div class="input-group input-group-sm" style="max-width: 250px;">
+                                            <span class="input-group-text bg-white">
+                                                <i class="bi bi-search"></i>
                                             </span>
+                                            <input type="text" class="form-control" id="filterPastInterviews" placeholder="Filter interviews...">
                                         </div>
-                                        <div class="d-flex w-100 justify-content-between">
-                                            <p class="mb-1">
-                                                <i class="bi bi-calendar"></i> {{ interview.datetime.strftime('%B %d, %Y') }} |
-                                                <i class="bi bi-clock"></i> {{ interview.datetime.strftime('%I:%M %p') }} |
-                                                <i class="bi bi-person-badge"></i> {{ interview.interview_type|capitalize }} Interview
-                                            </p>
-                                            <small class="text-muted">
-                                                {% set days_ago = ((now - interview.datetime).days) %}
-                                                {% if days_ago == 0 %}
-                                                    Today
-                                                {% elif days_ago == 1 %}
-                                                    Yesterday
+                                        
+                                        <select class="form-select form-select-sm" id="filterStatusPast" style="max-width: 150px;">
+                                            <option value="">All Status</option>
+                                            <option value="completed">Completed</option>
+                                            <option value="cancelled">Cancelled</option>
+                                            <option value="no_show">No Show</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="list-group list-group-flush interview-list">
+                                    {% for interview in past_interviews %}
+                                        <a href="{{ url_for('interviews.view_interview', interview_id=interview.id) }}" class="list-group-item list-group-item-action py-3 interview-item"
+                                           data-status="{{ interview.status }}">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <div class="d-flex align-items-center mb-1">
+                                                        <h6 class="mb-0">{{ interview.job.title if interview.job and interview.job.title else 'Untitled Job' }}</h6>
+                                                        {% if interview.status == 'completed' %}
+                                                            <span class="badge bg-success ms-2">Completed</span>
+                                                        {% elif interview.status == 'cancelled' %}
+                                                            <span class="badge bg-danger ms-2">Cancelled</span>
+                                                        {% elif interview.status == 'no_show' %}
+                                                            <span class="badge bg-warning text-dark ms-2">No Show</span>
+                                                        {% elif now is defined and interview.start_time < now %}
+                                                            <span class="badge bg-secondary ms-2">Past Due</span>
+                                                        {% endif %}
+                                                    </div>
+                                                    <p class="mb-0 text-muted small">{% if interview.job and interview.job.company %}{{ interview.job.company }}{% endif %}</p>
+                                                </div>
+                                                <div class="text-end">
+                                                    <div class="text-nowrap mb-1">
+                                                        <i class="bi bi-calendar-event me-1 text-muted"></i>
+                                                        <span class="small">{{ interview.start_time.strftime('%b %d, %Y') }}</span>
+                                                    </div>
+                                                    {% if hasattr(interview, 'feedback') and interview.feedback and interview.feedback.is_private is defined and not interview.feedback.is_private %}
+                                                        <a href="{{ url_for('interviews.interview_feedback', interview_id=interview.id) }}" class="btn btn-sm btn-outline-primary">
+                                                            <i class="bi bi-star me-1"></i> View Feedback
+                                                        </a>
                                                 {% else %}
-                                                    {{ days_ago }} days ago
+                                                        <div class="text-nowrap">
+                                                            <i class="bi bi-clock me-1 text-muted"></i>
+                                                            <span class="small">{{ interview.start_time.strftime('%I:%M %p') }}</span>
+                                                        </div>
                                                 {% endif %}
-                                            </small>
+                                                </div>
                                         </div>
                                     </a>
                                     {% endfor %}
                                 </div>
                             {% else %}
-                                <div class="alert alert-info">
-                                    <i class="bi bi-info-circle"></i> You don't have any past interviews.
+                                <div class="text-center py-5">
+                                    <div class="mb-3">
+                                        <i class="bi bi-clock-history text-muted" style="font-size: 3rem;"></i>
+                                    </div>
+                                    <h5>No past interviews</h5>
+                                    <p class="text-muted">Your interview history will be shown here</p>
+                                </div>
+                            {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+        <!-- Right Column: Resources and Preparation -->
+        <div class="col-lg-4">
+            <!-- Next Interview Card -->
+            {% if upcoming_interviews %}
+                {% set next_interview = upcoming_interviews|first %}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">
+                            <i class="bi bi-calendar-check me-2"></i> Your Next Interview
+                        </h5>
+                </div>
+                <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                                {% if next_interview.interview_type == 'video' %}
+                                    <i class="bi bi-camera-video text-primary h5 mb-0"></i>
+                                {% elif next_interview.interview_type == 'phone' %}
+                                    <i class="bi bi-telephone text-primary h5 mb-0"></i>
+                                {% elif next_interview.interview_type == 'in-person' %}
+                                    <i class="bi bi-building text-primary h5 mb-0"></i>
+                                {% elif next_interview.interview_type == 'technical' %}
+                                    <i class="bi bi-code-square text-primary h5 mb-0"></i>
+                                {% else %}
+                                    <i class="bi bi-chat-text text-primary h5 mb-0"></i>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h5 class="mb-0">{{ next_interview.job.title if next_interview.job and next_interview.job.title else 'Untitled Job' }}</h5>
+                                <p class="text-muted mb-0">{% if next_interview.job and next_interview.job.company %}{{ next_interview.job.company }}{% endif %}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-calendar-event me-2 text-primary"></i>
+                                <span>{{ next_interview.start_time.strftime('%A, %B %d, %Y') }}</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="bi bi-clock me-2 text-primary"></i>
+                                <span>{{ next_interview.start_time.strftime('%I:%M %p') }} - {{ next_interview.end_time.strftime('%I:%M %p') }}</span>
+                            </div>
+                            
+                            {% if next_interview.interview_type == 'video' and next_interview.video_link %}
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-link-45deg me-2 text-primary"></i>
+                                    <a href="{{ next_interview.video_link }}" target="_blank">Join Meeting Link</a>
+                                </div>
+                            {% elif next_interview.interview_type == 'in-person' and next_interview.location %}
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-geo-alt me-2 text-primary"></i>
+                                    <span>{{ next_interview.location }}</span>
                                 </div>
                             {% endif %}
                         </div>
+                        
+                        <div class="d-grid">
+                            <a href="{{ url_for('interviews.view_interview', interview_id=next_interview.id) }}" class="btn btn-primary">
+                                <i class="bi bi-eye me-1"></i> View Interview Details
+                            </a>
+                            </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Interview Calendar</h5>
+            {% endif %}
+            
+            <!-- Interview Preparation Tips -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightbulb me-2"></i> Interview Preparation
+                    </h5>
                 </div>
                 <div class="card-body">
-                    <div id="interviewCalendar"></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Interview Tips</h5>
-                </div>
-                <div class="card-body">
-                    <div class="list-group">
-                        <a href="#" class="list-group-item list-group-item-action">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">Research the company thoroughly</h6>
-                                <i class="bi bi-building"></i>
-                            </div>
-                            <small>Understand their mission, values, products, and recent news</small>
-                        </a>
-                        <a href="#" class="list-group-item list-group-item-action">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">Prepare for common questions</h6>
-                                <i class="bi bi-chat-dots"></i>
-                            </div>
-                            <small>Practice your responses to typical interview questions</small>
-                        </a>
-                        <a href="#" class="list-group-item list-group-item-action">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">Test your equipment before video interviews</h6>
-                                <i class="bi bi-camera-video"></i>
-                            </div>
-                            <small>Ensure camera, microphone, and internet connection work properly</small>
-                        </a>
-                        <a href="#" class="list-group-item list-group-item-action">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">Dress professionally</h6>
-                                <i class="bi bi-person-square"></i>
-                            </div>
-                            <small>First impressions matter, dress appropriately for the company culture</small>
-                        </a>
-                        <a href="#" class="list-group-item list-group-item-action">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h6 class="mb-1">Prepare questions to ask</h6>
-                                <i class="bi bi-question-circle"></i>
-                            </div>
-                            <small>Have thoughtful questions ready for the interviewer</small>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">Interview Statistics</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="card text-white bg-primary mb-3">
-                                <div class="card-body text-center">
-                                    <h2 class="card-title">{{ upcoming_interviews|length }}</h2>
-                                    <p class="card-text">Upcoming Interviews</p>
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item border-0 ps-0">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="bg-success bg-opacity-10 p-2 rounded me-3">
+                                    <i class="bi bi-journals text-success"></i>
                                 </div>
+                                <h6 class="mb-0">Research the Company</h6>
                             </div>
+                            <p class="text-muted mb-0 small ps-5">Learn about the company's culture, values, and recent news.</p>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card text-white bg-success mb-3">
-                                <div class="card-body text-center">
-                                    <h2 class="card-title">{{ completed_interviews|default(0) }}</h2>
-                                    <p class="card-text">Completed Interviews</p>
+                        <div class="list-group-item border-0 ps-0">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="bg-info bg-opacity-10 p-2 rounded me-3">
+                                    <i class="bi bi-card-checklist text-info"></i>
                                 </div>
+                                <h6 class="mb-0">Prepare Your Examples</h6>
                             </div>
+                            <p class="text-muted mb-0 small ps-5">Have 3-5 career stories ready for behavioral questions.</p>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card text-white bg-warning mb-3">
-                                <div class="card-body text-center">
-                                    <h2 class="card-title">{{ interview_success_rate|default(0) }}%</h2>
-                                    <p class="card-text">Interview Success Rate</p>
+                        <div class="list-group-item border-0 ps-0">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="bg-warning bg-opacity-10 p-2 rounded me-3">
+                                    <i class="bi bi-mic text-warning"></i>
                                 </div>
+                                <h6 class="mb-0">Practice Your Answers</h6>
                             </div>
+                            <p class="text-muted mb-0 small ps-5">Do mock interviews and record yourself to improve delivery.</p>
                         </div>
-                        <div class="col-md-3">
-                            <div class="card text-white bg-info mb-3">
-                                <div class="card-body text-center">
-                                    <h2 class="card-title">{{ total_applications|default(0) }}</h2>
-                                    <p class="card-text">Total Applications</p>
+                        <div class="list-group-item border-0 ps-0">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="bg-danger bg-opacity-10 p-2 rounded me-3">
+                                    <i class="bi bi-question-circle text-danger"></i>
                                 </div>
+                                <h6 class="mb-0">Prepare Questions</h6>
                             </div>
+                            <p class="text-muted mb-0 small ps-5">Have thoughtful questions ready to ask the interviewer.</p>
                         </div>
                     </div>
                 </div>
             </div>
+            
+            <!-- Job Application Status (if applicable) -->
+            {% if upcoming_interviews %}
+                {% set job_ids = upcoming_interviews|map(attribute='job_id')|list %}
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">
+                            <i class="bi bi-kanban me-2"></i> Application Status
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            {% for interview in upcoming_interviews[:3] %}
+                                {% if interview.job_id %}
+                                <a href="{{ url_for('jobs.view_job', job_id=interview.job_id) }}" class="list-group-item list-group-item-action py-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">{{ interview.job.title if interview.job and interview.job.title else 'Untitled Job' }}</h6>
+                                            <p class="mb-0 small text-muted">{% if interview.job and interview.job.company %}{{ interview.job.company }}{% endif %}</p>
+                                        </div>
+                                        <span class="badge bg-primary">Interviewing</span>
+                                    </div>
+                                </a>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
 
-{% block scripts %}
-{{ super() }}
+<!-- JavaScript for filtering and calendar -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize FullCalendar
-        fetch('{{ url_for("interviews.calendar_data") }}')
-            .then(response => response.json())
-            .then(data => {
-                const calendarEl = document.getElementById('interviewCalendar');
-                const calendar = new FullCalendar.Calendar(calendarEl, {
-                    initialView: 'dayGridMonth',
-                    headerToolbar: {
-                        left: 'prev,next today',
-                        center: 'title',
-                        right: 'dayGridMonth,timeGridWeek'
-                    },
-                    events: data,
-                    eventClick: function(info) {
-                        window.location.href = info.event.url;
+    // Filter functionality
+    function setupFilter(inputId, listItemClass, filterSelects = []) {
+        const filterInput = document.getElementById(inputId);
+        if (!filterInput) return;
+        
+        const listItems = document.querySelectorAll(`.${listItemClass}`);
+        
+        filterInput.addEventListener('input', filterItems);
+        filterSelects.forEach(select => {
+            const selectElement = document.getElementById(select.id);
+            if (selectElement) {
+                selectElement.addEventListener('change', filterItems);
+            }
+        });
+        
+        function filterItems() {
+            const searchTerm = filterInput.value.toLowerCase();
+            
+            // Get filter values from selects
+            const filterValues = {};
+            filterSelects.forEach(select => {
+                const selectElement = document.getElementById(select.id);
+                if (selectElement) {
+                    filterValues[select.dataAttr] = selectElement.value.toLowerCase();
+                }
+            });
+            
+            listItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                let shouldShow = text.includes(searchTerm);
+                
+                // Apply additional filters
+                Object.keys(filterValues).forEach(attr => {
+                    if (filterValues[attr] && shouldShow) {
+                        shouldShow = item.getAttribute(attr).toLowerCase().includes(filterValues[attr]);
                     }
                 });
-                calendar.render();
+                
+                item.style.display = shouldShow ? '' : 'none';
             });
+        }
+    }
+    
+    // Set up filters for each tab
+    setupFilter('filterInterviews', 'interview-item', [
+        {id: 'filterTypeUpcoming', dataAttr: 'data-type'}
+    ]);
+    
+    setupFilter('filterPastInterviews', 'interview-item', [
+        {id: 'filterStatusPast', dataAttr: 'data-status'}
+    ]);
     });
 </script>
-{% endblock %}
 {% endblock %} 

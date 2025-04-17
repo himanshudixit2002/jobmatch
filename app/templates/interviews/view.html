@@ -35,22 +35,22 @@
                             <h6 class="text-muted mb-2">Job Position</h6>
                             <div class="mb-4">
                                 <h5>{{ interview.job.title }}</h5>
-                                <p class="text-muted mb-0">{{ interview.job.company_name }}</p>
+                                <p class="text-muted mb-0">{% if interview.job.company %}{{ interview.job.company }}{% endif %}</p>
                             </div>
 
                             <h6 class="text-muted mb-2">Date and Time</h6>
                             <div class="mb-4">
                                 <div class="d-flex align-items-center mb-1">
                                     <i class="bi bi-calendar-event me-2 text-primary"></i>
-                                    <span>{{ interview.scheduled_at.strftime('%A, %B %d, %Y') }}</span>
+                                    <span>{{ interview.start_time.strftime('%A, %B %d, %Y') }}</span>
                                 </div>
                                 <div class="d-flex align-items-center mb-1">
                                     <i class="bi bi-clock me-2 text-primary"></i>
-                                    <span>{{ interview.scheduled_at.strftime('%I:%M %p') }} - {{ interview.end_time.strftime('%I:%M %p') }}</span>
+                                    <span>{{ interview.start_time.strftime('%I:%M %p') }} - {{ interview.end_time.strftime('%I:%M %p') }}</span>
                                 </div>
                                 <div class="d-flex align-items-center">
                                     <i class="bi bi-hourglass-split me-2 text-primary"></i>
-                                    <span>{{ interview.duration }} minutes</span>
+                                    <span>{{ (interview.end_time - interview.start_time).total_seconds() // 60 }} minutes</span>
                                 </div>
                             </div>
 
@@ -61,7 +61,7 @@
                                     <i class="bi bi-camera-video me-2 text-primary"></i>
                                     <span>Video Interview</span>
                                 </div>
-                                {% if interview.video_platform %}
+                                {% if hasattr(interview, 'video_platform') and interview.video_platform %}
                                 <div class="d-flex align-items-center mb-1">
                                     <i class="bi bi-display me-2 text-primary"></i>
                                     <span>Platform: {{ interview.video_platform }}</span>
@@ -78,7 +78,7 @@
                                     <i class="bi bi-telephone me-2 text-primary"></i>
                                     <span>Phone Interview</span>
                                 </div>
-                                {% if interview.phone_number %}
+                                {% if hasattr(interview, 'phone_number') and interview.phone_number %}
                                 <div class="d-flex align-items-center">
                                     <i class="bi bi-telephone-inbound me-2 text-primary"></i>
                                     <span>{{ interview.phone_number }}</span>
@@ -100,7 +100,7 @@
                                     <i class="bi bi-code-square me-2 text-primary"></i>
                                     <span>Technical Interview</span>
                                 </div>
-                                {% if interview.technical_details %}
+                                {% if hasattr(interview, 'technical_details') and interview.technical_details %}
                                 <div class="d-flex align-items-center">
                                     <i class="bi bi-info-circle me-2 text-primary"></i>
                                     <span>{{ interview.technical_details }}</span>
@@ -120,37 +120,37 @@
                             <div class="card bg-light border-0 mb-4">
                                 <div class="card-body p-3">
                                     <div class="d-flex align-items-center mb-2">
-                                        {% if interview.candidate.profile_image %}
-                                        <img src="{{ interview.candidate.profile_image }}" class="rounded-circle me-3" width="48" height="48" alt="{{ interview.candidate.name }}">
+                                        {% if hasattr(interview.applicant, 'profile_image') and interview.applicant.profile_image %}
+                                        <img src="{{ interview.applicant.profile_image }}" class="rounded-circle me-3" width="48" height="48" alt="{{ interview.applicant.name }}">
                                         {% else %}
                                         <div class="avatar-placeholder rounded-circle bg-primary bg-opacity-10 me-3 d-flex align-items-center justify-content-center" style="width:48px;height:48px;">
-                                            <span class="text-primary fw-bold">{{ interview.candidate.name[:1] }}</span>
+                                            <span class="text-primary fw-bold">{{ interview.applicant.name[:1] }}</span>
                                         </div>
                                         {% endif %}
                                         <div>
-                                            <h6 class="mb-1">{{ interview.candidate.name }}</h6>
+                                            <h6 class="mb-1">{{ interview.applicant.name }}</h6>
                                             <div class="d-flex align-items-center text-muted">
                                                 <i class="bi bi-envelope me-1"></i>
-                                                <a href="mailto:{{ interview.candidate.email }}" class="text-muted text-decoration-none">{{ interview.candidate.email }}</a>
+                                                <a href="mailto:{{ interview.applicant.email }}" class="text-muted text-decoration-none">{{ interview.applicant.email }}</a>
                                             </div>
                                         </div>
                                     </div>
-                                    {% if interview.candidate.phone %}
+                                    {% if hasattr(interview.applicant, 'phone') and interview.applicant.phone %}
                                     <div class="d-flex align-items-center mb-2 ps-2">
                                         <i class="bi bi-telephone me-2 text-muted"></i>
-                                        <a href="tel:{{ interview.candidate.phone }}" class="text-muted text-decoration-none">{{ interview.candidate.phone }}</a>
+                                        <a href="tel:{{ interview.applicant.phone }}" class="text-muted text-decoration-none">{{ interview.applicant.phone }}</a>
                                     </div>
                                     {% endif %}
                                     <div class="mt-2">
-                                        <a href="{{ url_for('profiles.view_candidate', user_id=interview.candidate.id) }}" class="btn btn-sm btn-outline-secondary w-100">
+                                        <a href="{{ url_for('profiles.view_candidate', user_id=interview.applicant.id) }}" class="btn btn-sm btn-outline-secondary w-100">
                                             <i class="bi bi-person-badge me-1"></i> View Full Profile
                                         </a>
                                     </div>
                                 </div>
                             </div>
 
+                            {% if hasattr(interview, 'interviewers') and interview.interviewers %}
                             <h6 class="text-muted mb-2">Interviewers</h6>
-                            {% if interview.interviewers %}
                             <div class="card bg-light border-0 mb-4">
                                 <div class="card-body p-3">
                                     {% for interviewer in interview.interviewers %}
@@ -170,14 +170,9 @@
                                     {% endfor %}
                                 </div>
                             </div>
-                            {% else %}
-                            <div class="alert alert-warning mb-4">
-                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                No interviewers assigned
-                            </div>
                             {% endif %}
 
-                            {% if interview.status == 'cancelled' %}
+                            {% if interview.status == 'cancelled' and hasattr(interview, 'cancelled_at') and interview.cancelled_at %}
                             <div class="card border-danger mb-4">
                                 <div class="card-header bg-danger text-white">
                                     <i class="bi bi-x-circle me-2"></i> Interview Cancelled
@@ -370,7 +365,7 @@
             <div class="card shadow-sm bg-primary bg-opacity-10 border-primary mb-4">
                 <div class="card-body">
                     <h5 class="text-primary mb-3"><i class="bi bi-calendar-check me-2"></i> Upcoming Interview</h5>
-                    <p class="mb-4">This interview is scheduled for <strong>{{ interview.scheduled_at.strftime('%B %d, %Y') }}</strong> at <strong>{{ interview.scheduled_at.strftime('%I:%M %p') }}</strong>.</p>
+                    <p class="mb-4">This interview is scheduled for <strong>{{ interview.start_time.strftime('%B %d, %Y') }}</strong> at <strong>{{ interview.start_time.strftime('%I:%M %p') }}</strong>.</p>
                     
                     {% if is_interviewer %}
                     <div class="alert alert-light mb-3">
@@ -477,7 +472,7 @@
                             <i class="bi bi-journal-check me-2 text-primary"></i> Prepare for Interview
                         </a>
                         {% endif %}
-                        <a href="{{ url_for('messages.compose', recipient_id=interview.candidate.id, subject='Interview: ' + interview.job.title) }}" class="list-group-item list-group-item-action">
+                        <a href="{{ url_for('messages.compose', recipient_id=interview.applicant.id, subject='Interview: ' + interview.job.title) }}" class="list-group-item list-group-item-action">
                             <i class="bi bi-envelope me-2 text-primary"></i> Message Candidate
                         </a>
                         {% if interview.status == 'completed' %}

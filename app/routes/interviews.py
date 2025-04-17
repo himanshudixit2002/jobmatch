@@ -18,18 +18,19 @@ interviews = Blueprint('interviews', __name__, url_prefix='/interviews')
 def index():
     """Main interviews dashboard view"""
     try:
+        now = datetime.utcnow()
         if current_user.user_type == 'recruiter':
             # Fetch upcoming interviews for the recruiter
             upcoming_interviews = Interview.query.join(Job).filter(
                 Job.recruiter_id == current_user.id,
-                Interview.scheduled_at > datetime.utcnow(),
+                Interview.scheduled_at > now,
                 Interview.status == 'scheduled'
             ).order_by(Interview.scheduled_at).all()
             
             # Fetch past interviews for the recruiter
             past_interviews = Interview.query.join(Job).filter(
                 Job.recruiter_id == current_user.id,
-                Interview.scheduled_at < datetime.utcnow()
+                Interview.scheduled_at < now
             ).order_by(Interview.scheduled_at.desc()).all()
             
             # Fetch all interviews for the recruiter (for the All tab)
@@ -41,27 +42,67 @@ def index():
                                   title='Manage Interviews',
                                   upcoming_interviews=upcoming_interviews,
                                   past_interviews=past_interviews,
-                                  all_interviews=all_interviews)
+                                  all_interviews=all_interviews,
+                                  now=now)
         else:
             # Fetch interviews for this applicant
             upcoming_interviews = Interview.query.filter(
-                Interview.candidate_id == current_user.id,
-                Interview.scheduled_at > datetime.utcnow(),
+                Interview.applicant_id == current_user.id,
+                Interview.scheduled_at > now,
                 Interview.status == 'scheduled'
             ).order_by(Interview.scheduled_at).all()
             
             past_interviews = Interview.query.filter(
-                Interview.candidate_id == current_user.id,
-                Interview.scheduled_at < datetime.utcnow()
+                Interview.applicant_id == current_user.id,
+                Interview.scheduled_at < now
             ).order_by(Interview.scheduled_at.desc()).all()
             
             return render_template('interviews/applicant_dashboard.html', 
                                   title='My Interviews',
                                   upcoming_interviews=upcoming_interviews,
-                                  past_interviews=past_interviews)
+                                  past_interviews=past_interviews,
+                                  now=now)
     except Exception as e:
         flash(f'Error loading interviews: {str(e)}', 'danger')
         return redirect(url_for('main.index'))
+
+@interviews.route('/manage')
+@login_required
+def manage():
+    """Advanced interview management view for recruiters"""
+    if current_user.user_type != 'recruiter':
+        flash('Only recruiters can access this page', 'danger')
+        return redirect(url_for('interviews.index'))
+    
+    try:
+        now = datetime.utcnow()
+        # Get all jobs managed by this recruiter
+        jobs = Job.query.filter_by(recruiter_id=current_user.id).all()
+        job_ids = [job.id for job in jobs]
+        
+        # Get all interviews for these jobs
+        all_interviews = Interview.query.filter(Interview.job_id.in_(job_ids)).order_by(Interview.scheduled_at.desc()).all()
+        
+        # Organize interviews by status
+        scheduled = [i for i in all_interviews if i.status == 'scheduled' and i.scheduled_at > now]
+        completed = [i for i in all_interviews if i.status == 'completed']
+        cancelled = [i for i in all_interviews if i.status == 'cancelled']
+        past_due = [i for i in all_interviews if i.status == 'scheduled' and i.scheduled_at < now]
+        needs_feedback = [i for i in all_interviews if i.status == 'completed' and not hasattr(i, 'feedback')]
+        
+        return render_template('interviews/manage.html', 
+                            title='Interview Management',
+                            all_interviews=all_interviews,
+                            scheduled=scheduled,
+                            completed=completed,
+                            cancelled=cancelled, 
+                            past_due=past_due,
+                            needs_feedback=needs_feedback,
+                            jobs=jobs,
+                            now=now)
+    except Exception as e:
+        flash(f'Error loading interview management: {str(e)}', 'danger')
+        return redirect(url_for('interviews.index'))
 
 @interviews.route('/schedule', methods=['GET', 'POST'])
 @login_required
@@ -74,47 +115,78 @@ def schedule_interview():
     # Get recruiter's job listings with applications
     jobs = Job.query.filter_by(recruiter_id=current_user.id).all()
     
+    # Default values
+    edit_mode = False
+    today = datetime.utcnow().strftime('%Y-%m-%d')
+    notify_candidate = True
+    notify_interviewers = True
+    add_to_calendar = True
+    candidate_availability = []
+    available_interviewers = []
+    
+    # Get job and application details from query parameters
+    job_id = request.args.get('job_id')
+    application_id = request.args.get('application_id')
+    
+    job = None
+    application = None
+    candidate = None
+    
+    if job_id and application_id:
+        job = Job.query.get(job_id)
+        application = Application.query.get(application_id)
+        if application:
+            candidate = User.query.get(application.applicant_id)
+            # Get available interviewers (for now, just use all users who are recruiters)
+            available_interviewers = User.query.filter_by(user_type='recruiter').all()
+    
     if request.method == 'POST':
         try:
             # Process the form data
             job_id = request.form.get('job_id')
-            candidate_id = request.form.get('candidate_id')
+            applicant_id = request.form.get('applicant_id')
             application_id = request.form.get('application_id')
             interview_type = request.form.get('interview_type')
-            date_str = request.form.get('interview_date')
-            time_str = request.form.get('interview_time')
-            duration = request.form.get('duration', 60)
+            date_str = request.form.get('scheduled_date')
+            time_str = request.form.get('scheduled_time')
+            duration = int(request.form.get('duration', 60))
+            interview_stage = request.form.get('interview_stage')
+            custom_stage = request.form.get('custom_stage')
             
             # Validate required fields
-            if not all([job_id, candidate_id, application_id, interview_type, date_str, time_str]):
+            if not all([job_id, applicant_id, application_id, interview_type, date_str, time_str, interview_stage]):
                 flash('All fields are required', 'danger')
                 return redirect(url_for('interviews.schedule_interview'))
             
             # Parse date and time
-            interview_datetime = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
+            scheduled_at = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
             
             # Create new interview
             new_interview = Interview(
                 job_id=job_id,
-                candidate_id=candidate_id,
+                recruiter_id=current_user.id,
+                applicant_id=applicant_id,
                 application_id=application_id,
-                stage='first_round',  # Default stage
-                interview_type=interview_type,
-                scheduled_at=interview_datetime,
+                scheduled_at=scheduled_at,
                 duration=duration,
-                status='scheduled',
-                created_by_id=current_user.id
+                interview_type=interview_type,
+                stage=interview_stage,
+                status='scheduled'
             )
+            
+            # Add custom stage if provided
+            if interview_stage == 'custom' and custom_stage:
+                new_interview.custom_stage = custom_stage
             
             # Add type-specific details if provided
             if interview_type == 'video':
-                new_interview.video_platform = request.form.get('video_platform')
                 new_interview.video_link = request.form.get('video_link')
-            elif interview_type == 'phone':
-                new_interview.phone_number = request.form.get('phone_number')
-                new_interview.who_calls = request.form.get('who_calls')
             elif interview_type == 'in_person':
                 new_interview.location = request.form.get('location')
+            
+            # Add notes if provided
+            if request.form.get('notes'):
+                new_interview.notes = request.form.get('notes')
             
             db.session.add(new_interview)
             db.session.commit()
@@ -128,10 +200,28 @@ def schedule_interview():
     
     # GET request - display the form
     applications = Application.query.join(Job).filter(Job.recruiter_id == current_user.id).all()
+    now = datetime.utcnow()
+    
+    # Get application_id from request if not set
+    if application_id is None:
+        application_id = request.args.get('application_id')
+    
     return render_template('interviews/schedule.html', 
                           title='Schedule Interview',
                           jobs=jobs,
-                          applications=applications)
+                          applications=applications,
+                          job=job,
+                          application=application,
+                          application_id=application_id,
+                          candidate=candidate,
+                          edit_mode=edit_mode,
+                          available_interviewers=available_interviewers,
+                          candidate_availability=candidate_availability,
+                          notify_candidate=notify_candidate,
+                          notify_interviewers=notify_interviewers,
+                          add_to_calendar=add_to_calendar,
+                          today=today,
+                          now=now)
 
 @interviews.route('/<int:interview_id>')
 @login_required
@@ -139,20 +229,42 @@ def view_interview(interview_id):
     """View details of a specific interview"""
     try:
         interview = Interview.query.get_or_404(interview_id)
+        now = datetime.utcnow()
         
         # Check if user is authorized to view this interview
         if current_user.user_type == 'recruiter':
-            if interview.job.recruiter_id != current_user.id:
+            if interview.job and interview.job.recruiter_id != current_user.id:
                 flash('You are not authorized to view this interview', 'danger')
                 return redirect(url_for('interviews.index'))
         else:  # applicant
-            if interview.candidate_id != current_user.id:
+            if interview.applicant_id != current_user.id:
                 flash('You are not authorized to view this interview', 'danger')
                 return redirect(url_for('interviews.index'))
         
+        # Create dummy application stages for the UI
+        application_stages = [
+            {"name": "Application Submitted", "completed": True, "date": "Aug 15, 2023"},
+            {"name": "Resume Screened", "completed": True, "date": "Aug 18, 2023"},
+            {"name": "Interview Scheduled", "completed": True, "date": "Aug 20, 2023"},
+            {"name": "Interview Completed", "completed": interview.status in ['completed', 'cancelled'], "current": interview.status not in ['completed', 'cancelled'], "date": interview.scheduled_at.strftime('%b %d, %Y') if interview.status in ['completed', 'cancelled'] else None},
+            {"name": "Decision", "completed": False, "current": interview.status == 'completed'}
+        ]
+        
+        # Create dummy documents for UI
+        documents = [
+            {"id": 1, "name": "Resume", "type": "resume", "uploaded_at": datetime.now() - timedelta(days=15)},
+            {"id": 2, "name": "Cover Letter", "type": "cover_letter", "uploaded_at": datetime.now() - timedelta(days=15)},
+            {"id": 3, "name": "Portfolio", "type": "portfolio", "uploaded_at": datetime.now() - timedelta(days=10)}
+        ]
+        
         return render_template('interviews/view.html', 
                               title='Interview Details',
-                              interview=interview)
+                              interview=interview,
+                              application_stages=application_stages,
+                              documents=documents,
+                              is_interviewer=False,
+                              can_edit_feedback=current_user.user_type == 'recruiter',
+                              now=now)
     except Exception as e:
         flash(f'Error loading interview: {str(e)}', 'danger')
         return redirect(url_for('interviews.index'))
@@ -163,6 +275,7 @@ def reschedule_interview(interview_id):
     """Reschedule an existing interview"""
     try:
         interview = Interview.query.get_or_404(interview_id)
+        now = datetime.utcnow()
         
         # Check authorization
         if current_user.user_type == 'recruiter' and interview.job.recruiter_id != current_user.id:
@@ -174,9 +287,9 @@ def reschedule_interview(interview_id):
             return redirect(url_for('interviews.view_interview', interview_id=interview_id))
         
         if request.method == 'POST':
-            date_str = request.form.get('interview_date')
-            time_str = request.form.get('interview_time')
-            duration = request.form.get('duration')
+            date_str = request.form.get('scheduled_date')
+            time_str = request.form.get('scheduled_time')
+            duration = int(request.form.get('duration'))
             reschedule_reason = request.form.get('reschedule_reason')
             
             if not all([date_str, time_str, duration, reschedule_reason]):
@@ -184,10 +297,10 @@ def reschedule_interview(interview_id):
                 return redirect(url_for('interviews.reschedule_interview', interview_id=interview_id))
             
             # Parse date and time
-            new_datetime = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
+            new_scheduled_at = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
             
             # Update interview
-            interview.scheduled_at = new_datetime
+            interview.scheduled_at = new_scheduled_at
             interview.duration = duration
             interview.notes = f"{interview.notes or ''}\n\nRescheduled on {datetime.now().strftime('%Y-%m-%d %H:%M')}. Reason: {reschedule_reason}"
             interview.updated_at = datetime.utcnow()
@@ -198,7 +311,8 @@ def reschedule_interview(interview_id):
         
         return render_template('interviews/reschedule.html', 
                               title='Reschedule Interview',
-                              interview=interview)
+                              interview=interview,
+                              now=now)
     except Exception as e:
         flash(f'Error rescheduling interview: {str(e)}', 'danger')
         return redirect(url_for('interviews.index'))
@@ -209,6 +323,7 @@ def cancel_interview(interview_id):
     """Cancel an existing interview"""
     try:
         interview = Interview.query.get_or_404(interview_id)
+        now = datetime.utcnow()
     
         # Check authorization
         if current_user.user_type == 'recruiter' and interview.job.recruiter_id != current_user.id:
@@ -222,8 +337,7 @@ def cancel_interview(interview_id):
         # Update interview
         cancellation_reason = request.form.get('cancellation_reason', 'No reason provided')
         interview.status = 'cancelled'
-        interview.cancelled_at = datetime.utcnow()
-        interview.cancelled_by_id = current_user.id
+        interview.updated_at = datetime.utcnow()
         interview.cancellation_reason = cancellation_reason
         
         db.session.commit()
@@ -236,70 +350,40 @@ def cancel_interview(interview_id):
 @interviews.route('/<int:interview_id>/feedback', methods=['GET', 'POST'])
 @login_required
 def interview_feedback(interview_id):
-    """Submit feedback for an interview (for recruiters)"""
-    if current_user.user_type != 'recruiter':
-        flash('Only recruiters can submit interview feedback', 'danger')
-        return redirect(url_for('main.index'))
-    
+    """Submit or view feedback for an interview"""
     try:
         interview = Interview.query.get_or_404(interview_id)
+        now = datetime.utcnow()
         
         # Check authorization
-        if interview.job.recruiter_id != current_user.id:
-            flash('You are not authorized to provide feedback for this interview', 'danger')
-            return redirect(url_for('interviews.index'))
-        
-        if interview.status != 'completed':
-            flash('Feedback can only be provided for completed interviews', 'warning')
-            return redirect(url_for('interviews.view_interview', interview_id=interview_id))
-        
-        if request.method == 'POST':
-            # Process feedback form
-            rating = request.form.get('overall_rating')
-            recommendation = request.form.get('recommendation')
-            strengths = request.form.get('strengths')
-            areas_for_improvement = request.form.get('areas_for_improvement')
-            cultural_fit = request.form.get('cultural_fit', '')
-            additional_comments = request.form.get('additional_comments', '')
+        if current_user.user_type == 'recruiter':
+            if interview.job.recruiter_id != current_user.id:
+                flash('You are not authorized to access this feedback', 'danger')
+                return redirect(url_for('interviews.index'))
+                
+            # Handle feedback logic for recruiters
+            return render_template('interviews/feedback_form.html', 
+                                title='Interview Feedback',
+                                interview=interview,
+                                now=now)
+        else:  # applicant
+            if interview.applicant_id != current_user.id:
+                flash('You are not authorized to access this feedback', 'danger')
+                return redirect(url_for('interviews.index'))
             
-            if not all([rating, recommendation, strengths, areas_for_improvement]):
-                flash('Please fill out all required fields', 'danger')
-                return redirect(url_for('interviews.interview_feedback', interview_id=interview_id))
-            
-            # Check if feedback already exists
+            # Applicants can only view feedback, not submit it
             if hasattr(interview, 'feedback') and interview.feedback:
-                # Update existing feedback
-                interview.feedback.overall_rating = rating
-                interview.feedback.recommendation = recommendation
-                interview.feedback.strengths = strengths
-                interview.feedback.areas_for_improvement = areas_for_improvement
-                interview.feedback.cultural_fit = cultural_fit
-                interview.feedback.additional_comments = additional_comments
-                interview.feedback.updated_at = datetime.utcnow()
+                return render_template('interviews/feedback.html', 
+                                    title='Interview Feedback',
+                                    interview=interview,
+                                    feedback=interview.feedback,
+                                    view_only=True,
+                                    now=now)
             else:
-                # Create new feedback object
-                from app.models.interview import InterviewFeedback
-                feedback = InterviewFeedback(
-                    interview_id=interview_id,
-                    submitted_by_id=current_user.id,
-                    overall_rating=rating,
-                    recommendation=recommendation,
-                    strengths=strengths,
-                    areas_for_improvement=areas_for_improvement,
-                    cultural_fit=cultural_fit,
-                    additional_comments=additional_comments
-                )
-                db.session.add(feedback)
-            
-            db.session.commit()
-            flash('Feedback submitted successfully', 'success')
-            return redirect(url_for('interviews.view_interview', interview_id=interview_id))
-        
-        return render_template('interviews/feedback.html', 
-                              title='Interview Feedback',
-                              interview=interview)
+                flash('Feedback for this interview is not available yet', 'info')
+                return redirect(url_for('interviews.view_interview', interview_id=interview_id))
     except Exception as e:
-        flash(f'Error processing feedback: {str(e)}', 'danger')
+        flash(f'Error with interview feedback: {str(e)}', 'danger')
         return redirect(url_for('interviews.index'))
 
 # API endpoints for calendar and scheduling
@@ -309,22 +393,26 @@ def interview_feedback(interview_id):
 def calendar_data():
     """API endpoint for calendar view of interviews"""
     try:
+        now = datetime.utcnow()
         # Determine which interviews to fetch based on user type
         if current_user.user_type == 'recruiter':
             interviews_query = Interview.query.join(Job).filter(Job.recruiter_id == current_user.id)
         else:  # applicant
-            interviews_query = Interview.query.filter(Interview.candidate_id == current_user.id)
+            interviews_query = Interview.query.filter(Interview.applicant_id == current_user.id)
         
         interviews_list = interviews_query.all()
         
         calendar_events = []
         for interview in interviews_list:
             # Create a calendar event for each interview
+            job_title = interview.job.title if hasattr(interview, 'job') and interview.job and hasattr(interview.job, 'title') else 'Untitled Job'
+            job_company = interview.job.company if hasattr(interview, 'job') and interview.job and hasattr(interview.job, 'company') else ''
+            
             event = {
                 "id": interview.id,
-                "title": f"Interview: {interview.job.title}" if current_user.user_type == 'recruiter' else f"Interview with {interview.job.company}",
+                "title": f"Interview: {job_title}" if current_user.user_type == 'recruiter' else f"Interview with {job_company}",
                 "start": interview.scheduled_at.strftime('%Y-%m-%dT%H:%M:%S'),
-                "end": (interview.scheduled_at + timedelta(minutes=interview.duration)).strftime('%Y-%m-%dT%H:%M:%S'),
+                "end": interview.end_time.strftime('%Y-%m-%dT%H:%M:%S'),
                 "url": url_for('interviews.view_interview', interview_id=interview.id),
                 "className": f"event-{interview.status}",  # CSS class based on status
                 "description": f"Type: {interview.interview_type}"
@@ -342,6 +430,7 @@ def available_times(job_id, date):
     try:
         # Parse the date string
         selected_date = datetime.strptime(date, '%Y-%m-%d').date()
+        now = datetime.utcnow()
         
         # In a real implementation, this would check existing interviews and calendar
         # For now, return standard business hours with some slots marked as busy
@@ -378,7 +467,7 @@ def available_times(job_id, date):
             # Mark slots that overlap with existing interviews as busy
             for interview in recruiter_interviews:
                 interview_start = interview.scheduled_at
-                interview_end = interview_start + timedelta(minutes=interview.duration)
+                interview_end = interview.end_time
                 
                 for slot in all_slots:
                     slot_start = datetime.strptime(f"{date} {slot['start']}", '%Y-%m-%d %H:%M')

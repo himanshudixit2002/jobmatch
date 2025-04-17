@@ -11,7 +11,7 @@ email-validator==1.3.1
 python-dotenv==1.0.0
 gunicorn==20.1.0
 celery==5.2.7
-requests==2.30.0
+requests>=2.32.0
 
 # Data processing and analysis
 numpy>=1.24.0
@@ -24,13 +24,14 @@ scikit-learn>=1.3.0
 nltk>=3.8.1
 spacy>=3.7.0
 
-# Resume parsing
+# Resume parsing and AI features
 google-generativeai>=0.3.0
 PyPDF2>=3.0.0
 python-docx>=0.8.11
 
 # Real-time communication
 Flask-SocketIO==5.1.1
+eventlet==0.33.3  # For WebSocket support in production
 
 # Data generation and testing
 Faker>=18.4.0
@@ -42,18 +43,31 @@ pytz
 # UUID handling (used in chatbot and data generation)
 uuid
 
-# Advanced features (duplicate entries removed)
-celery==5.2.7
+# HTTP client for API calls
+httpx>=0.23.0
+
+# Fix for dependency conflicts
+idna>=3.7
+opencv-python-headless>=4.10.0.84
+
+# AWS deployment requirements
+boto3>=1.28.0  # AWS SDK for Python
+botocore>=1.31.0
+awscli>=1.29.0  # AWS command-line interface
+mysqlclient>=2.2.0  # For MySQL database connections
+psycopg2-binary>=2.9.9  # For PostgreSQL database connections (if using RDS PostgreSQL)
+redis>=5.0.0  # For Redis caching and session management
+
+# Monitoring and logging
+sentry-sdk>=1.38.0  # Error tracking
+prometheus-flask-exporter>=0.22.4  # Metrics for monitoring
+
+# WSGI HTTP Server for Unix
+gunicorn==20.1.0  # Already listed, important for production deployment
+
+# Security
+itsdangerous==2.1.2  # For secure signing of data
+flask-cors>=4.0.0  # For handling Cross-Origin Resource Sharing (CORS)
 
 # Job matching and skill analysis features
-numpy>=1.24.0
-spacy>=3.7.0
-scipy>=1.11.0
-# Resume parsing
-google-generativeai>=0.3.0
-PyPDF2>=3.0.0
-python-docx>=0.8.11
-# Data generation
-Faker>=18.4.0
-tqdm>=4.66.1
-# Chart.js is a JavaScript library and should be included in frontend assets, not installed via pip 
+# Note: Duplicate entries have been removed 

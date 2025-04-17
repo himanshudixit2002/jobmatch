@@ -1,0 +1,326 @@
+{% extends "base.html" %}
+
+{% block title %}Skill Recommendations{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="fw-bold">Skill Recommendations</h1>
+            <p class="text-muted">
+                Discover skills that can enhance your employability based on current job market trends and your experience level.
+            </p>
+            {% if gemini_api_available %}
+            <form action="{{ url_for('skills.generate_recommendations') }}" method="post" class="mb-4">
+                <button type="submit" class="btn btn-primary" {% if not current_user.skills %}disabled{% endif %}>
+                    <i class="fas fa-sync-alt me-2"></i>Generate New Recommendations
+                </button>
+                {% if not current_user.skills %}
+                <div class="text-danger mt-2">
+                    <small><i class="fas fa-exclamation-circle"></i> Please add some skills to your profile first.</small>
+                </div>
+                {% endif %}
+            </form>
+            {% else %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>AI Recommendations Unavailable</strong>: The Gemini AI service is not currently configured. Only basic recommendations will be available.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if not has_recommendations %}
+    <div class="row justify-content-center mb-5">
+        <div class="col-12 col-md-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-lightbulb text-warning mb-3" style="font-size: 3rem;"></i>
+                    <h3>No Recommendations Yet</h3>
+                    <p class="text-muted mb-4">
+                        You haven't generated any skill recommendations yet. Click the button above to get personalized skill suggestions.
+                    </p>
+                    {% if not current_user.skills %}
+                    <a href="{{ url_for('profiles.manage_skills') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-plus-circle me-1"></i> Add Skills to Your Profile
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if active_recommendations %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="h3 fw-bold">Recommended Skills</h2>
+            <p class="text-muted">Skills that could enhance your profile based on current job market trends.</p>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
+        {% for recommendation in active_recommendations %}
+        <div class="col recommendation-card" data-id="{{ recommendation.id }}">
+            <div class="card h-100 shadow-sm hover-shadow">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h3 class="h5 fw-bold mb-0">{{ recommendation.skill.name }}</h3>
+                        <span class="badge bg-primary">{{ recommendation.relevance_score|round|int }}%</span>
+                    </div>
+                    <p class="text-muted mb-3 recommendation-reason">{{ recommendation.recommendation_reason }}</p>
+                    <div class="d-flex justify-content-between">
+                        <button class="btn btn-sm btn-outline-success acquire-skill" data-id="{{ recommendation.id }}">
+                            <i class="fas fa-plus-circle me-1"></i> Add to My Skills
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary learn-more" data-id="{{ recommendation.skill.id }}" data-bs-toggle="modal" data-bs-target="#skillDetailsModal">
+                            <i class="fas fa-info-circle me-1"></i> Learn More
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger dismiss-recommendation" data-id="{{ recommendation.id }}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="progress" style="height: 4px; border-radius: 0 0 0.25rem 0.25rem;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ recommendation.relevance_score }}%"></div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if acquired_recommendations %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="h3 fw-bold">Acquired Skills</h2>
+            <p class="text-muted">Skills you've added to your profile based on our recommendations.</p>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-3 mb-4">
+        {% for recommendation in acquired_recommendations %}
+        <div class="col">
+            <div class="card h-100 border-success">
+                <div class="card-body py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="h6 fw-bold mb-0">{{ recommendation.skill.name }}</h3>
+                        <span class="badge bg-success"><i class="fas fa-check me-1"></i>Added</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Skill Details Modal -->
+    <div class="modal fade" id="skillDetailsModal" tabindex="-1" aria-labelledby="skillDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="skillDetailsModalLabel">Skill Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="skillDetailsContent">
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-3">Loading skill details...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get skill details via API
+    const learnMoreButtons = document.querySelectorAll('.learn-more');
+    
+    learnMoreButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const skillId = this.getAttribute('data-id');
+            const detailsContent = document.getElementById('skillDetailsContent');
+            
+            detailsContent.innerHTML = `
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Loading skill details...</p>
+                </div>
+            `;
+            
+            fetch(`/skills/skill-details/${skillId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    let resourcesHtml = '';
+                    
+                    if (data.resources && data.resources.length > 0) {
+                        resourcesHtml = `
+                            <h5 class="mt-4">Learning Resources</h5>
+                            <ul class="list-group">
+                                ${data.resources.map(resource => `
+                                    <li class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <strong>${resource.name}</strong>
+                                                <p class="mb-0 small text-muted">${resource.description || ''}</p>
+                                            </div>
+                                            <a href="${resource.url}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-external-link-alt me-1"></i> Visit
+                                            </a>
+                                        </div>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        `;
+                    }
+                    
+                    detailsContent.innerHTML = `
+                        <h3>${data.name}</h3>
+                        <p>${data.description || 'No description available.'}</p>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="card bg-light mb-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><i class="fas fa-chart-line me-2 text-primary"></i>Market Value</h5>
+                                        <p class="card-text">${data.market_value || 'Information not available.'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-light mb-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><i class="fas fa-clock me-2 text-primary"></i>Learning Time</h5>
+                                        <p class="card-text">${data.learning_time || 'Varies based on your background.'}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        ${resourcesHtml}
+                        
+                        ${data.error ? `<div class="alert alert-warning mt-3">Note: Some information may be limited: ${data.error}</div>` : ''}
+                    `;
+                })
+                .catch(error => {
+                    console.error('Error fetching skill details:', error);
+                    detailsContent.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <strong>Error:</strong> Could not load skill details. Please try again later.
+                        </div>
+                    `;
+                });
+        });
+    });
+    
+    // Dismiss recommendation
+    const dismissButtons = document.querySelectorAll('.dismiss-recommendation');
+    
+    dismissButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const recommendationId = this.getAttribute('data-id');
+            const card = document.querySelector(`.recommendation-card[data-id="${recommendationId}"]`);
+            
+            if (confirm('Are you sure you want to dismiss this recommendation?')) {
+                fetch(`/skills/recommendations/${recommendationId}/dismiss`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        card.remove();
+                        
+                        // Check if there are no more recommendations
+                        const remainingCards = document.querySelectorAll('.recommendation-card');
+                        if (remainingCards.length === 0) {
+                            location.reload(); // Reload to show the "No recommendations" message
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error dismissing recommendation:', error);
+                    alert('An error occurred. Please try again.');
+                });
+            }
+        });
+    });
+    
+    // Acquire skill
+    const acquireButtons = document.querySelectorAll('.acquire-skill');
+    
+    acquireButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const recommendationId = this.getAttribute('data-id');
+            const card = document.querySelector(`.recommendation-card[data-id="${recommendationId}"]`);
+            
+            fetch(`/skills/recommendations/${recommendationId}/acquire`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    card.remove();
+                    
+                    // Show success message
+                    const successToast = document.createElement('div');
+                    successToast.className = 'position-fixed bottom-0 end-0 p-3';
+                    successToast.style.zIndex = '5';
+                    successToast.innerHTML = `
+                        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="toast-header bg-success text-white">
+                                <strong class="me-auto"><i class="fas fa-check-circle me-2"></i>Success</strong>
+                                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                            <div class="toast-body">
+                                Skill added to your profile successfully!
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(successToast);
+                    
+                    // Remove toast after 3 seconds
+                    setTimeout(() => {
+                        successToast.remove();
+                    }, 3000);
+                    
+                    // Refresh page after a short delay to show the updated lists
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                }
+            })
+            .catch(error => {
+                console.error('Error acquiring skill:', error);
+                alert('An error occurred. Please try again.');
+            });
+        });
+    });
+});
+</script>
+{% endblock %} 

@@ -23,7 +23,7 @@
                         {% endif %}
                     </h5>
                 </div>
-                <form method="post" action="{{ url_for('interviews.schedule', job_id=job.id, application_id=application.id) if not edit_mode else url_for('interviews.edit', interview_id=interview.id) }}">
+                <form method="post" action="{{ url_for('interviews.schedule_interview', job_id=request.args.get('job_id'), application_id=request.args.get('application_id')) if not edit_mode else url_for('interviews.edit', interview_id=interview.id) }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     {% if edit_mode %}
                     <input type="hidden" name="interview_id" value="{{ interview.id }}">
@@ -44,6 +44,7 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="candidate_name" class="form-label fw-bold">Candidate</label>
+                                    {% if candidate %}
                                     <div class="d-flex align-items-center">
                                         {% if candidate.profile_image %}
                                         <img src="{{ candidate.profile_image }}" alt="{{ candidate.name }}" class="rounded-circle me-2" style="width: 40px; height: 40px;">
@@ -53,13 +54,32 @@
                                         </div>
                                         {% endif %}
                                         <input type="text" class="form-control-plaintext" id="candidate_name" value="{{ candidate.name }}" readonly>
+                                        <input type="hidden" name="applicant_id" value="{{ candidate.id }}">
                                     </div>
+                                    {% else %}
+                                    <select class="form-select" id="candidate_select" name="applicant_id" required>
+                                        <option value="" selected disabled>Select a candidate</option>
+                                        {% for application in applications %}
+                                        <option value="{{ application.applicant.id }}">{{ application.applicant.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    {% endif %}
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label for="job_title" class="form-label fw-bold">Position</label>
+                                    {% if job %}
                                     <input type="text" class="form-control-plaintext" id="job_title" value="{{ job.title }}" readonly>
+                                    <input type="hidden" name="job_id" value="{{ job.id }}">
+                                    {% else %}
+                                    <select class="form-select" id="job_select" name="job_id" required>
+                                        <option value="" selected disabled>Select a position</option>
+                                        {% for job in jobs %}
+                                        <option value="{{ job.id }}">{{ job.title }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -225,10 +245,14 @@
                     </div>
                     <div class="card-footer bg-white py-3 d-flex justify-content-between">
                         {% if edit_mode %}
-                        <a href="{{ url_for('interviews.view', interview_id=interview.id) }}" class="btn btn-outline-secondary">Cancel</a>
+                        <a href="{{ url_for('interviews.view_interview', interview_id=interview.id) }}" class="btn btn-outline-secondary">Cancel</a>
                         <button type="submit" class="btn btn-primary">Update Interview</button>
                         {% else %}
+                        {% if job and application %}
                         <a href="{{ url_for('jobs.application', job_id=job.id, application_id=application.id) }}" class="btn btn-outline-secondary">Cancel</a>
+                        {% else %}
+                        <a href="{{ url_for('interviews.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                        {% endif %}
                         <button type="submit" class="btn btn-primary">Schedule Interview</button>
                         {% endif %}
                     </div>
@@ -241,11 +265,12 @@
                     <h5 class="mb-0">Candidate Availability</h5>
                 </div>
                 <div class="card-body">
-                    {% if candidate_availability %}
+                    {% set availability = candidate_availability if candidate_availability is defined else [] %}
+                    {% if availability %}
                     <div class="mb-3">
                         <h6 class="text-muted mb-2">Preferred Times</h6>
                         <ul class="list-group list-group-flush">
-                            {% for slot in candidate_availability %}
+                            {% for slot in availability %}
                             <li class="list-group-item px-0 py-2 border-0">
                                 <div class="d-flex align-items-center">
                                     <div class="flex-shrink-0 me-2">
@@ -274,7 +299,7 @@
                     </div>
                     {% endif %}
                 </div>
-                {% if candidate.phone or candidate.email %}
+                {% if candidate and (candidate.phone or candidate.email) %}
                 <div class="card-footer bg-white py-3">
                     <h6 class="text-muted mb-2">Contact Candidate Directly</h6>
                     <div class="d-flex gap-2">
@@ -293,7 +318,7 @@
                 {% endif %}
             </div>
 
-            {% if application.status %}
+            {% if application and application.status %}
             <div class="card shadow-sm mb-4">
                 <div class="card-header bg-white py-3">
                     <h5 class="mb-0">Application Status</h5>
@@ -328,7 +353,7 @@
                                     <div class="fw-bold">{{ prev_interview.stage|replace('_', ' ')|title }}</div>
                                     <div class="small">{{ prev_interview.scheduled_at.strftime('%b %d, %Y at %I:%M %p') }}</div>
                                 </div>
-                                <a href="{{ url_for('interviews.view', interview_id=prev_interview.id) }}" class="btn btn-sm btn-link ms-auto">View</a>
+                                <a href="{{ url_for('interviews.view_interview', interview_id=prev_interview.id) }}" class="btn btn-sm btn-link ms-auto">View</a>
                             </div>
                         </li>
                         {% endfor %}

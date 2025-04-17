@@ -4,6 +4,10 @@ from flask_login import LoginManager
 from flask_mail import Mail
 from app.extensions import db
 from flask_wtf.csrf import CSRFProtect
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 login_manager = LoginManager()
 mail = Mail()
@@ -14,9 +18,17 @@ def create_app():
     
     # Configuration
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-for-testing')
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///job_recruitment.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///job_recruitment.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['WTF_CSRF_ENABLED'] = False  # Temporarily disable CSRF protection
+    app.config['WTF_CSRF_ENABLED'] = os.environ.get('WTF_CSRF_ENABLED', 'false').lower() in ['true', 'yes', '1']
+    
+    # Debug and testing mode
+    app.config['DEBUG'] = os.environ.get('DEBUG', 'false').lower() in ['true', 'yes', '1']
+    app.config['TESTING'] = os.environ.get('TESTING', 'false').lower() in ['true', 'yes', '1']
+    
+    # Maximum content length for file uploads
+    if 'MAX_CONTENT_LENGTH' in os.environ:
+        app.config['MAX_CONTENT_LENGTH'] = int(os.environ.get('MAX_CONTENT_LENGTH'))
     
     # Mail configuration
     app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'localhost')
@@ -28,6 +40,9 @@ def create_app():
     app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER', 'JobMatch <noreply@jobmatch.com>')
     app.config['MAIL_MAX_EMAILS'] = int(os.environ.get('MAIL_MAX_EMAILS', 50))
     app.config['MAIL_DEBUG'] = app.debug
+    
+    # Gemini API key (used for AI-powered features)
+    app.config['GEMINI_API_KEY'] = os.environ.get('GEMINI_API_KEY')
     
     # Initialize extensions
     db.init_app(app)
@@ -46,6 +61,7 @@ def create_app():
     from app.routes.profiles import profiles
     from app.routes.insights import insights
     from app.routes.interviews import interviews
+    from app.routes.skills import skills
     
     app.register_blueprint(auth)
     app.register_blueprint(main)
@@ -53,6 +69,7 @@ def create_app():
     app.register_blueprint(profiles)
     app.register_blueprint(insights)
     app.register_blueprint(interviews)
+    app.register_blueprint(skills)
     
     return app
 

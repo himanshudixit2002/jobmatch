@@ -3,6 +3,10 @@ from datetime import datetime
 import os
 from app.models.models import db
 from flask import Flask
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = create_app()
 
@@ -24,4 +28,15 @@ with app.app_context():
     db.create_all()
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    # Get configuration from environment variables
+    host = os.environ.get('HOST', '0.0.0.0')
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('DEBUG', 'false').lower() in ['true', 'yes', '1']
+    
+    print(f"Starting JobMatch with Gemini AI integration...")
+    if os.environ.get('GEMINI_API_KEY'):
+        print("✓ Gemini API key found - AI features enabled")
+    else:
+        print("⚠ Gemini API key not found - AI features will use fallback mode")
+    
+    app.run(host=host, port=port, debug=debug) 

@@ -14,7 +14,7 @@ class Interview(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     job_id = db.Column(db.Integer, db.ForeignKey('jobs.id'), nullable=False)
-    candidate_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    applicant_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     application_id = db.Column(db.Integer, db.ForeignKey('job_applications.id'), nullable=False)
     
     # Interview details
@@ -50,7 +50,7 @@ class Interview(db.Model):
     
     # Relationships
     job = db.relationship('Job', backref=db.backref('interviews', lazy='dynamic'))
-    candidate = db.relationship('User', foreign_keys=[candidate_id], backref=db.backref('candidate_interviews', lazy='dynamic'))
+    candidate = db.relationship('User', foreign_keys=[applicant_id], backref=db.backref('candidate_interviews', lazy='dynamic'))
     application = db.relationship('JobApplication', backref=db.backref('interviews', lazy='dynamic'))
     cancelled_by = db.relationship('User', foreign_keys=[cancelled_by_id])
     created_by = db.relationship('User', foreign_keys=[created_by_id])
