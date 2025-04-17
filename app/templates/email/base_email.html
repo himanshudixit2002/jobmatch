@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}JobMatch{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/email.css', _external=True) }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <div class="container">
+        <div class="header {% block header_class %}{% endblock %}">
+            <h1>{% block header_title %}{% endblock %}</h1>
+        </div>
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+        <div class="footer">
+            <p>© {{ now.year }} JobMatch. All rights reserved.</p>
+            <p>
+                <a href="{{ url_for('main.index', _external=True) }}">Visit Our Website</a> | 
+                <a href="{{ url_for('main.privacy', _external=True) }}">Privacy Policy</a> | 
+                <a href="{{ url_for('main.unsubscribe', email=email_address|default(''), _external=True) }}">Unsubscribe</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html> 

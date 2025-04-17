@@ -11,7 +11,8 @@ import sys
 from datetime import datetime
 from sqlalchemy import inspect, text
 from app import create_app
-from app.models.models import db, User
+from app.models.models import User
+from app.extensions import db
 
 # Add the app directory to the Python path
 sys.path.insert(0, os.path.abspath(os.getcwd()))
@@ -39,7 +40,8 @@ def add_column(engine, table_name, column):
         
         # Build the SQL statement
         sql = f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type} {nullable} {default_value}"
-        engine.execute(sql)
+        with engine.connect() as conn:
+            conn.execute(text(sql))
         print(f"Added column {column_name} to {table_name}")
     else:
         print(f"Column {column.name} already exists in {table_name}")
@@ -59,10 +61,11 @@ def run_migrations():
             print("Adding updated_at column to users table...")
             
             # Add the column without a default
-            db.engine.execute(text("ALTER TABLE users ADD COLUMN updated_at DATETIME"))
-            
-            # Update the column with values from created_at
-            db.engine.execute(text("UPDATE users SET updated_at = created_at"))
+            with db.engine.connect() as conn:
+                conn.execute(text("ALTER TABLE users ADD COLUMN updated_at DATETIME"))
+                
+                # Update the column with values from created_at
+                conn.execute(text("UPDATE users SET updated_at = created_at"))
             
             print("Column updated_at added to users table")
         else:
@@ -73,7 +76,8 @@ def run_migrations():
             print("Adding profile_completed column to users table...")
             
             # Add the column with a default value of 0 (false)
-            db.engine.execute(text("ALTER TABLE users ADD COLUMN profile_completed BOOLEAN DEFAULT 0 NOT NULL"))
+            with db.engine.connect() as conn:
+                conn.execute(text("ALTER TABLE users ADD COLUMN profile_completed BOOLEAN DEFAULT 0 NOT NULL"))
             
             print("Column profile_completed added to users table")
         else:
@@ -85,10 +89,11 @@ def run_migrations():
             print("Adding updated_at column to applications table...")
             
             # Add the column without a default
-            db.engine.execute(text("ALTER TABLE applications ADD COLUMN updated_at DATETIME"))
-            
-            # Update the column with values from created_at
-            db.engine.execute(text("UPDATE applications SET updated_at = created_at"))
+            with db.engine.connect() as conn:
+                conn.execute(text("ALTER TABLE applications ADD COLUMN updated_at DATETIME"))
+                
+                # Update the column with values from created_at
+                conn.execute(text("UPDATE applications SET updated_at = created_at"))
             
             print("Column updated_at added to applications table")
         else:
@@ -96,7 +101,8 @@ def run_migrations():
         
         # Fix any null or invalid application status values
         print("Checking for invalid application status values...")
-        db.engine.execute(text("UPDATE applications SET status = 'pending' WHERE status IS NULL OR status = ''"))
+        with db.engine.connect() as conn:
+            conn.execute(text("UPDATE applications SET status = 'pending' WHERE status IS NULL OR status = ''"))
         
         print("Database migration completed successfully!")
 

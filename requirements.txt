@@ -1,17 +1,17 @@
-Flask==2.2.3
+Flask==2.3.3
 Flask-Login==0.6.2
 Flask-WTF==1.1.1
 Flask-SQLAlchemy==3.0.3
 Flask-Mail==0.9.1
-Werkzeug==2.2.3
-Jinja2==3.0.1
+Werkzeug==2.3.7
+Jinja2==3.1.2
 SQLAlchemy==1.4.23
 bcrypt==3.2.0
 email-validator==1.3.1
 python-dotenv==1.0.0
 gunicorn==20.1.0
 celery==5.2.7
-requests==2.26.0
+requests==2.30.0
 
 # Data processing and analysis
 numpy>=1.24.0
@@ -42,15 +42,9 @@ pytz
 # UUID handling (used in chatbot and data generation)
 uuid
 
-# Advanced features
-Flask-SocketIO==5.1.1
-scikit-learn>=1.3.0
-nltk>=3.8.1
-pandas>=2.0.0
-matplotlib>=3.7.0
-gunicorn==20.1.0
+# Advanced features (duplicate entries removed)
 celery==5.2.7
-requests==2.26.0
+
 # Job matching and skill analysis features
 numpy>=1.24.0
 spacy>=3.7.0

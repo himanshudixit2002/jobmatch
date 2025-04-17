@@ -2,6 +2,7 @@ from flask import render_template
 from flask_mail import Message
 from app import mail
 from app import app
+from datetime import datetime
 
 def send_job_recommendations(user, job_matches):
     """
@@ -16,7 +17,9 @@ def send_job_recommendations(user, job_matches):
     html = render_template(
         'email/job_recommendation.html',
         user=user,
-        job_matches=job_matches
+        job_matches=job_matches,
+        now=datetime.utcnow(),
+        email_address=user.email
     )
     
     msg = Message(
@@ -47,10 +50,21 @@ def send_application_status_update(applicant, job, status, feedback=None):
         feedback=feedback
     )
     
+    html = render_template(
+        'email/application_status.html',
+        applicant=applicant,
+        job=job,
+        status=status,
+        feedback=feedback,
+        now=datetime.utcnow(),
+        email_address=applicant.email
+    )
+    
     msg = Message(
         subject=subject,
         recipients=[applicant.email],
-        body=text
+        body=text,
+        html=html
     )
     
     mail.send(msg)
@@ -81,10 +95,19 @@ def send_new_application_notification(recruiter, applicant, job):
     Job Portal Team
     """
     
+    html = render_template(
+        'email/new_application_notification.html',
+        recruiter=recruiter,
+        applicant=applicant,
+        job=job,
+        now=datetime.utcnow()
+    )
+    
     msg = Message(
         subject=subject,
         recipients=[recruiter.email],
-        body=text
+        body=text,
+        html=html
     )
     
     mail.send(msg) 

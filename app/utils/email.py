@@ -47,7 +47,8 @@ def send_application_notification(application):
     html_body = render_template('email/new_application.html', 
                                job=job, 
                                applicant=applicant,
-                               application=application)
+                               application=application,
+                               now=datetime.utcnow())
     
     return send_email(subject, sender, recipients, text_body, html_body)
 
@@ -72,7 +73,9 @@ def send_status_update(application):
     
     html_body = render_template('email/status_update.html', 
                                job=job, 
-                               application=application)
+                               application=application,
+                               now=datetime.utcnow(),
+                               email_address=applicant.email)
     
     return send_email(subject, sender, recipients, text_body, html_body)
 
@@ -90,7 +93,9 @@ def send_job_recommendations(user, jobs):
     html_body = render_template('email/job_recommendations.html', 
                                user=user,
                                jobs=jobs,
-                               date=datetime.utcnow())
+                               date=datetime.utcnow(),
+                               now=datetime.utcnow(),
+                               email_address=user.email)
     
     return send_email(subject, sender, recipients, text_body, html_body)
 

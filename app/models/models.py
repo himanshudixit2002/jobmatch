@@ -1,10 +1,8 @@
-from flask_sqlalchemy import SQLAlchemy
+from app.extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 from flask_login import UserMixin
 import uuid
-
-db = SQLAlchemy()
 
 # Association tables for many-to-many relationships
 user_skills = db.Table('user_skills',

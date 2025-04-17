@@ -2,95 +2,6 @@
 
 {% block title %}Trending Tech Skills in India | JobMatch{% endblock %}
 
-{% block styles %}
-<style>
-    .skill-tag {
-        display: inline-block;
-        padding: 6px 12px;
-        border-radius: var(--border-radius);
-        margin-right: 8px;
-        margin-bottom: 8px;
-        transition: all 0.3s ease;
-    }
-    
-    .skill-tag:hover {
-        transform: translateY(-3px);
-    }
-    
-    .skill-card {
-        height: 100%;
-        transition: all 0.3s ease;
-        border-radius: var(--border-radius);
-        overflow: hidden;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-    }
-    
-    .skill-card:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--box-shadow);
-    }
-    
-    .skill-card .card-header {
-        background: rgba(var(--bs-primary-rgb), 0.05);
-        border-bottom: none;
-    }
-    
-    .chart-container {
-        position: relative;
-        height: 300px;
-    }
-    
-    .skill-growth {
-        display: flex;
-        align-items: center;
-        margin-bottom: 12px;
-    }
-    
-    .skill-growth .skill-name {
-        width: 140px;
-        font-weight: 500;
-    }
-    
-    .skill-growth .progress {
-        flex: 1;
-        height: 10px;
-    }
-    
-    .skill-growth .percentage {
-        width: 60px;
-        text-align: right;
-        font-weight: 600;
-    }
-    
-    .icon-box {
-        width: 48px;
-        height: 48px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 1rem;
-    }
-    
-    .course-item {
-        padding: 16px;
-        border-radius: var(--border-radius);
-        margin-bottom: 16px;
-        transition: all 0.3s ease;
-        border: 1px solid rgba(0,0,0,0.08);
-    }
-    
-    .course-item:hover {
-        box-shadow: var(--box-shadow);
-        border-color: transparent;
-    }
-    
-    .course-rating {
-        color: #FFB400;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
 <section class="py-5">
     <div class="container">
@@ -600,7 +511,5 @@
             }
         });
     }
-</script>
-{% endblock %} 
 </script>
 {% endblock %} 

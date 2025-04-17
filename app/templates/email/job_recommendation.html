@@ -1,451 +1,82 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jobs Recommended For You</title>
-    <style>
-        body {
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f9fafb;
-            color: #1e293b;
-            line-height: 1.6;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            border-radius: 0.5rem;
-            overflow: hidden;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        }
-        .header {
-            padding: 2rem 1.5rem;
-            text-align: center;
-            background: linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%);
-            color: white;
-        }
-        .header h1 {
-            margin: 0;
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-        .header p {
-            margin: 0.625rem 0 0;
-            opacity: 0.9;
-        }
-        .content {
-            padding: 2rem 1.5rem;
-        }
-        .section {
-            margin-bottom: 1.875rem;
-        }
-        .section-title {
-            font-size: 1.125rem;
-            margin-bottom: 1rem;
-            color: #4f46e5;
-            font-weight: 600;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 0.625rem;
-            position: relative;
-        }
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            width: 50px;
-            height: 3px;
-            background: linear-gradient(90deg, #4f46e5 0%, #0ea5e9 100%);
-            border-radius: 1px;
-        }
-        .intro {
-            background-color: #f8fafc;
-            padding: 1rem;
-            border-radius: 0.375rem;
-            margin-bottom: 1.25rem;
-            border-left: 4px solid #4f46e5;
-        }
-        .match-reason {
-            background-color: #eff6ff;
-            padding: 0.75rem 1rem;
-            border-radius: 0.375rem;
-            font-size: 0.875rem;
-            margin-bottom: 0.75rem;
-            border-left: 3px solid #0ea5e9;
-        }
-        .match-reason strong {
-            color: #1e293b;
-        }
-        .job-card {
-            border: 1px solid #e2e8f0;
-            border-radius: 0.5rem;
-            padding: 1.25rem;
-            margin-bottom: 1.25rem;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-        .job-card:hover {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            transform: translateY(-2px);
-        }
-        .match-score {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background-color: #10b981;
-            color: white;
-            font-weight: 600;
-            padding: 0.375rem 0.75rem;
-            border-radius: 1.25rem;
-            font-size: 0.8125rem;
-        }
-        .match-score.high {
-            background-color: #10b981;
-        }
-        .match-score.medium {
-            background-color: #f59e0b;
-        }
-        .match-score.low {
-            background-color: #0ea5e9;
-        }
-        .company-logo {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        .company-logo img {
-            max-height: 40px;
-            max-width: 120px;
-        }
-        .job-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: #1e293b;
-        }
-        .job-company {
-            color: #64748b;
-            font-size: 0.9375rem;
-            margin-bottom: 0.75rem;
-        }
-        .job-details {
-            display: flex;
-            flex-wrap: wrap;
-            margin-bottom: 1rem;
-            font-size: 0.875rem;
-        }
-        .job-detail {
-            display: flex;
-            align-items: center;
-            margin-right: 1.25rem;
-            margin-bottom: 0.375rem;
-            color: #64748b;
-        }
-        .job-detail i {
-            margin-right: 0.375rem;
-            color: #94a3b8;
-        }
-        .job-highlight {
-            background-color: #f8fafc;
-            border-radius: 0.375rem;
-            padding: 0.75rem 1rem;
-            margin: 0.75rem 0;
-            font-size: 0.875rem;
-        }
-        .job-highlight-title {
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 0.375rem;
-        }
-        .job-highlight ul {
-            margin: 0;
-            padding: 0 0 0 1.25rem;
-        }
-        .job-highlight li {
-            margin-bottom: 0.375rem;
-        }
-        .matched-skills {
-            display: flex;
-            flex-wrap: wrap;
-            margin: 0.75rem 0;
-        }
-        .skill-tag {
-            background-color: #eff6ff;
-            color: #3b82f6;
-            padding: 0.25rem 0.75rem;
-            border-radius: 1.25rem;
-            font-size: 0.75rem;
-            margin-right: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-        .cta-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            margin-top: 1rem;
-        }
-        .cta-button {
-            display: inline-block;
-            text-decoration: none;
-            padding: 0.75rem 1.25rem;
-            border-radius: 0.375rem;
-            font-weight: 600;
-            font-size: 0.875rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            margin-bottom: 0.625rem;
-        }
-        .primary-cta {
-            background-color: #4f46e5;
-            color: white;
-            flex: 0 0 100%;
-        }
-        .primary-cta:hover {
-            background-color: #4338ca;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        .secondary-cta {
-            background-color: #f8fafc;
-            color: #4f46e5;
-            border: 1px solid #e2e8f0;
-            flex: 0 0 48%;
-        }
-        .secondary-cta:hover {
-            background-color: #f1f5f9;
-            color: #4338ca;
-            border-color: #4f46e5;
-            transform: translateY(-2px);
-        }
-        .cta-button:hover {
-            opacity: 0.9;
-        }
-        .stats-section {
-            background-color: #f8fafc;
-            border-radius: 0.5rem;
-            padding: 1.25rem;
-            margin-top: 1.875rem;
-            border: 1px solid #e2e8f0;
-        }
-        .stats-title {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: #1e293b;
-        }
-        .stats-flex {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-        }
-        .stat-item {
-            text-align: center;
-            margin-bottom: 1rem;
-            flex: 0 0 30%;
-        }
-        .stat-number {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #4f46e5;
-            margin-bottom: 0.375rem;
-        }
-        .stat-label {
-            font-size: 0.8125rem;
-            color: #64748b;
-        }
-        .footer {
-            background-color: #f8fafc;
-            padding: 1.25rem;
-            text-align: center;
-            font-size: 0.75rem;
-            color: #64748b;
-            border-top: 1px solid #e2e8f0;
-        }
-        .footer a {
-            color: #4f46e5;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-        .footer a:hover {
-            color: #4338ca;
-            text-decoration: underline;
-        }
-        .view-all-link {
-            display: block;
-            text-align: center;
-            margin: 0.75rem 0;
-        }
-        .view-all-link a {
-            color: #4f46e5;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-        .view-all-link a:hover {
-            color: #4338ca;
-            text-decoration: underline;
-        }
-        @media only screen and (max-width: 600px) {
-            .container {
-                width: 100%;
-                border-radius: 0;
-            }
-            .job-details {
-                flex-direction: column;
-            }
-            .job-detail {
-                margin-right: 0;
-                margin-bottom: 0.5rem;
-            }
-            .cta-buttons {
-                flex-direction: column;
-            }
-            .cta-button, .secondary-cta {
-                flex: 0 0 100%;
-                margin-bottom: 0.625rem;
-                width: 100%;
-            }
-            .stat-item {
-                flex: 0 0 45%;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Jobs Recommended For You</h1>
-            <p>{{ recommendation_date|date }}</p>
-        </div>
-        <div class="content">
-            <div class="intro">
-                <p>Hello {{ applicant.name }},</p>
-                <p>Based on your profile and preferences, we've found {{ recommended_jobs|length }} job{% if recommended_jobs|length != 1 %}s{% endif %} that match your skills and experience.</p>
-            </div>
-            
-            {% if primary_reason %}
-            <div class="match-reason">
-                <strong>Why these jobs?</strong> {{ primary_reason }}
-            </div>
+{% extends "email/base_email.html" %}
+
+{% block title %}Jobs Recommended For You{% endblock %}
+
+{% block body_class %}{% endblock %}
+
+{% block header_class %}{% endblock %}
+
+{% block header_title %}Jobs Recommended For You{% endblock %}
+
+{% block content %}
+<div class="intro">
+    <p>Hello {{ user.name }},</p>
+    <p>We've found some job opportunities that match your skills and preferences. These recommendations are based on your profile and previous applications.</p>
+</div>
+
+<div class="section">
+    <h2 class="section-title">Recommended Jobs</h2>
+    
+    {% for job_match in job_matches %}
+    <div class="job-card">
+        {% set score = job_match.score|float %}
+        {% set score_class = 'high' if score >= 80 else ('medium' if score >= 50 else 'low') %}
+        <div class="match-score {{ score_class }}">{{ score|round|int }}% Match</div>
+        
+        <div class="company-logo">
+            {% if job_match.job.company_logo %}
+            <img src="{{ job_match.job.company_logo }}" alt="{{ job_match.job.company }} logo">
+            {% else %}
+            <span class="company-initial">{{ job_match.job.company[:1] }}</span>
             {% endif %}
-            
-            <div class="section">
-                <div class="section-title">Recommended Jobs</div>
-                
-                {% for job in recommended_jobs %}
-                <div class="job-card">
-                    {% if job.match_score %}
-                    <div class="match-score {% if job.match_score >= 80 %}high{% elif job.match_score >= 60 %}medium{% else %}low{% endif %}">
-                        {{ job.match_score }}% Match
-                    </div>
-                    {% endif %}
-                    
-                    {% if job.company_logo %}
-                    <div class="company-logo">
-                        <img src="{{ job.company_logo }}" alt="{{ job.company_name }}" />
-                    </div>
-                    {% endif %}
-                    
-                    <div class="job-title">{{ job.title }}</div>
-                    <div class="job-company">{{ job.company_name }}</div>
-                    
-                    <div class="job-details">
-                        <div class="job-detail">
-                            <i class="icon-location"></i> {{ job.location }}
-                        </div>
-                        <div class="job-detail">
-                            <i class="icon-salary"></i> {{ job.salary_range }}
-                        </div>
-                        <div class="job-detail">
-                            <i class="icon-type"></i> {{ job.job_type }}
-                        </div>
-                        <div class="job-detail">
-                            <i class="icon-calendar"></i> Posted: {{ job.posted_date|date }}
-                        </div>
-                    </div>
-                    
-                    {% if job.key_requirements %}
-                    <div class="job-highlight">
-                        <div class="job-highlight-title">Key Requirements</div>
-                        <ul>
-                            {% for req in job.key_requirements %}
-                            <li>{{ req }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
-                    
-                    {% if job.matched_skills %}
-                    <div class="job-highlight">
-                        <div class="job-highlight-title">Skills You Match</div>
-                        <div class="matched-skills">
-                            {% for skill in job.matched_skills %}
-                            <span class="skill-tag">{{ skill }}</span>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-                    
-                    <div class="cta-buttons">
-                        <a href="{{ url_for('jobs.view', job_id=job.id, _external=True) }}" class="cta-button primary-cta">View Job Details</a>
-                        <a href="{{ url_for('applications.start', job_id=job.id, _external=True) }}" class="cta-button secondary-cta">Apply Now</a>
-                        <a href="{{ url_for('jobs.save', job_id=job.id, _external=True) }}" class="cta-button secondary-cta">Save For Later</a>
-                    </div>
-                </div>
-                {% endfor %}
-                
-                <div class="view-all-link">
-                    <a href="{{ url_for('jobs.recommended', _external=True) }}">View All Recommended Jobs →</a>
-                </div>
-            </div>
-            
-            <div class="stats-section">
-                <div class="stats-title">Your Job Search Stats</div>
-                <div class="stats-flex">
-                    <div class="stat-item">
-                        <div class="stat-number">{{ stats.applications_submitted }}</div>
-                        <div class="stat-label">Applications Submitted</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">{{ stats.profile_views }}</div>
-                        <div class="stat-label">Profile Views</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">{{ stats.active_applications }}</div>
-                        <div class="stat-label">Active Applications</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">{{ stats.saved_jobs }}</div>
-                        <div class="stat-label">Saved Jobs</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">{{ stats.profile_completeness }}%</div>
-                        <div class="stat-label">Profile Completeness</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">{{ stats.matches_this_week }}</div>
-                        <div class="stat-label">New Matches This Week</div>
-                    </div>
-                </div>
-            </div>
-            
-            <p>Don't miss out on these opportunities that align with your career goals!</p>
-            <p>Best regards,<br>The JobMatch Team</p>
         </div>
-        <div class="footer">
-            <p>You're receiving this email because you opted in to job recommendations based on your profile.</p>
-            <p>
-                <a href="{{ url_for('dashboard.index', _external=True) }}">Your Dashboard</a> | 
-                <a href="{{ url_for('jobs.recommended', _external=True) }}">View All Recommendations</a> | 
-                <a href="{{ url_for('profile.update', _external=True) }}">Update Your Profile</a> | 
-                <a href="{{ url_for('settings.notifications', _external=True) }}">Email Preferences</a>
-            </p>
+        
+        <div class="job-title">{{ job_match.job.title }}</div>
+        <div class="job-company">{{ job_match.job.company }}</div>
+        
+        <div class="job-details">
+            <div class="job-detail">
+                <i>📍</i> {{ job_match.job.location }}
+            </div>
+            <div class="job-detail">
+                <i>💰</i> {{ job_match.job.salary_range }}
+            </div>
+            <div class="job-detail">
+                <i>⏱️</i> {{ job_match.job.employment_type }}
+            </div>
+        </div>
+        
+        {% if job_match.matched_skills %}
+        <div class="matched-skills">
+            {% for skill in job_match.matched_skills %}
+            <span class="skill-tag">{{ skill }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div class="match-reason">
+            <strong>Why we think this is a good match:</strong> {{ job_match.reason }}
+        </div>
+        
+        <div class="cta-buttons">
+            <a href="{{ url_for('jobs.view_job', job_id=job_match.job.id, source='recommendation', _external=True) }}" class="cta-button">View Job</a>
+            <a href="{{ url_for('jobs.apply', job_id=job_match.job.id, source='recommendation', _external=True) }}" class="cta-button secondary">Apply Now</a>
         </div>
     </div>
-</body>
-</html>
+    {% endfor %}
+</div>
+
+<div class="section">
+    <h2 class="section-title">Improve Your Matches</h2>
+    <p>For more tailored job recommendations, keep your profile up-to-date:</p>
+    <ul>
+        <li>Add relevant skills to your profile</li>
+        <li>Update your work experience</li>
+        <li>Complete your education details</li>
+    </ul>
+    <p>
+        <a href="{{ url_for('profiles.edit_profile', _external=True) }}" class="cta-button">Update Profile</a>
+        <a href="{{ url_for('profiles.manage_skills', _external=True) }}" class="cta-button secondary">Manage Skills</a>
+    </p>
+</div>
+{% endblock %}

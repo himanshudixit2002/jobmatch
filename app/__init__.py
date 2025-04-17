@@ -2,7 +2,7 @@ import os
 from flask import Flask
 from flask_login import LoginManager
 from flask_mail import Mail
-from app.models.models import db, User
+from app.extensions import db
 from flask_wtf.csrf import CSRFProtect
 
 login_manager = LoginManager()
@@ -58,4 +58,5 @@ def create_app():
 
 @login_manager.user_loader
 def load_user(user_id):
+    from app.models.models import User
     return User.query.get(int(user_id)) 

@@ -1,0 +1,668 @@
+/* JobMatch Email Templates Stylesheet */
+
+/* Base styles */
+body {
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9fafb;
+    color: #1e293b;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Header styles */
+.header {
+    padding: 2rem 1.5rem;
+    text-align: center;
+    color: white;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* Content area */
+.content {
+    padding: 2rem 1.5rem;
+}
+
+.section {
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    font-size: 1.125rem;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+    position: relative;
+}
+
+.section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 50px;
+    height: 3px;
+    border-radius: 1px;
+}
+
+/* Status-specific styles */
+/* Applied */
+.status-applied .header {
+    background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+}
+
+.status-applied .section-title {
+    color: #0ea5e9;
+}
+
+.status-applied .section-title::after {
+    background: linear-gradient(90deg, #0ea5e9 0%, #3b82f6 100%);
+}
+
+.status-applied .application-details {
+    border-left-color: #0ea5e9;
+    background-color: #f0f9ff;
+}
+
+.status-applied .status-badge {
+    background-color: #0ea5e9;
+}
+
+/* Reviewing */
+.status-reviewing .header {
+    background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+}
+
+.status-reviewing .section-title {
+    color: #f59e0b;
+}
+
+.status-reviewing .section-title::after {
+    background: linear-gradient(90deg, #f59e0b 0%, #f97316 100%);
+}
+
+.status-reviewing .application-details {
+    border-left-color: #f59e0b;
+    background-color: #fffbeb;
+}
+
+.status-reviewing .status-badge {
+    background-color: #f59e0b;
+}
+
+/* Interview */
+.status-interview .header {
+    background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+}
+
+.status-interview .section-title {
+    color: #8b5cf6;
+}
+
+.status-interview .section-title::after {
+    background: linear-gradient(90deg, #8b5cf6 0%, #a855f7 100%);
+}
+
+.status-interview .application-details {
+    border-left-color: #8b5cf6;
+    background-color: #f5f3ff;
+}
+
+.status-interview .status-badge {
+    background-color: #8b5cf6;
+}
+
+/* Rejected */
+.status-rejected .header {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.status-rejected .section-title {
+    color: #ef4444;
+}
+
+.status-rejected .section-title::after {
+    background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+}
+
+.status-rejected .application-details {
+    border-left-color: #ef4444;
+    background-color: #fef2f2;
+}
+
+.status-rejected .status-badge {
+    background-color: #ef4444;
+}
+
+/* Accepted */
+.status-accepted .header {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.status-accepted .section-title {
+    color: #10b981;
+}
+
+.status-accepted .section-title::after {
+    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+}
+
+.status-accepted .application-details {
+    border-left-color: #10b981;
+    background-color: #ecfdf5;
+}
+
+.status-accepted .status-badge {
+    background-color: #10b981;
+}
+
+/* Withdrawn */
+.status-withdrawn .header {
+    background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+}
+
+.status-withdrawn .section-title {
+    color: #64748b;
+}
+
+.status-withdrawn .section-title::after {
+    background: linear-gradient(90deg, #64748b 0%, #475569 100%);
+}
+
+.status-withdrawn .application-details {
+    border-left-color: #64748b;
+    background-color: #f1f5f9;
+}
+
+.status-withdrawn .status-badge {
+    background-color: #64748b;
+}
+
+/* Interview-specific styles */
+.interview-header {
+    background: linear-gradient(135deg, #4f46e5 0%, #0ea5e9 100%);
+}
+
+.interview-details {
+    background-color: #f8fafc;
+    border-left: 4px solid #4f46e5;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    margin: 1.25rem 0;
+}
+
+/* Detail rows for all email types */
+.detail-row {
+    margin-bottom: 0.75rem;
+    display: flex;
+}
+
+.detail-row:last-child {
+    margin-bottom: 0;
+}
+
+.detail-icon {
+    width: 24px;
+    margin-right: 0.75rem;
+    text-align: center;
+}
+
+.detail-content {
+    flex: 1;
+}
+
+.detail-label {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+/* Application details panel */
+.application-details {
+    background-color: #f8fafc;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    margin: 1.25rem 0;
+    border-left: 4px solid #e2e8f0;
+}
+
+/* Status badges */
+.status-badge {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    border-radius: 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: white;
+    margin-bottom: 1rem;
+}
+
+/* Timeline for application progress */
+.timeline {
+    position: relative;
+    margin-left: 30px;
+    padding-left: 30px;
+    border-left: 2px solid #e2e8f0;
+    margin-bottom: 1.875rem;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+}
+
+/* CTA Buttons */
+.cta-button {
+    display: inline-block;
+    background-color: #4f46e5;
+    color: white;
+    text-decoration: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+    margin: 0.375rem;
+    transition: all 0.3s ease;
+}
+
+.cta-button:hover {
+    background-color: #4338ca;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.cta-button.secondary {
+    background-color: #f8fafc;
+    color: #4f46e5;
+    border: 1px solid #4f46e5;
+}
+
+.cta-button.secondary:hover {
+    background-color: #f1f5f9;
+    color: #4338ca;
+    border-color: #4338ca;
+}
+
+.actions {
+    text-align: center;
+    margin: 1.5rem 0;
+}
+
+/* Company info section */
+.company-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid #e1e1e1;
+}
+
+.company-logo {
+    width: 60px;
+    height: 60px;
+    background-color: #f1f5f9;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.company-logo img {
+    max-width: 45px;
+    max-height: 45px;
+}
+
+.company-details {
+    flex: 1;
+}
+
+.company-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: #1e293b;
+}
+
+.job-title {
+    color: #4f46e5;
+    font-weight: 500;
+}
+
+/* Preparation tips section */
+.preparation-tips {
+    background-color: #f0f9ff;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    margin-bottom: 1.25rem;
+    border-left: 4px solid #0ea5e9;
+}
+
+.preparation-tips h3 {
+    margin-top: 0;
+    color: #0ea5e9;
+    font-size: 1rem;
+}
+
+.preparation-tips ul {
+    padding-left: 1.25rem;
+    margin-bottom: 0;
+}
+
+.preparation-tips ul li {
+    margin-bottom: 0.5rem;
+}
+
+.preparation-tips ul li:last-child {
+    margin-bottom: 0;
+}
+
+/* Footer */
+.footer {
+    background-color: #f8fafc;
+    padding: 1.25rem;
+    text-align: center;
+    font-size: 0.75rem;
+    color: #64748b;
+    border-top: 1px solid #e2e8f0;
+}
+
+.footer a {
+    color: #4f46e5;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer a:hover {
+    color: #4338ca;
+    text-decoration: underline;
+}
+
+/* Responsive styles */
+@media only screen and (max-width: 600px) {
+    .container {
+        width: 100%;
+        border-radius: 0;
+    }
+    
+    .actions {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .cta-button {
+        margin: 0.375rem 0;
+    }
+}
+
+/* Notification badge */
+.notification-badge {
+    background-color: #f43f5e;
+    color: white;
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 2rem;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    font-weight: 500;
+}
+
+/* Introduction box */
+.intro {
+    background-color: #f8fafc;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    margin-bottom: 1.25rem;
+    border-left: 4px solid #4f46e5;
+}
+
+/* Job recommendation */
+.job-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.match-score {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background-color: #10b981;
+    color: white;
+    font-weight: 600;
+    padding: 0.375rem 0.75rem;
+    border-radius: 1.25rem;
+    font-size: 0.8125rem;
+}
+
+.match-score.high {
+    background-color: #10b981;
+}
+
+.match-score.medium {
+    background-color: #f59e0b;
+}
+
+.match-score.low {
+    background-color: #0ea5e9;
+}
+
+.job-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #1e293b;
+}
+
+.job-company {
+    color: #64748b;
+    font-size: 0.9375rem;
+    margin-bottom: 0.75rem;
+}
+
+.job-details {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+}
+
+.job-detail {
+    display: flex;
+    align-items: center;
+    margin-right: 1.25rem;
+    margin-bottom: 0.375rem;
+    color: #64748b;
+}
+
+.job-detail i {
+    margin-right: 0.375rem;
+    color: #94a3b8;
+}
+
+.matched-skills {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0.75rem 0;
+}
+
+.skill-tag {
+    background-color: #eff6ff;
+    color: #3b82f6;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1.25rem;
+    font-size: 0.75rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.match-reason {
+    background-color: #eff6ff;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
+    border-left: 3px solid #0ea5e9;
+}
+
+.match-reason strong {
+    color: #1e293b;
+}
+
+/* Job info */
+.job-info {
+    background-color: #f8fafc;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    margin-bottom: 1.25rem;
+    border-left: 4px solid #4f46e5;
+}
+
+.job-meta {
+    margin-bottom: 0.625rem;
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.job-meta-item {
+    margin-bottom: 0.375rem;
+}
+
+.job-meta-item strong {
+    display: inline-block;
+    width: 100px;
+    color: #1e293b;
+}
+
+/* Applicant info */
+.applicant-info {
+    background-color: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.applicant-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.applicant-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    color: #4f46e5;
+    font-size: 1.25rem;
+    font-weight: 600;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.applicant-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0;
+    color: #1e293b;
+}
+
+.applicant-location {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.applicant-meta {
+    margin-bottom: 1rem;
+}
+
+.applicant-meta-item {
+    margin-bottom: 0.5rem;
+    display: flex;
+}
+
+.applicant-meta-label {
+    width: 120px;
+    color: #64748b;
+    font-size: 0.875rem;
+}
+
+.applicant-meta-value {
+    flex: 1;
+    font-size: 0.875rem;
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.applicant-match {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.high-match {
+    background-color: #10b981;
+}
+
+.medium-match {
+    background-color: #f59e0b;
+}
+
+.low-match {
+    background-color: #0ea5e9;
+}
+
+.matched-skill {
+    background-color: #dcfce7;
+    color: #10b981;
+    border: 1px solid #a7f3d0;
+}
+
+/* Info box */
+.info-box {
+    background-color: #f8fafc;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    margin-bottom: 1.25rem;
+    border-left: 4px solid #4f46e5;
+}
+
+/* Company logo placeholder */
+.company-initial {
+    font-size: 1.5rem;
+    color: #4f46e5;
+    font-weight: 700;
+}
+
+/* Subtitle/section subheading */
+.subsection-title {
+    color: #4f46e5;
+    margin: 1rem 0 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+} 

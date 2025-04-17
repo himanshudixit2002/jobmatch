@@ -2,6 +2,7 @@ from app import create_app
 from datetime import datetime
 import os
 from app.models.models import db
+from flask import Flask
 
 app = create_app()
 
@@ -18,8 +19,8 @@ def nl2br(value):
     return ''
 
 # Create database tables if they don't exist
-@app.before_first_request
-def create_tables():
+# @app.before_first_request  # Deprecated in Flask 2.3+
+with app.app_context():
     db.create_all()
 
 if __name__ == '__main__':
