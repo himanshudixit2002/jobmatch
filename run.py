@@ -1,7 +1,7 @@
 from app import create_app
 from datetime import datetime
 import os
-from app.models.models import db
+from app.models.models import db, User
 from flask import Flask
 from dotenv import load_dotenv
 
@@ -22,10 +22,16 @@ def nl2br(value):
         return value.replace('\n', '<br>')
     return ''
 
-# Create database tables if they don't exist
-# @app.before_first_request  # Deprecated in Flask 2.3+
+# Create database tables only if they don't exist
 with app.app_context():
-    db.create_all()
+    # Try to query the User table to check if it exists
+    try:
+        User.query.first()
+        print("Database tables already exist, skipping creation")
+    except:
+        # If the table doesn't exist, create all tables
+        print("Creating database tables...")
+        db.create_all()
 
 if __name__ == '__main__':
     # Get configuration from environment variables
